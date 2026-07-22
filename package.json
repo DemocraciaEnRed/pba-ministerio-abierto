@@ -1,0 +1,32 @@
+{
+  "name": "pba-ministerio-abierto",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare",
+    "lint": "eslint .",
+    "typecheck": "nuxt typecheck",
+    "icons:optimize": "svgo --config=svgo.config.js --multipass --recursive --folder app/assets/icons",
+    "icons:optimize:pba": "svgo --config=svgo.config.js --multipass --folder app/assets/icons/pba",
+    "icons:optimize:der": "svgo --config=svgo.config.js --multipass --folder app/assets/icons/der"
+  },
+  "dependencies": {
+    "@iconify-json/lucide": "^1.2.114",
+    "@iconify-json/simple-icons": "^1.2.87",
+    "@nuxt/ui": "^4.9.0",
+    "nuxt": "^4.4.8",
+    "tailwindcss": "^4.3.1"
+  },
+  "devDependencies": {
+    "@nuxt/eslint": "^1.16.0",
+    "eslint": "^10.6.0",
+    "svgo": "^4.0.1",
+    "typescript": "^6.0.3",
+    "vue-tsc": "^3.3.5"
+  },
+  "packageManager": "pnpm@11.9.0"
+}

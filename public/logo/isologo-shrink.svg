@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="380.39938mm"
+   height="499mm"
+   viewBox="0 0 380.39938 499"
+   version="1.1"
+   id="svg1"
+   inkscape:version="1.4.4 (dcaf3e7d9e, 2026-05-05)"
+   sodipodi:docname="isologo-shrink.svg"
+   inkscape:export-filename="isologo.png"
+   inkscape:export-xdpi="96"
+   inkscape:export-ydpi="96"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#505050"
+     bordercolor="#eeeeee"
+     borderopacity="1"
+     inkscape:showpageshadow="0"
+     inkscape:pageopacity="0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#505050"
+     inkscape:document-units="mm"
+     inkscape:zoom="0.24220739"
+     inkscape:cx="299.33026"
+     inkscape:cy="984.69334"
+     inkscape:window-width="1920"
+     inkscape:window-height="977"
+     inkscape:window-x="0"
+     inkscape:window-y="32"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs1" />
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-59.800305,-0.5)">
+    <path
+       class="st1"
+       d="M 359.76749,80.364299 V 0.5 L 59.800305,103.2174 v 345.38982 l 9.400517,-3.24162 c 0,0 11.912865,-4.0925 30.916508,-10.57561 v 40.155 L 400.08468,372.22762 V 105.8917 l -14.22245,4.94342 v 251.22206 l -271.52245,92.95213 v -25.08169 c 79.78332,-27.26965 238.05316,-81.3635 245.42771,-83.87573 l -14.18187,-10.17044 c -7.21252,2.4717 -152.39456,52.0678 -231.24584,79.01344 V 137.17291 L 322.85412,68.289435 V 53.297161 L 100.11733,129.55521 v 290.20204 c -10.899807,3.72771 -19.895102,6.80731 -26.094576,8.91428 V 113.38786 L 345.5452,20.435686 V 85.226661 L 140.19132,155.52832 v 226.50505 l 14.22244,-4.94339 V 165.69876 L 345.5452,100.25948 v 207.62286 l 14.22229,10.21096 V 95.397115 L 425.9768,72.746608 V 388.03031 L 145.21586,484.06188 144.1224,499.5 440.1997,398.20073 V 52.810918 Z"
+       id="path10"
+       style="fill:#e81f76;stroke-width:4.05197" />
+  </g>
+</svg>
