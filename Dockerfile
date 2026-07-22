@@ -10,8 +10,11 @@ WORKDIR /app
 COPY ./package.json /app/
 COPY ./pnpm-lock.yaml /app/
 
-# Install dependencies using the pnpm version pinned in package.json
-RUN corepack enable && corepack prepare --activate \
+# Install dependencies using the pnpm version pinned in package.json.
+# corepack@latest is required to avoid signature verification errors with
+# the outdated Corepack bundled in the Node image.
+RUN npm install -g corepack@latest \
+	&& corepack enable && corepack prepare --activate \
 	&& pnpm install --frozen-lockfile
 
 # Copy the rest of the application files to the working directory
