@@ -25,8 +25,9 @@ COPY . ./
 
 # Generate the Prisma client (prisma/generated is gitignored, so it is not
 # present in the checkout and must be generated before building Nitro, which
-# imports it from server/utils/db.ts).
-RUN pnpm run db:generate
+# imports it from server/utils/db.ts). prisma.config.ts eagerly resolves
+# DATABASE_URL, so a dummy value is provided; `generate` does not connect.
+RUN DATABASE_URL="mysql://user:pass@localhost:3306/db" pnpm run db:generate
 
 # Build the application
 RUN pnpm run build
