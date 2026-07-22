@@ -6,9 +6,12 @@ FROM node:${NODE_VERSION}-slim AS build
 # Set the working directory inside the container
 WORKDIR /app
 
-# Copy dependency manifests to leverage Docker layer caching
+# Copy dependency manifests to leverage Docker layer caching.
+# pnpm-workspace.yaml is required so pnpm reads the allowBuilds settings
+# during install; otherwise build scripts fail with ERR_PNPM_IGNORED_BUILDS.
 COPY ./package.json /app/
 COPY ./pnpm-lock.yaml /app/
+COPY ./pnpm-workspace.yaml /app/
 
 # Install dependencies using the pnpm version pinned in package.json.
 # corepack@latest is required to avoid signature verification errors with
