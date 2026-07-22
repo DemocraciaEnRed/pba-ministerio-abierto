@@ -1,0 +1,36 @@
+services:
+  mariadb:
+    image: mariadb:12.3
+    container_name: pba_ministerio_abierto_mariadb
+    restart: "no"
+    ports:
+      - "3306:3306"
+    environment:
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-changeme-root-password}
+      MARIADB_DATABASE: ${DB_NAME:-consultas_ciudadanas}
+      MARIADB_USER: ${DB_USER:-consultas_app}
+      MARIADB_PASSWORD: ${DB_PASSWORD:-changeme-app-password}
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "mariadb-admin ping -h 127.0.0.1 -u$$MARIADB_USER -p$$MARIADB_PASSWORD --silent || exit 1"
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 8
+      start_period: 25s
+    networks:
+      - app_net
+
+volumes:
+  db_data:
+
+networks:
+  app_net:
+    driver: bridge

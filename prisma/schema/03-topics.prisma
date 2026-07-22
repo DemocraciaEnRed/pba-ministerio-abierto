@@ -1,0 +1,54 @@
+enum MechanismType {
+  support
+  vote
+  survey
+}
+
+model Topic {
+  id                                    Int       @id @default(autoincrement())
+  consultationId                        Int
+  slug                                  String
+  title                                 String
+  summary                               String?   @db.Text
+  body                                  String?   @db.Text
+  questionText                          String?   @db.Text
+  displayOrder                          Int       @default(0)
+  participationStartsAt                 DateTime
+  participationEndsAt                   DateTime?
+  visibility                            Visibility @default(hidden)
+  mechanismType                         MechanismType?
+  publishResultsWhenParticipationEnds   Boolean   @default(false)
+  configLockedAt                        DateTime?
+  voteAllowAbstain                      Boolean   @default(true)
+  surveyMinSelections                   Int       @default(1)
+  surveyMaxSelections                   Int?
+  createdAt                             DateTime  @default(now())
+  updatedAt                             DateTime  @updatedAt
+
+  consultation          Consultation @relation(fields: [consultationId], references: [id], onDelete: Cascade)
+  supportParticipations SupportParticipation[]
+  voteParticipations    VoteParticipation[]
+  surveyOptions         SurveyOption[]
+  surveyParticipations  SurveyParticipation[]
+  topicTags             TopicTag[]
+  comments              Comment[]
+  relatedLinks          TopicRelatedLink[]
+
+  @@unique([consultationId, slug])
+  @@index([visibility, mechanismType])
+  @@index([displayOrder])
+}
+
+model TopicRelatedLink {
+  id           Int      @id @default(autoincrement())
+  topicId      Int
+  label        String
+  url          String   @db.Text
+  displayOrder Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  topic Topic @relation(fields: [topicId], references: [id], onDelete: Cascade)
+
+  @@index([topicId, displayOrder])
+}

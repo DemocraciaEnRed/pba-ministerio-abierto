@@ -1,0 +1,41 @@
+@import "tailwindcss";
+@import "@nuxt/ui";
+@plugin "@tailwindcss/typography";
+
+@theme static {
+  --font-sans: 'Encode Sans', 'Inter', sans-serif;
+
+  --color-pba-50: #ebfffe;
+  --color-pba-100: #cdffff;
+  --color-pba-200: #a1fdff;
+  --color-pba-300: #60f9ff;
+  --color-pba-400: #18ecf8;
+  --color-pba-500: #00cfde;
+  --color-pba-600: #009aae;
+  --color-pba-700: #088396;
+  --color-pba-800: #10697a;
+  --color-pba-900: #125767;
+  --color-pba-950: #053a47;
+
+  --color-pba-alt-50: oklch(0.958 0.02 2.37);
+  --color-pba-alt-100: oklch(0.92 0.04 2.51);
+  --color-pba-alt-200: oklch(0.839 0.087 2.69);
+  --color-pba-alt-300: oklch(0.767 0.137 2.22);
+  --color-pba-alt-400: oklch(0.69 0.199 2.74);
+  --color-pba-alt-500: oklch(0.607 0.23 2.56);
+  --color-pba-alt-600: oklch(0.518 0.196 2.67);
+  --color-pba-alt-700: oklch(0.427 0.162 2.56);
+  --color-pba-alt-800: oklch(0.325 0.124 2.18);
+  --color-pba-alt-900: oklch(0.237 0.089 2.14);
+  --color-pba-alt-950: oklch(0.186 0.072 2.66);
+}
+
+:root {
+  --ui-primary: var(--color-pba-600);
+  --ui-secondary: var(--color-pba-alt-600);
+}
+
+.dark {
+  --ui-primary: var(--color-pba-500);
+  --ui-secondary: var(--color-pba-alt-500);
+}

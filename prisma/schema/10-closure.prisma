@@ -1,0 +1,22 @@
+model ConsultationClosure {
+  id                Int      @id @default(autoincrement())
+  consultationId    Int      @unique
+  summaryText       String?  @db.Text
+  resultsSummary    String?  @db.Text
+  attachmentAssetId Int?
+  publishedAt       DateTime?
+  createdByUserId   Int?
+  updatedByUserId   Int?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  consultation    Consultation @relation(fields: [consultationId], references: [id], onDelete: Cascade)
+  attachmentAsset Asset?       @relation("ConsultationClosureAttachment", fields: [attachmentAssetId], references: [id], onDelete: SetNull)
+  createdBy       User?        @relation("ConsultationClosureCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
+  updatedBy       User?        @relation("ConsultationClosureUpdatedBy", fields: [updatedByUserId], references: [id], onDelete: SetNull)
+
+  @@index([attachmentAssetId])
+  @@index([publishedAt])
+  @@index([createdByUserId])
+  @@index([updatedByUserId])
+}

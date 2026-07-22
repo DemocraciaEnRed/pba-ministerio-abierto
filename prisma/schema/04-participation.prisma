@@ -1,0 +1,64 @@
+enum VoteValue {
+  in_favor
+  abstain
+  against
+}
+
+model SupportParticipation {
+  id        Int      @id @default(autoincrement())
+  topicId   Int
+  userId    Int
+  createdAt DateTime @default(now())
+
+  topic Topic @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([topicId, userId])
+  @@index([userId])
+}
+
+model VoteParticipation {
+  id        Int       @id @default(autoincrement())
+  topicId   Int
+  userId    Int
+  voteValue VoteValue
+  createdAt DateTime  @default(now())
+
+  topic Topic @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([topicId, userId])
+  @@index([userId])
+  @@index([voteValue])
+}
+
+model SurveyOption {
+  id           Int      @id @default(autoincrement())
+  topicId      Int
+  label        String
+  description  String?  @db.Text
+  displayOrder Int      @default(0)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+
+  topic                Topic @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  surveyParticipations SurveyParticipation[]
+
+  @@index([topicId, displayOrder])
+}
+
+model SurveyParticipation {
+  id             Int      @id @default(autoincrement())
+  topicId        Int
+  surveyOptionId Int
+  userId         Int
+  createdAt      DateTime @default(now())
+
+  topic        Topic        @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  surveyOption SurveyOption @relation(fields: [surveyOptionId], references: [id], onDelete: Restrict)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([topicId, userId, surveyOptionId])
+  @@index([surveyOptionId])
+  @@index([userId])
+}

@@ -1,0 +1,81 @@
+enum AssetType {
+  uploaded_file
+  external_link
+}
+
+enum MediaType {
+  image
+  document
+  video
+  audio
+  other
+}
+
+enum StorageProvider {
+  local
+  s3
+  external
+}
+
+enum AssetOwnerType {
+  consultation
+  topic
+  closure
+}
+
+enum AssetLinkRole {
+  cover
+  attachment
+  context
+  gallery
+}
+
+model Asset {
+  id               Int             @id @default(autoincrement())
+  title            String?
+  description      String?         @db.Text
+  altText          String?
+  assetType        AssetType
+  mediaType        MediaType
+  storageProvider  StorageProvider
+  storagePath      String?
+  externalUrl      String?
+  originalFilename String?
+  mimeType         String?
+  sizeBytes        Int?
+  checksum         String?
+  metadata         Json?
+  uploadedByUserId Int?
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  uploadedBy                 User?                @relation("AssetUploadedBy", fields: [uploadedByUserId], references: [id], onDelete: SetNull)
+  assetLinks                 AssetLink[]
+  avatarUsers                User[]               @relation("UserAvatar")
+  logoLightPlatform          PlatformSettings[]   @relation("PlatformLogoLight")
+  logoDarkPlatform           PlatformSettings[]   @relation("PlatformLogoDark")
+  symbolLightPlatform        PlatformSettings[]   @relation("PlatformSymbolLight")
+  symbolDarkPlatform         PlatformSettings[]   @relation("PlatformSymbolDark")
+  consultationClosureAsFile  ConsultationClosure[] @relation("ConsultationClosureAttachment")
+
+  @@index([uploadedByUserId])
+  @@index([assetType, mediaType])
+}
+
+model AssetLink {
+  id           Int           @id @default(autoincrement())
+  assetId      Int
+  ownerType    AssetOwnerType
+  ownerId      Int
+  role         AssetLinkRole
+  displayOrder Int           @default(0)
+  isPublic     Boolean       @default(true)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  asset Asset @relation(fields: [assetId], references: [id], onDelete: Cascade)
+
+  @@unique([assetId, ownerType, ownerId, role])
+  @@index([ownerType, ownerId, role])
+  @@index([displayOrder])
+}

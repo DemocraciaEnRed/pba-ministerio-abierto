@@ -1,0 +1,39 @@
+enum PlatformRole {
+  platform_admin
+  collaborator
+}
+
+enum ConsultationRole {
+  consultation_admin
+}
+
+model PlatformRoleAssignment {
+  id               Int          @id @default(autoincrement())
+  userId           Int
+  role             PlatformRole
+  assignedAt       DateTime     @default(now())
+  assignedByUserId Int?
+
+  user           User   @relation("PlatformRoleUser", fields: [userId], references: [id], onDelete: Cascade)
+  assignedByUser User?  @relation("PlatformRoleAssignedBy", fields: [assignedByUserId], references: [id], onDelete: SetNull)
+
+  @@unique([userId, role])
+  @@index([assignedByUserId])
+}
+
+model ConsultationMembership {
+  id               Int              @id @default(autoincrement())
+  consultationId   Int
+  userId           Int
+  role             ConsultationRole
+  assignedAt       DateTime         @default(now())
+  assignedByUserId Int?
+
+  consultation   Consultation @relation(fields: [consultationId], references: [id], onDelete: Cascade)
+  user           User         @relation("ConsultationMembershipUser", fields: [userId], references: [id], onDelete: Cascade)
+  assignedByUser User?        @relation("ConsultationMembershipAssignedBy", fields: [assignedByUserId], references: [id], onDelete: SetNull)
+
+  @@unique([consultationId, userId, role])
+  @@index([userId])
+  @@index([assignedByUserId])
+}

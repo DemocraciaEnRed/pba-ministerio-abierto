@@ -1,0 +1,69 @@
+enum ConsultationFormat {
+  single
+  multiple
+}
+
+/// Visibilidad manual de una consulta o tema. El estado temporal
+/// (programada/abierta/cerrada) se deriva de las fechas, no se almacena.
+enum Visibility {
+  hidden
+  visible
+  archived
+}
+
+enum ResultsVisibility {
+  hidden
+  participants_only
+  public
+}
+
+model Consultation {
+  id                  Int       @id @default(autoincrement())
+  slug                String    @unique
+  title               String
+  summary             String?   @db.Text
+  body                String?   @db.Text
+  consultationFormat  ConsultationFormat @default(single)
+  visibility          Visibility @default(hidden)
+  featured            Boolean   @default(false)
+  startsAt            DateTime
+  endsAt              DateTime?
+  publishedAt         DateTime?
+  closedMessage       String?   @db.Text
+  resultsVisibility   ResultsVisibility @default(hidden)
+  sectionId           Int?
+  createdByUserId     Int?
+  updatedByUserId     Int?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  createdBy User? @relation("ConsultationCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
+  updatedBy User? @relation("ConsultationUpdatedBy", fields: [updatedByUserId], references: [id], onDelete: SetNull)
+  section   Section? @relation(fields: [sectionId], references: [id], onDelete: SetNull)
+  topics    Topic[]
+  memberships ConsultationMembership[]
+  categoryAssignments ConsultationCategoryAssignment[]
+  consultationTags ConsultationTag[]
+  closure ConsultationClosure?
+  comments Comment[]
+  relatedLinks ConsultationRelatedLink[]
+
+  @@index([visibility])
+  @@index([featured])
+  @@index([startsAt, endsAt])
+  @@index([sectionId])
+}
+
+model ConsultationRelatedLink {
+  id             Int      @id @default(autoincrement())
+  consultationId Int
+  label          String
+  url            String   @db.Text
+  displayOrder   Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  consultation Consultation @relation(fields: [consultationId], references: [id], onDelete: Cascade)
+
+  @@index([consultationId, displayOrder])
+}

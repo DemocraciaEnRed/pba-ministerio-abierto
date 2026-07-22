@@ -1,0 +1,95 @@
+enum UserStatus {
+  active
+  inactive
+  suspended
+}
+
+model User {
+  id              Int       @id @default(autoincrement())
+  email           String    @unique
+  emailVerifiedAt DateTime?
+  passwordHash    String?
+  firstName       String?
+  lastName        String?
+  displayName     String?
+  organization    String?
+  profession      String?
+  aboutMe         String?   @db.Text
+  provincia       String?
+  municipio       String?
+  phone           String?
+  avatarAssetId   Int?
+  status          UserStatus @default(active)
+  lastLoginAt     DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  avatarAsset          Asset?          @relation("UserAvatar", fields: [avatarAssetId], references: [id], onDelete: SetNull)
+  socialLinks          UserSocialLink[]
+  createdConsultations Consultation[] @relation("ConsultationCreatedBy")
+  updatedConsultations Consultation[] @relation("ConsultationUpdatedBy")
+  platformRoleAssignments PlatformRoleAssignment[] @relation("PlatformRoleUser")
+  platformRoleGrantedAssignments PlatformRoleAssignment[] @relation("PlatformRoleAssignedBy")
+  consultationMemberships ConsultationMembership[] @relation("ConsultationMembershipUser")
+  consultationMembershipGrantedAssignments ConsultationMembership[] @relation("ConsultationMembershipAssignedBy")
+  supportParticipations SupportParticipation[]
+  voteParticipations    VoteParticipation[]
+  surveyParticipations  SurveyParticipation[]
+  uploadedAssets        Asset[] @relation("AssetUploadedBy")
+  commentReactions      CommentReaction[]
+  comments              Comment[] @relation("CommentAuthor")
+  deletedComments       Comment[] @relation("CommentDeletedBy")
+  createdConsultationClosures ConsultationClosure[] @relation("ConsultationClosureCreatedBy")
+  updatedConsultationClosures ConsultationClosure[] @relation("ConsultationClosureUpdatedBy")
+  verificationTokens VerificationToken[]
+
+  @@index([status])
+  @@index([avatarAssetId])
+}
+
+enum VerificationTokenType {
+  email_verification
+  password_reset
+  email_change
+}
+
+model VerificationToken {
+  id         Int                   @id @default(autoincrement())
+  userId     Int
+  type       VerificationTokenType
+  tokenHash  String                @unique
+  newEmail   String?
+  expiresAt  DateTime
+  consumedAt DateTime?
+  createdAt  DateTime              @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, type])
+  @@index([expiresAt])
+}
+
+enum UserSocialPlatform {
+  linkedin
+  x
+  instagram
+  threads
+  mastodon
+  bluesky
+  substack
+  medium
+}
+
+model UserSocialLink {
+  id        Int                @id @default(autoincrement())
+  userId    Int
+  platform  UserSocialPlatform
+  handle    String
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, platform])
+  @@index([userId])
+}

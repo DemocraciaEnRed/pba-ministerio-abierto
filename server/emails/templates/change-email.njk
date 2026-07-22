@@ -1,0 +1,28 @@
+{% extends "layout.njk" %}
+
+{% block title %}Confirmá tu nuevo correo electrónico{% endblock %}
+
+{% block content %}
+  <h1 style="margin:0 0 16px; font-size:20px; color:#18181b;">
+    {% if displayName %}Hola {{ displayName }},{% else %}¡Hola!{% endif %}
+  </h1>
+  <p style="margin:0 0 16px;">
+    Recibimos una solicitud para cambiar el correo electrónico de tu cuenta a esta
+    dirección. Para confirmarlo, hacé clic en el siguiente botón:
+  </p>
+  <p style="margin:0 0 24px;">
+    <a href="{{ changeEmailUrl }}"
+       style="display:inline-block; background-color:#18181b; color:#ffffff; text-decoration:none; padding:12px 24px; border-radius:8px; font-weight:600;">
+      Confirmar nuevo correo
+    </a>
+  </p>
+  <p style="margin:0 0 8px; color:#71717a; font-size:13px;">
+    Si el botón no funciona, copiá y pegá este enlace en tu navegador:
+  </p>
+  <p style="margin:0 0 16px; word-break:break-all; font-size:13px;">
+    <a href="{{ changeEmailUrl }}" style="color:#2563eb;">{{ changeEmailUrl }}</a>
+  </p>
+  <p style="margin:0; color:#71717a; font-size:13px;">
+    Si no solicitaste este cambio, ignorá este mensaje: tu correo actual seguirá sin cambios.
+  </p>
+{% endblock %}

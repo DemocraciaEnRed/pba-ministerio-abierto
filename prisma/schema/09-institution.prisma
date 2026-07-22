@@ -1,0 +1,40 @@
+model PlatformSettings {
+  id                  Int      @id @default(autoincrement())
+  name                String
+  platformName        String?
+  logoLightAssetId    Int?
+  logoDarkAssetId     Int?
+  symbolLightAssetId  Int?
+  symbolDarkAssetId   Int?
+  contactEmail        String?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  logoLightAsset   Asset? @relation("PlatformLogoLight", fields: [logoLightAssetId], references: [id], onDelete: SetNull)
+  logoDarkAsset    Asset? @relation("PlatformLogoDark", fields: [logoDarkAssetId], references: [id], onDelete: SetNull)
+  symbolLightAsset Asset? @relation("PlatformSymbolLight", fields: [symbolLightAssetId], references: [id], onDelete: SetNull)
+  symbolDarkAsset  Asset? @relation("PlatformSymbolDark", fields: [symbolDarkAssetId], references: [id], onDelete: SetNull)
+  sitePages        SitePage[]
+
+  @@index([logoLightAssetId])
+  @@index([logoDarkAssetId])
+  @@index([symbolLightAssetId])
+  @@index([symbolDarkAssetId])
+}
+
+model SitePage {
+  id                 Int      @id @default(autoincrement())
+  platformSettingsId Int?
+  pageKey            String   @unique
+  title              String
+  slug               String   @unique
+  content            String?  @db.LongText
+  isPublished        Boolean  @default(false)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  platformSettings PlatformSettings? @relation(fields: [platformSettingsId], references: [id], onDelete: SetNull)
+
+  @@index([platformSettingsId])
+  @@index([isPublished])
+}

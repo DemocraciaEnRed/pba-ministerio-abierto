@@ -1,0 +1,25 @@
+{% extends "layout.njk" %}
+
+{% block title %}Verificá tu correo electrónico{% endblock %}
+
+{% block content %}
+  <h1 style="margin:0 0 16px; font-size:20px; color:#18181b;">
+    {% if displayName %}Hola {{ displayName }},{% else %}¡Hola!{% endif %}
+  </h1>
+  <p style="margin:0 0 16px;">
+    Gracias por crear una cuenta. Para activarla, confirmá tu dirección de correo
+    haciendo clic en el siguiente botón:
+  </p>
+  <p style="margin:0 0 24px;">
+    <a href="{{ verificationUrl }}"
+       style="display:inline-block; background-color:#18181b; color:#ffffff; text-decoration:none; padding:12px 24px; border-radius:8px; font-weight:600;">
+      Verificar correo
+    </a>
+  </p>
+  <p style="margin:0 0 8px; color:#71717a; font-size:13px;">
+    Si el botón no funciona, copiá y pegá este enlace en tu navegador:
+  </p>
+  <p style="margin:0; word-break:break-all; font-size:13px;">
+    <a href="{{ verificationUrl }}" style="color:#2563eb;">{{ verificationUrl }}</a>
+  </p>
+{% endblock %}

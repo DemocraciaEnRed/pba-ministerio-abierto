@@ -1,0 +1,60 @@
+enum CommentAuthorMode {
+  citizen
+  institution
+}
+
+enum CommentModerationStatus {
+  visible
+  hidden
+  deleted
+}
+
+model Comment {
+  id               Int      @id @default(autoincrement())
+  consultationId   Int?
+  topicId          Int?
+  authorUserId     Int
+  parentCommentId  Int?
+  body             String   @db.Text
+  authorMode       CommentAuthorMode @default(citizen)
+  moderationStatus CommentModerationStatus @default(visible)
+  deletedAt        DateTime?
+  deletedByUserId  Int?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  consultation   Consultation? @relation(fields: [consultationId], references: [id], onDelete: Cascade)
+  topic          Topic?    @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  author         User      @relation("CommentAuthor", fields: [authorUserId], references: [id], onDelete: Cascade)
+  deletedBy      User?     @relation("CommentDeletedBy", fields: [deletedByUserId], references: [id], onDelete: SetNull)
+  parentComment  Comment?  @relation("CommentReplies", fields: [parentCommentId], references: [id], onDelete: Cascade)
+  replies        Comment[] @relation("CommentReplies")
+  reactions      CommentReaction[]
+
+  @@index([consultationId, moderationStatus])
+  @@index([topicId, moderationStatus])
+  @@index([authorUserId])
+  @@index([parentCommentId])
+}
+
+enum CommentReactionType {
+  heart
+  agree
+  idea
+  relevant
+  deepen
+}
+
+model CommentReaction {
+  id           Int                 @id @default(autoincrement())
+  commentId    Int
+  userId       Int
+  reactionType CommentReactionType
+  createdAt    DateTime            @default(now())
+
+  comment Comment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([commentId, userId, reactionType])
+  @@index([userId])
+}

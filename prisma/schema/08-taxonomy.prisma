@@ -1,0 +1,95 @@
+/// Sección: contenedor de nivel superior ("gran filtro") que agrupa
+/// entidades participativas y posee su propio catálogo de categorías.
+/// Hoy solo agrupa consultas; a futuro puede agrupar otros tipos de entidad.
+model Section {
+  id          Int      @id @default(autoincrement())
+  slug        String   @unique
+  name        String
+  description String?  @db.Text
+  isActive    Boolean  @default(true)
+  displayOrder Int     @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  categories    Category[]
+  consultations Consultation[]
+
+  @@index([isActive, displayOrder])
+}
+
+model Category {
+  id          Int      @id @default(autoincrement())
+  sectionId   Int
+  slug        String
+  name        String
+  description String?  @db.Text
+  isActive    Boolean  @default(true)
+  displayOrder Int     @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  section                 Section  @relation(fields: [sectionId], references: [id], onDelete: Restrict)
+  consultationAssignments ConsultationCategoryAssignment[]
+
+  // El slug es único dentro de cada sección: se permite repetir el mismo
+  // nombre/slug en secciones distintas (categorías propias por sección).
+  @@unique([sectionId, slug])
+  @@index([isActive, displayOrder])
+  @@index([sectionId])
+}
+
+model ConsultationCategoryAssignment {
+  id             Int      @id @default(autoincrement())
+  consultationId Int
+  categoryId     Int
+  isPrimary      Boolean  @default(false)
+  displayOrder   Int      @default(0)
+  createdAt      DateTime @default(now())
+
+  consultation Consultation @relation(fields: [consultationId], references: [id], onDelete: Cascade)
+  category     Category     @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@unique([consultationId, categoryId])
+  @@index([consultationId, isPrimary])
+}
+
+model Tag {
+  id          Int      @id @default(autoincrement())
+  slug        String   @unique
+  name        String
+  description String?  @db.Text
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  consultationTags ConsultationTag[]
+  topicTags        TopicTag[]
+
+  @@index([isActive])
+}
+
+model ConsultationTag {
+  id             Int      @id @default(autoincrement())
+  consultationId Int
+  tagId          Int
+  createdAt      DateTime @default(now())
+
+  consultation Consultation @relation(fields: [consultationId], references: [id], onDelete: Cascade)
+  tag          Tag          @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@unique([consultationId, tagId])
+  @@index([tagId])
+}
+
+model TopicTag {
+  id        Int      @id @default(autoincrement())
+  topicId   Int
+  tagId     Int
+  createdAt DateTime @default(now())
+
+  topic Topic @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  tag   Tag   @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@unique([topicId, tagId])
+  @@index([tagId])
+}
