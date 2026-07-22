@@ -23,6 +23,11 @@ RUN npm install -g corepack@latest \
 # Copy the rest of the application files to the working directory
 COPY . ./
 
+# Generate the Prisma client (prisma/generated is gitignored, so it is not
+# present in the checkout and must be generated before building Nitro, which
+# imports it from server/utils/db.ts).
+RUN pnpm run db:generate
+
 # Build the application
 RUN pnpm run build
 
