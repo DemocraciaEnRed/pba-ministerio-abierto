@@ -41,12 +41,9 @@ export default defineNuxtConfig({
       crawlLinks: true,
       routes: [
         '/',
-        '/territorio',
-        '/auth/login',
-        '/auth/signup',
-        '/auth/recover-password',
-        '/auth/reset-password',
-        '/auth/resend-verification'
+        '/dialogos',
+        '/politica-de-privacidad',
+        '/terminos-y-condiciones'
       ]
     }
   },
