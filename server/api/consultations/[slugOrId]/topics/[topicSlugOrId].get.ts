@@ -1,6 +1,7 @@
 import { parseTopicSlugOrId, resolveTopicBySlugOrId } from '~~/server/utils/topics/slug'
 import { serializeTopic } from '~~/server/utils/serializers/topic'
 import { resolveConsultationIdFromParam } from '~~/server/utils/consultations/slug'
+import { getCoverImage } from '~~/server/utils/assets/cover'
 
 export default defineEventHandler(async (event) => {
   const consultationId = await resolveConsultationIdFromParam(event)
@@ -49,7 +50,17 @@ export default defineEventHandler(async (event) => {
     })
   }
 
+  const cover = await getCoverImage(
+    { ownerType: 'topic', ownerId: topic.id },
+    { adminView: isAdmin }
+  )
+  const withCover = {
+    ...(topic as any), // eslint-disable-line @typescript-eslint/no-explicit-any
+    coverUrl: cover?.url ?? null,
+    coverAltText: cover?.altText ?? null
+  }
+
   return isAdmin
-    ? { ...serializeTopic(topic as any, 'admin'), canManage: true } // eslint-disable-line @typescript-eslint/no-explicit-any
-    : { ...serializeTopic(topic as any, 'public'), canManage: false } // eslint-disable-line @typescript-eslint/no-explicit-any
+    ? { ...serializeTopic(withCover, 'admin'), canManage: true }
+    : { ...serializeTopic(withCover, 'public'), canManage: false }
 })

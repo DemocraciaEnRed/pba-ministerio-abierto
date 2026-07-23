@@ -62,6 +62,12 @@ const itemsNavigationMenu = computed<NavigationMenuItem[][]>(() => [
       label: 'Contenido'
     },
     {
+      label: 'Portada',
+      icon: 'i-lucide-image',
+      to: `${basePath.value}/portada`,
+      active: route.path.startsWith(`${basePath.value}/portada`)
+    },
+    {
       label: 'Enlaces',
       icon: 'i-lucide-link',
       to: `${basePath.value}/enlaces`,

@@ -5,6 +5,7 @@ import { resolveConsultationIdFromParam } from '~~/server/utils/consultations/sl
 import { deriveParticipationState } from '~~/server/utils/participation-state'
 import { listAttachments } from '~~/server/utils/assets/attachments'
 import { listGalleryImages } from '~~/server/utils/assets/gallery'
+import { getCoverImage, getCoverImagesByOwner } from '~~/server/utils/assets/cover'
 import type { TopicModel, TopicRelatedLinkModel } from '~~/prisma/generated/models'
 
 function isPubliclyVisible(entity: { visibility: string }): boolean {
@@ -91,6 +92,31 @@ export default defineEventHandler(async (event) => {
     { adminView: isAdminView }
   )
 
+  // Portada propia del tema (fondo del hero) y portadas de los hermanos
+  // (carrusel de "otros temas"), resueltas por lote para evitar el N+1.
+  const topicCover = await getCoverImage(
+    { ownerType: 'topic', ownerId: topic.id },
+    { adminView: isAdminView }
+  )
+  const topicWithCover = {
+    ...(topic as unknown as TopicModel),
+    coverUrl: topicCover?.url ?? null,
+    coverAltText: topicCover?.altText ?? null
+  }
+
+  const siblingCovers = await getCoverImagesByOwner(
+    'topic',
+    visibleSiblings.map(sibling => sibling.id),
+    { adminView: isAdminView }
+  )
+  const attachSiblingCover = (sibling: TopicModel) => {
+    const cover = siblingCovers.get(sibling.id)
+    return {
+      ...sibling,
+      coverUrl: cover?.url ?? null,
+      coverAltText: cover?.altText ?? null
+    }
+  }
   const consultationSummary = {
     slug: consultation.slug,
     title: consultation.title,
@@ -104,8 +130,8 @@ export default defineEventHandler(async (event) => {
   if (isAdminView) {
     return {
       consultation: consultationSummary,
-      topic: { ...serializeTopic(topic as unknown as TopicModel, 'admin'), canManage: true },
-      topics: visibleSiblings.map(sibling => serializeTopic(sibling as unknown as TopicModel, 'admin')),
+      topic: { ...serializeTopic(topicWithCover, 'admin'), canManage: true },
+      topics: visibleSiblings.map(sibling => serializeTopic(attachSiblingCover(sibling as unknown as TopicModel), 'admin')),
       links: relatedLinks.map(link => serializeTopicLink(link, 'admin')),
       attachments,
       gallery
@@ -114,8 +140,8 @@ export default defineEventHandler(async (event) => {
 
   return {
     consultation: consultationSummary,
-    topic: { ...serializeTopic(topic as unknown as TopicModel, 'public'), canManage: false },
-    topics: visibleSiblings.map(sibling => serializeTopic(sibling as unknown as TopicModel, 'public')),
+    topic: { ...serializeTopic(topicWithCover, 'public'), canManage: false },
+    topics: visibleSiblings.map(sibling => serializeTopic(attachSiblingCover(sibling as unknown as TopicModel), 'public')),
     links: relatedLinks.map(link => serializeTopicLink(link, 'public')),
     attachments,
     gallery

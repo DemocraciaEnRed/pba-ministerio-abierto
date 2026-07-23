@@ -70,6 +70,12 @@ const itemsNavigationMenu = computed<NavigationMenuItem[][]>(() => [
       active: route.path.startsWith(`${basePath.value}/editar`)
     },
     {
+      label: 'Portada',
+      icon: 'i-lucide-image',
+      to: `${basePath.value}/portada`,
+      active: route.path.startsWith(`${basePath.value}/portada`)
+    },
+    {
       label: 'Método de participación',
       icon: 'i-lucide-sliders-horizontal',
       to: `${basePath.value}/metodo-participacion`,

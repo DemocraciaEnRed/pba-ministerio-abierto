@@ -26,6 +26,9 @@ export interface ConsultationDetail {
   section: ConsultationTaxonomy | null
   categories: ConsultationCategory[]
   tags: ConsultationTaxonomy[]
+  /** Portada de la consulta para el hero; `null` cuando no hay imagen cargada. */
+  coverUrl: string | null
+  coverAltText: string | null
   /** Indica si el usuario actual puede gestionar la consulta (admin o gestor). */
   canManage?: boolean
 }

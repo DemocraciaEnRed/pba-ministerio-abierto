@@ -77,6 +77,11 @@ const hero = computed<PageHeroProps>(() => ({
   description: tema.value?.summary || 'Detalle del tema de participación.'
 }))
 
+const cover = computed(() => ({
+  url: tema.value?.coverUrl ?? null,
+  altText: tema.value?.coverAltText ?? null
+}))
+
 const breadcrumb = computed<BreadcrumbItem[]>(() => {
   const items: BreadcrumbItem[] = [
     { label: 'Consultas', icon: 'i-lucide-folders', to: '/consultas' }
@@ -154,6 +159,7 @@ const topicSections = computed<NavigationMenuItem[]>(() => {
   <NuxtLayout
     name="tema-consulta"
     :hero="hero"
+    :cover="cover"
     :topic-sections="topicSections"
     :breadcrumb="breadcrumb"
   >

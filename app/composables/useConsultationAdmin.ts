@@ -16,6 +16,9 @@ export interface AdminConsultationSummary {
   section: { id: number, slug: string, name: string } | null
   categories: { id: number, slug: string, name: string, isPrimary: boolean }[]
   tags: { id: number, slug: string, name: string }[]
+  /** Portada de la consulta; `null` cuando no hay imagen cargada. */
+  coverUrl: string | null
+  coverAltText: string | null
   createdAt?: string
   updatedAt?: string
   /** Indica si el usuario actual puede gestionar esta consulta (admin o gestor). */

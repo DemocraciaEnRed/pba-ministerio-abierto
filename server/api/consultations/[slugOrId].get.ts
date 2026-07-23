@@ -1,5 +1,6 @@
 import { resolveConsultationBySlugOrId, parseConsultationSlugOrId } from '~~/server/utils/consultations/slug'
 import { serializeConsultation } from '~~/server/utils/serializers/consultation'
+import { getCoverImage } from '~~/server/utils/assets/cover'
 
 function isPubliclyVisibleConsultation(consultation: { visibility: string }): boolean {
   return consultation.visibility !== 'hidden'
@@ -42,9 +43,19 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  if (isAdminView) {
-    return { ...serializeConsultation(consultation, 'admin'), canManage: true }
+  const cover = await getCoverImage(
+    { ownerType: 'consultation', ownerId: consultation.id },
+    { adminView: isAdminView }
+  )
+  const withCover = {
+    ...consultation,
+    coverUrl: cover?.url ?? null,
+    coverAltText: cover?.altText ?? null
   }
 
-  return { ...serializeConsultation(consultation, 'public'), canManage: false }
+  if (isAdminView) {
+    return { ...serializeConsultation(withCover, 'admin'), canManage: true }
+  }
+
+  return { ...serializeConsultation(withCover, 'public'), canManage: false }
 })

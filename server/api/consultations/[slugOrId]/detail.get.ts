@@ -4,7 +4,7 @@ import { serializeTopic } from '~~/server/utils/serializers/topic'
 import { serializeConsultationLink } from '~~/server/utils/serializers/consultationLink'
 import { listAttachments } from '~~/server/utils/assets/attachments'
 import { listGalleryImages } from '~~/server/utils/assets/gallery'
-import { getCoverImagesByOwner } from '~~/server/utils/assets/cover'
+import { getCoverImage, getCoverImagesByOwner } from '~~/server/utils/assets/cover'
 import type { ConsultationRelatedLinkModel, TopicModel } from '~~/prisma/generated/models'
 
 function isPubliclyVisible(entity: { visibility: string }): boolean {
@@ -90,6 +90,17 @@ export default defineEventHandler(async (event) => {
     { adminView: isAdminView }
   )
 
+  // Portada propia de la consulta para el fondo del hero.
+  const consultationCover = await getCoverImage(
+    { ownerType: 'consultation', ownerId: consultation.id },
+    { adminView: isAdminView }
+  )
+  const consultationWithCover = {
+    ...consultation,
+    coverUrl: consultationCover?.url ?? null,
+    coverAltText: consultationCover?.altText ?? null
+  }
+
   const attachCover = (topic: TopicModel) => {
     const cover = topicCovers.get(topic.id)
     return {
@@ -101,7 +112,7 @@ export default defineEventHandler(async (event) => {
 
   if (isAdminView) {
     return {
-      consultation: { ...serializeConsultation(consultation, 'admin'), canManage: true },
+      consultation: { ...serializeConsultation(consultationWithCover, 'admin'), canManage: true },
       topics: visibleTopics.map(topic => serializeTopic(attachCover(topic), 'admin')),
       links: relatedLinks.map(link => serializeConsultationLink(link, 'admin')),
       attachments,
@@ -110,7 +121,7 @@ export default defineEventHandler(async (event) => {
   }
 
   return {
-    consultation: { ...serializeConsultation(consultation, 'public'), canManage: false },
+    consultation: { ...serializeConsultation(consultationWithCover, 'public'), canManage: false },
     topics: visibleTopics.map(topic => serializeTopic(attachCover(topic), 'public')),
     links: relatedLinks.map(link => serializeConsultationLink(link, 'public')),
     attachments,

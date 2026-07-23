@@ -69,6 +69,11 @@ const hero = computed<PageHeroProps>(() => ({
   description: consultation.value?.summary || 'Detalle de la consulta ciudadana.'
 }))
 
+const cover = computed(() => ({
+  url: consultation.value?.coverUrl ?? null,
+  altText: consultation.value?.coverAltText ?? null
+}))
+
 const metadata = computed<ConsultaHeroMetadata[]>(() => {
   if (!consultation.value) return []
   const items: ConsultaHeroMetadata[] = [
@@ -166,6 +171,7 @@ const commentingOpen = computed(() =>
   <NuxtLayout
     name="consultas"
     :hero="hero"
+    :cover="cover"
     :consultation-sections="consultationSections"
   >
     <UPage>

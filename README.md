@@ -1,8 +1,19 @@
-# Consultas Ciudadanas
+# Ministerio Abierto
 
-Consultas Ciudadanas es un flavor de democraciaOS, impulsado por Democracia en Red.
+**Ministerio Abierto** es un desarrollo de **Democracia en Red** para el **Ministerio de Infraestructura y Servicios Públicos de la Provincia de Buenos Aires**, basado en el producto **Consultas Digitales** —un *flavor* de **democraciaOS**.
 
-Este repositorio está hecho con Nuxt y provee el frontend y backend de Consultas Ciudadanas, orientada a publicar procesos de consulta y participacion ciudadana con una arquitectura moderna en Nuxt.
+La plataforma habilita al Ministerio a publicar procesos de consulta y participación ciudadana (consultas, temas y mecanismos de participación como apoyo, voto y encuesta), acercando la gestión pública a la ciudadanía con una experiencia moderna y accesible.
+
+Este repositorio contiene el frontend y el backend en una única aplicación **Nuxt 4** (monolito modular con backend Nitro).
+
+## Sobre el producto
+
+- **Producto base:** Consultas Digitales (Democracia en Red), un *flavor* de democraciaOS.
+- **Instancia:** Ministerio Abierto — Ministerio de Infraestructura y Servicios Públicos, Provincia de Buenos Aires.
+- **Alcance funcional y de producto:** ver [docs/lineamientos-producto.md](docs/lineamientos-producto.md).
+- **Dirección técnica y arquitectura:** ver [docs/lineamientos-tecnicos.md](docs/lineamientos-tecnicos.md) y [AGENTS.md](AGENTS.md).
+
+> Nota: algunos identificadores internos del entorno de desarrollo (nombres de base de datos como `consultas_ciudadanas`, emails `@consultas.local`, etc.) conservan la nomenclatura del producto base y no afectan la identidad de la instancia.
 
 ## Stack
 

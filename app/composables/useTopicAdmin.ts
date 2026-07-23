@@ -18,6 +18,9 @@ export interface AdminTopicSummary {
   participationOpen: boolean
   publishResultsWhenParticipationEnds: boolean
   configLockedAt: string | null
+  /** Portada del tema; `null` cuando no hay imagen cargada. */
+  coverUrl: string | null
+  coverAltText: string | null
   createdAt: string
   updatedAt: string
 }

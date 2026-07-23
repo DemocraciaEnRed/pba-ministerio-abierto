@@ -1,30 +1,39 @@
 <script setup lang="ts">
 import type { PageHeroProps, NavigationMenuItem, ThemeUI } from '@nuxt/ui'
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
     hero?: PageHeroProps
     consultationSections?: NavigationMenuItem[]
+    cover?: { url: string | null, altText?: string | null }
   }>(),
   {
     hero: () => ({
       title: 'Consultas ciudadanas',
       description: 'Participa en las consultas ciudadanas abiertas y conoce los resultados de las consultas pasadas.'
     }),
-    consultationSections: () => []
+    consultationSections: () => [],
+    cover: () => ({ url: null })
   }
 )
 
-const uiTheme: ThemeUI = {
+// Cuando hay portada, el hero la usa de fondo (con un velo oscuro para
+// legibilidad) y el texto pasa a claro; si no, se mantiene el gradiente.
+const hasCover = computed(() => Boolean(props.cover?.url))
+
+const uiTheme = computed<ThemeUI>(() => ({
   pageHero: {
-    root: 'bg-linear-to-b from-primary-500/50 to-white dark:from-neutral-500/10 dark:to-black/10',
-    container: 'flex flex-col lg:grid py-24 sm:py-32 lg:py-16 gap-16 sm:gap-y-24',
-    headline: 'justify-center',
+    root: hasCover.value
+      ? 'relative isolate overflow-hidden bg-transparent'
+      : 'bg-linear-to-b from-primary-500/50 to-white dark:from-neutral-500/10 dark:to-black/10',
+    container: 'relative z-10 flex flex-col lg:grid py-24 sm:py-32 lg:py-16 gap-16 sm:gap-y-24',
+    headline: hasCover.value ? 'justify-center text-white/90' : 'justify-center',
     wrapper: 'text-center',
-    description: 'text-balance',
+    title: hasCover.value ? 'text-white' : undefined,
+    description: hasCover.value ? 'text-white/85 text-balance' : 'text-balance',
     links: 'justify-center'
   }
-}
+}))
 
 // Mide la altura real de la barra de navegación de contenido para exponerla
 // como variable CSS. Así el `UPageAside` (y cualquier otro elemento sticky)
@@ -59,10 +68,25 @@ const stickyTop = computed(() =>
   <UTheme :ui="uiTheme">
     <UMain :style="{ '--consultas-sticky-top': stickyTop }">
       <Header />
-      <UPageHero
-        v-bind="hero"
-        id="page-hero-top"
-      />
+      <div class="relative">
+        <div
+          v-if="hasCover"
+          class="pointer-events-none absolute inset-0 overflow-hidden"
+          aria-hidden="true"
+        >
+          <img
+            :src="cover.url!"
+            :alt="cover.altText || ''"
+            class="h-full w-full object-cover"
+          >
+          <div class="absolute inset-0 bg-linear-to-b from-black/55 via-black/45 to-black/70" />
+        </div>
+        <UPageHero
+          v-bind="hero"
+          id="page-hero-top"
+          class="relative"
+        />
+      </div>
       <USeparator />
       <div
         v-if="consultationSections.length"
