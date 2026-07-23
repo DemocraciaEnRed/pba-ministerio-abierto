@@ -19,6 +19,26 @@ class MemoryLoader {
   }
 }
 
+/**
+ * Decodifica el contenido crudo de un asset a texto UTF-8. En dev el storage
+ * devuelve un string, pero en el build de producción Nitro devuelve los assets
+ * como Uint8Array/Buffer. Usar `String(raw)` sobre un Uint8Array produce la
+ * lista de bytes separada por comas ("123,37,...") en vez del texto, así que
+ * hay que decodificar explícitamente.
+ */
+function decodeSource(raw: unknown): string {
+  if (typeof raw === 'string') {
+    return raw
+  }
+  if (raw instanceof Uint8Array) {
+    return new TextDecoder().decode(raw)
+  }
+  if (raw instanceof ArrayBuffer) {
+    return new TextDecoder().decode(new Uint8Array(raw))
+  }
+  return String(raw)
+}
+
 async function buildEnv(): Promise<Environment> {
   const storage = useStorage('assets:emails')
   const keys = await storage.getKeys()
@@ -27,8 +47,8 @@ async function buildEnv(): Promise<Environment> {
   for (const key of keys) {
     // Las keys vienen con ':' como separador (ej. 'verify-email.njk').
     const name = key.split(':').pop()!
-    const raw = await storage.getItem(key)
-    sources.set(name, typeof raw === 'string' ? raw : String(raw))
+    const raw = await storage.getItemRaw(key)
+    sources.set(name, decodeSource(raw))
   }
 
   return new nunjucks.Environment(new MemoryLoader(sources) as never, {

@@ -54,7 +54,7 @@ const statusItems: ListboxItem[] = [
   { label: 'Todas', value: 'all', icon: statusFilterIcons.all },
   { label: 'Programadas', value: 'scheduled', icon: statusFilterIcons.scheduled },
   { label: 'Abiertas', value: 'open', icon: statusFilterIcons.open },
-  { label: 'Cerradas', value: 'closed', icon: statusFilterIcons.closed },
+  { label: 'Cerradas', value: 'closed', icon: statusFilterIcons.closed }
 //   { label: 'Archivadas', value: 'archived', icon: statusFilterIcons.archived }
 ]
 
