@@ -56,7 +56,7 @@ const footerColumns: FooterColumn[] = [
         label: 'Encuentros regionales'
       },
       {
-        label: 'Obras y proyectos en dialogo'
+        label: 'Obras y proyectos en diálogo'
       },
       {
         label: 'Observatorio'

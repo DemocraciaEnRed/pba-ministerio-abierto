@@ -3,9 +3,9 @@ import type { PrismaClient } from '../generated/client'
 const SECTIONS = [
   { slug: 'audiencias-publicas', name: 'Audiencias Públicas', description: 'Instancias formales de participación donde la ciudadanía expone su opinión sobre decisiones públicas.', displayOrder: 1 },
   { slug: 'consultas-publicas', name: 'Consultas Públicas', description: 'Procesos abiertos para recoger opiniones y propuestas de la ciudadanía sobre temas de interés público.', displayOrder: 2 },
-  { slug: 'dialogos', name: 'Diálogos', description: 'Espacios de intercambio y construcción colectiva entre la ciudadanía y el Estado.', displayOrder: 3 },
+  { slug: 'dialogos', name: 'Obras y proyectos en diálogo', description: 'Espacios de intercambio y construcción colectiva entre la ciudadanía y el Estado.', displayOrder: 3 },
   { slug: 'encuentros-regionales', name: 'Encuentros Regionales', description: 'Instancias participativas descentralizadas en las distintas regiones de la provincia.', displayOrder: 4 },
-  { slug: 'observatorio-obras-servicios', name: 'Observatorio de Obras y Servicios Públicos', description: 'Seguimiento y participación ciudadana sobre las obras y los servicios públicos.', displayOrder: 5 }
+  { slug: 'observatorio-obras-servicios', name: 'Observatorio de Obras y Servicios Públicos', description: 'Espacio institucional de participación y control ciudadano', displayOrder: 5 }
 ]
 
 const CATEGORIES: Array<{ slug: string, sectionSlug: string, name: string, description: string, displayOrder: number }> = []

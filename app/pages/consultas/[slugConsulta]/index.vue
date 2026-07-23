@@ -65,7 +65,7 @@ const estadoBadge = computed(() =>
 
 const hero = computed<PageHeroProps>(() => ({
   title: consultation.value?.title || 'Consulta',
-  headline: 'Consulta ciudadana',
+  headline: consultation.value?.section?.name ?? undefined,
   description: consultation.value?.summary || 'Detalle de la consulta ciudadana.'
 }))
 

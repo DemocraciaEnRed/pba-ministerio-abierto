@@ -92,32 +92,32 @@ const items = computed<NavigationMenuItem[]>(() => [
     active: isParticipaMenuActive.value,
     children: [
       {
-        label: 'Audiencias',
+        label: 'Audiencias públicas',
         disabled: true,
         icon: 'pba:audiencias-publicas',
-        description: 'Conocé y seguí las audiencias públicas abiertas a la comunidad',
+        description: 'Conocé y seguí las audiencias públicas abiertas a la comunidad.',
         active: route.path.startsWith('/audiencias')
       },
       {
-        label: 'Consultas',
+        label: 'Consultas públicas',
         disabled: true,
         icon: 'pba:consultas-publicas',
-        description: 'Sumate a las consultas ciudadanas sobre proyectos de impacto',
+        description: 'Sumate a las consultas ciudadanas sobre proyectos de impacto.',
         active: route.path.startsWith('/consultas')
       },
       {
-        label: 'Diálogos',
+        label: 'Obras y proyectos en diálogo',
         to: '/dialogos',
-        icon: 'pba:obras',
-        description: 'Formá parte para conocer el avance de obras estratégicas',
+        icon: 'pba:dialogos',
+        description: 'Formá parte para conocer el avance de obras estratégicas.',
         active: route.path.startsWith('/dialogos')
       },
       {
-        label: 'Encuentros regionales',
+        label: 'Encuentros Regionales',
         disabled: true,
-        icon: 'pba:territorio',
-        description: 'Participá para construir la agenda de desarrollo de tu región',
-        active: route.path.startsWith('/territorio')
+        icon: 'pba:encuentros-regionales',
+        description: 'Participá para construir la agenda de desarrollo de tu región.',
+        active: route.path.startsWith('/encuentros-regionales')
       },
       {
         label: 'Observatorio',
@@ -142,7 +142,7 @@ const items = computed<NavigationMenuItem[]>(() => [
       {
         label: 'Política de privacidad',
         to: '/acerca-de/politica-de-privacidad',
-        description: 'Cómo protegemos y tratamos tus datos personales',
+        description: 'Cómo protegemos y tratamos tus datos personales.',
         active: route.path.startsWith('/acerca-de/politica-de-privacidad')
       }
     ]
@@ -165,38 +165,38 @@ const itemsMobile = computed<NavigationMenuItem[][]>(() => [
       ui: { label: 'font-medium text-primary text-base' }
     },
     {
-      label: 'Audiencias',
+      label: 'Audiencias públicas',
       disabled: true,
       icon: 'pba:audiencias-publicas',
-      description: 'Conocé y seguí las audiencias públicas abiertas a la comunidad',
+      description: 'Conocé y seguí las audiencias públicas abiertas a la comunidad.',
       active: route.path.startsWith('/audiencias')
     },
     {
-      label: 'Consultas',
+      label: 'Consultas públicas',
       disabled: true,
       icon: 'pba:consultas-publicas',
-      description: 'Sumate a las consultas ciudadanas sobre proyectos de impacto',
+      description: 'Sumate a las consultas ciudadanas sobre proyectos de impacto.',
       active: route.path.startsWith('/consultas')
     },
     {
-      label: 'Diálogos',
+      label: 'Obras y proyectos en diálogo',
       to: '/dialogos',
-      icon: 'pba:obras',
-      description: 'Formá parte para conocer el avance de obras estratégicas',
+      icon: 'pba:dialogos',
+      description: 'Formá parte para conocer el avance de obras estratégicas.',
       active: route.path.startsWith('/dialogos')
     },
     {
-      label: 'Encuentros regionales',
+      label: 'Encuentros Regionales',
       disabled: true,
-      icon: 'pba:territorio',
-      description: 'Participá para construir la agenda de desarrollo de tu región',
-      active: route.path.startsWith('/territorio')
+      icon: 'pba:encuentros-regionales',
+      description: 'Participá para construir la agenda de desarrollo de tu región.',
+      active: route.path.startsWith('/encuentros-regionales')
     },
     {
       label: 'Observatorio',
       disabled: true,
       icon: 'pba:observatorio',
-      description: 'Accedé a información sobre este espacio institucional de la Obra Pública provincial',
+      description: 'Accedé a información sobre este espacio institucional de la Obra Pública provincial.',
       active: route.path.startsWith('/observatorio')
     }
   ],
@@ -216,7 +216,7 @@ const itemsMobile = computed<NavigationMenuItem[][]>(() => [
     {
       label: 'Política de privacidad',
       to: '/acerca-de/politica-de-privacidad',
-      description: 'Cómo protegemos y tratamos tus datos personales',
+      description: 'Cómo protegemos y tratamos tus datos personales.',
       active: route.path.startsWith('/acerca-de/politica-de-privacidad')
     }
   ]
@@ -226,9 +226,13 @@ const itemsMobile = computed<NavigationMenuItem[][]>(() => [
 const navigationMenuUi = {
   linkLabel: 'font-medium text-primary hover:text-primary',
   linkLeadingIcon: 'text-primary',
-  childLinkLabel: 'text-primary',
+  childList: 'grid-cols-1 gap-2 lg:grid-cols-2',
+  childLinkLabel: 'text-primary break-words whitespace-normal',
   childLinkDescription: 'text-xs',
-  childLinkIcon: 'size-10 text-primary'
+  childLinkIcon: 'size-10 text-primary',
+  viewportWrapper: 'absolute top-full left-1/2 flex w-[min(92vw,72rem)] -translate-x-1/2 justify-center',
+  viewport: 'w-full',
+  content: 'w-full'
 }
 </script>
 
@@ -238,14 +242,19 @@ const navigationMenuUi = {
   >
     <template #left>
       <NuxtLink to="/">
-        <AppLogo class="w-auto h-12 shrink-0" />
+        <!-- <AppLogoFull class="w-auto h-12 shrink-0" /> -->
+        <img
+          src="https://democraciaenred.nyc3.digitaloceanspaces.com/projects/pba-ministerio-abierto/app/assets/logo/logofull.svg"
+          alt="Footer Header"
+          class="w-auto h-12 shrink-0"
+        >
       </NuxtLink>
     </template>
 
     <UNavigationMenu
       :items="items"
       :ui="navigationMenuUi"
-      content-orientation="vertical"
+      content-orientation="horizontal"
     />
     <template #body>
       <UNavigationMenu

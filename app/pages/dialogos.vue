@@ -3,7 +3,7 @@ import type { AccordionItem } from '@nuxt/ui'
 import type { ThemeUI } from '@nuxt/ui/runtime/types/theme.js'
 
 usePageSeo({
-  title: 'Diálogos',
+  title: 'Obras y proyectos en diálogo',
   description: 'Encuentros participativos del Ministerio de Infraestructura y Servicios Públicos: presentación de obras y proyectos en el territorio y espacios para recibir aportes de la ciudadanía.',
   url: '/dialogos'
 })
@@ -44,13 +44,13 @@ const fotosDialogos = [
 const themeUi: ThemeUI = {
   pageHero: {
     root: 'bg-[linear-gradient(351deg,rgba(0,154,174,0.75)_0%,rgba(186,24,94,0.75)_100%)]',
-    // Default constainer: flex flex-col lg:grid py-24 sm:py-32 lg:py-40 gap-16 sm:gap-y-24
-    container: 'flex flex-col lg:flex lg:flex-row py-24 sm:py-32 lg:py-16 gap-16 sm:gap-y-24 justify-center ',
+    // Default container: flex flex-col lg:grid py-24 sm:py-32 lg:py-40 gap-16 sm:gap-y-24
+    container: 'flex flex-col lg:flex lg:flex-row py-12 sm:py-16 md:py-16 lg:py-16 gap-6 sm:gap-y-6 md:gap-y-6 md:gap-12 justify-center items-center',
     // Default title: 'text-5xl sm:text-7xl text-pretty tracking-tight font-bold text-highlighted',
     title: 'text-white text-shadow-lg text-4xl sm:text-5xl font-extrabold ',
     // Default description: 'text-lg sm:text-xl/8 text-muted',
     description: 'text-white text-shadow-lg',
-    wrapper: 'max-w-2xl text-center'
+    wrapper: 'max-w-2xl text-center lg:text-left lg:ml-0 lg:mr-full'
   }
 }
 </script>
@@ -59,13 +59,19 @@ const themeUi: ThemeUI = {
   <UTheme :ui="themeUi">
     <UPageHero
       title="Obras y proyectos en diálogo"
-      description="Espacios participativos para conocer las intervenciones del Ministerio de Infraestructura y Servicios Públicos en tu región"
       orientation="horizontal"
       reverse
     >
+      <template #description>
+        <p class="">
+          Espacios participativos para conocer las intervenciones del<br>
+          <span class="block font-semibold md:inline">Ministerio de Infraestructura y Servicios Públicos</span>
+          en tu región
+        </p>
+      </template>
       <UIcon
-        name="pba:obras"
-        class="size-50 md:size-60 text-white"
+        name="pba:dialogos"
+        class="size-40 shrink-0 text-white sm:size-40 md:size-52 lg:size-60"
       />
     </UPageHero>
     <USeparator />
@@ -89,7 +95,6 @@ const themeUi: ThemeUI = {
             </p>
           </div>
           <USeparator
-            label="Preguntas y respuestas"
             class="my-6"
           />
           <div class="max-w-3xl mx-auto py-12">
@@ -102,7 +107,6 @@ const themeUi: ThemeUI = {
             />
           </div>
           <USeparator
-            label="Galeria de fotos"
             class="my-6"
           />
           <UCarousel

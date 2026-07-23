@@ -31,35 +31,35 @@ const sectionsAsPageCards: Array<PageCardProps> = [
     to: undefined,
     icon: 'pba:audiencias-publicas',
     title: 'Audiencias Públicas',
-    description: 'Conocé y seguí las audiencias públicas abiertas a la comunidad'
+    description: 'Conocé y seguí las audiencias públicas abiertas a la comunidad.'
   },
   {
     class: 'opacity-60 cursor-not-allowed pointer-events-none',
     to: undefined,
     icon: 'pba:consultas-publicas',
     title: 'Consultas Públicas',
-    description: 'Sumate a las consultas ciudadanas sobre proyectos de impacto'
+    description: 'Sumate a las consultas ciudadanas sobre proyectos de impacto.'
   },
   {
     to: '/dialogos',
-    icon: 'pba:obras',
-    title: 'Diálogos',
-    description: 'Formá parte para conocer el avance de obras estratégicas'
+    icon: 'pba:dialogos',
+    title: 'Obras y proyectos en diálogo',
+    description: 'Formá parte para conocer el avance de obras estratégicas.'
   },
   {
     class: 'opacity-60 cursor-not-allowed pointer-events-none',
-    icon: 'pba:territorio',
+    icon: 'pba:encuentros-regionales',
     title: 'Encuentros Regionales',
     to: undefined,
     target: '_self',
-    description: 'Participá para construir la agenda de desarrollo de tu región'
+    description: 'Participá para construir la agenda de desarrollo de tu región.'
   },
   {
     class: 'opacity-60 cursor-not-allowed pointer-events-none',
     to: undefined,
     icon: 'pba:observatorio',
     title: 'Observatorio de Obras y Servicios Públicos',
-    description: 'Primer espacio institucional de participación y control ciudadano sobre obras y servicios públicos de PBA.'
+    description: 'Espacio institucional de participación y control ciudadano.'
   }
 ]
 </script>
@@ -118,7 +118,10 @@ const sectionsAsPageCards: Array<PageCardProps> = [
     >
       <template #description>
         <p class="text-center max-w-4xl mx-auto">
-          <span class="font-bold">MINISTERIO ABIERTO</span> es una iniciativa del <span class="font-bold">Ministerio de Infraestructura y Servicios Públicos (MISP)</span> para impulsar la gestión abierta y participativa en la Provincia de Buenos Aires.
+          <span class="font-bold">MINISTERIO ABIERTO</span> es una iniciativa del
+          <br class="hidden md:block">
+          <span class="font-bold md:whitespace-nowrap">Ministerio de Infraestructura y Servicios Públicos (MISP)</span>
+          para impulsar la gestión abierta y participativa en la Provincia de Buenos Aires.
         </p>
       </template>
       <div class="space-y-6 text-center max-w-4xl mx-auto">
@@ -129,7 +132,7 @@ const sectionsAsPageCards: Array<PageCardProps> = [
           Tu voz cuenta. El desarrollo de la Provincia se logra entre todos y todas.
         </p>
       </div>
-      <div class="flex flex-wrap justify-center gap-3 mx-auto max-w-full lg:max-w-[90%]">
+      <div class="flex flex-wrap justify-center gap-3 mx-auto max-w-full xl:max-w-[90%]">
         <UPageCard
           v-for="(feature, index) in sectionsAsPageCards"
           :key="index"
@@ -142,6 +145,9 @@ const sectionsAsPageCards: Array<PageCardProps> = [
           :class="feature.class ?? undefined"
           :to="feature.to"
           :target="feature.target"
+          :ui="{
+            container: 'p-3 sm:p-3'
+          }"
         >
           <div class="flex-1 flex flex-col justify-evenly min-h-100 items-center text-center">
             <UIcon

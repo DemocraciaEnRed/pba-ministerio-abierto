@@ -86,7 +86,6 @@ const totalSorted = computed(() => sortedItems.value.length)
       color="neutral"
       variant="subtle"
       title="La participación está cerrada"
-      description="Podés leer los comentarios, pero ya no es posible dejar nuevos."
     />
 
     <UAlert
