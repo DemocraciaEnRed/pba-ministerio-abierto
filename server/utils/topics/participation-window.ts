@@ -118,7 +118,7 @@ export function assertTopicWindowWithinConsultation(
   if (errors.length > 0) {
     throw createError({
       statusCode: 422,
-      message: 'Validation error',
+      message: VALIDATION_ERROR_MESSAGE,
       data: errors
     })
   }

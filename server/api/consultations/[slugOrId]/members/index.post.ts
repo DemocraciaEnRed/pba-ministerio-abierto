@@ -45,7 +45,7 @@ export default defineEventHandler(async (event) => {
   if (!isEligible) {
     throw createError({
       statusCode: 422,
-      message: 'Validation error',
+      message: VALIDATION_ERROR_MESSAGE,
       data: [
         {
           field: 'userId',

@@ -36,7 +36,7 @@ export default defineEventHandler(async (event) => {
   if (body.questionText !== undefined && topic.mechanismType === null) {
     throw createError({
       statusCode: 422,
-      message: 'Validation error',
+      message: VALIDATION_ERROR_MESSAGE,
       data: [{ field: 'questionText', message: 'Definí un método de participación antes de cargar la consigna.' }]
     })
   }
@@ -47,7 +47,7 @@ export default defineEventHandler(async (event) => {
   if (nextMax !== null && nextMax < nextMin) {
     throw createError({
       statusCode: 422,
-      message: 'Validation error',
+      message: VALIDATION_ERROR_MESSAGE,
       data: [{ field: 'surveyMaxSelections', message: 'El máximo no puede ser menor que el mínimo' }]
     })
   }

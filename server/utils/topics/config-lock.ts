@@ -74,7 +74,7 @@ export async function assertTopicMechanismConfigValid(
     if (activeOptions < required) {
       throw createError({
         statusCode: 422,
-        message: 'Validation error',
+        message: VALIDATION_ERROR_MESSAGE,
         data: [{ field: 'mechanism', message: `La encuesta necesita al menos ${required} opciones activas.` }]
       })
     }

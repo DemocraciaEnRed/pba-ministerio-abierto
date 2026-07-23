@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { FormSubmitEvent, AuthFormField } from '@nuxt/ui'
 import { LoginSchema, type LoginInput } from '#shared/schemas/auth'
+import type { FormLike } from '~/utils/formErrors'
 
 const { login, loading } = useAuth()
 
@@ -25,7 +26,9 @@ const fields: AuthFormField[] = [{
   required: true
 }]
 
-const handleLogin = (event: FormSubmitEvent<LoginInput>) => login(event.data)
+const authFormRef = useTemplateRef<{ formRef?: FormLike | null }>('authForm')
+
+const handleLogin = (event: FormSubmitEvent<LoginInput>) => login(event.data, authFormRef.value?.formRef)
 </script>
 
 <template>
@@ -36,6 +39,7 @@ const handleLogin = (event: FormSubmitEvent<LoginInput>) => login(event.data)
         variant="subtle"
       >
         <UAuthForm
+          ref="authForm"
           :schema="LoginSchema"
           title="Iniciar sesión"
           description="Ingrese sus credenciales para acceder a su cuenta."

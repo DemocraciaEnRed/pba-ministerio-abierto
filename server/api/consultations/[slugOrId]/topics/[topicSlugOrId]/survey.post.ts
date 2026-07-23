@@ -27,7 +27,7 @@ export default defineEventHandler(async (event) => {
   if (validOptions.length !== optionIds.length) {
     throw createError({
       statusCode: 422,
-      message: 'Validation error',
+      message: VALIDATION_ERROR_MESSAGE,
       data: [{ field: 'surveyOptionIds', message: 'Alguna opción no pertenece al tema o no está activa' }]
     })
   }
@@ -43,7 +43,7 @@ export default defineEventHandler(async (event) => {
   if (optionIds.length < min) {
     throw createError({
       statusCode: 422,
-      message: 'Validation error',
+      message: VALIDATION_ERROR_MESSAGE,
       data: [{ field: 'surveyOptionIds', message: `Elegí al menos ${min} ${min === 1 ? 'opción' : 'opciones'}` }]
     })
   }
@@ -51,7 +51,7 @@ export default defineEventHandler(async (event) => {
   if (max !== null && optionIds.length > max) {
     throw createError({
       statusCode: 422,
-      message: 'Validation error',
+      message: VALIDATION_ERROR_MESSAGE,
       data: [{ field: 'surveyOptionIds', message: `Elegí como máximo ${max} ${max === 1 ? 'opción' : 'opciones'}` }]
     })
   }

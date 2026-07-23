@@ -151,7 +151,7 @@ export async function parseUploadedAssetFromMultipart(
   if (!parsedMetadata.success) {
     throw createError({
       statusCode: 422,
-      message: 'Validation error',
+      message: VALIDATION_ERROR_MESSAGE,
       data: formatZodIssues(parsedMetadata.error)
     })
   }

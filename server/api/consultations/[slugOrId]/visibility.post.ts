@@ -30,7 +30,7 @@ export default defineEventHandler(async (event) => {
   if (body.visibility === 'visible' && existing.startsAt === null) {
     throw createError({
       statusCode: 422,
-      message: 'Validation error',
+      message: VALIDATION_ERROR_MESSAGE,
       data: [{ field: 'startsAt', message: 'Definí la fecha de inicio antes de publicar la consulta' }]
     })
   }

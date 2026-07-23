@@ -15,7 +15,7 @@ interface FetchLikeError {
   }
 }
 
-interface FormLike {
+export interface FormLike {
   setErrors: (errors: FormError[]) => void
 }
 

@@ -24,7 +24,7 @@ export default defineEventHandler(async (event) => {
     if (config && !config.voteAllowAbstain) {
       throw createError({
         statusCode: 422,
-        message: 'Validation error',
+        message: VALIDATION_ERROR_MESSAGE,
         data: [{ field: 'voteValue', message: 'La abstención no está habilitada para este tema' }]
       })
     }

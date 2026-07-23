@@ -1,4 +1,5 @@
 import type { LoginInput, RegisterInput, ResendVerificationInput, RequestPasswordResetInput, ResetPasswordInput } from '#shared/schemas/auth'
+import type { FormLike } from '~/utils/formErrors'
 
 /**
  * Composable de autenticación.
@@ -29,7 +30,7 @@ export function useAuth() {
     })
   }
 
-  async function login(credentials: LoginInput) {
+  async function login(credentials: LoginInput, form?: FormLike | null) {
     loading.value = true
     try {
       await $fetch('/api/auth/login', { method: 'POST', body: credentials })
@@ -53,19 +54,21 @@ export function useAuth() {
         await router.push(`/auth/resend-verification?email=${encodeURIComponent(credentials.email)}`)
         return
       }
+      if (applyServerErrors(form, error)) return
       notifyError(error, 'Credenciales inválidas')
     } finally {
       loading.value = false
     }
   }
 
-  async function register(data: RegisterInput) {
+  async function register(data: RegisterInput, form?: FormLike | null) {
     loading.value = true
     try {
       await $fetch('/api/auth/register', { method: 'POST', body: data })
       // El registro no inicia sesión: el usuario debe verificar su correo.
       await router.push(`/auth/signup-success?email=${encodeURIComponent(data.email)}`)
     } catch (error) {
+      if (applyServerErrors(form, error)) return
       notifyError(error, 'No se pudo completar el registro')
     } finally {
       loading.value = false

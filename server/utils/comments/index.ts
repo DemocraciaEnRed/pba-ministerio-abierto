@@ -212,7 +212,7 @@ export async function assertValidParent(
   if (!parent || !sameContainer || parent.moderationStatus !== 'visible') {
     throw createError({
       statusCode: 422,
-      message: 'Validation error',
+      message: VALIDATION_ERROR_MESSAGE,
       data: [{ field: 'parentCommentId', message: 'El comentario al que respondés no es válido' }]
     })
   }
@@ -221,7 +221,7 @@ export async function assertValidParent(
   if (parent.parentCommentId !== null) {
     throw createError({
       statusCode: 422,
-      message: 'Validation error',
+      message: VALIDATION_ERROR_MESSAGE,
       data: [{ field: 'parentCommentId', message: 'Solo se puede responder a un comentario principal' }]
     })
   }

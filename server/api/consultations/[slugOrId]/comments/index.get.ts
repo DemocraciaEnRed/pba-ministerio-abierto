@@ -47,7 +47,7 @@ export default defineEventHandler(async (event) => {
       if (query.topicId === undefined) {
         throw createError({
           statusCode: 422,
-          message: 'Validation error',
+          message: VALIDATION_ERROR_MESSAGE,
           data: [{ field: 'topicId', message: 'Indicá el tema a filtrar' }]
         })
       }

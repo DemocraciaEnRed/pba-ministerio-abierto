@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { FormSubmitEvent } from '@nuxt/ui'
+import type { Form, FormSubmitEvent } from '@nuxt/ui'
 import { RegisterSchema, type RegisterInput } from '#shared/schemas/auth'
 import {
   BUENOS_AIRES,
@@ -60,7 +60,9 @@ const institutionOptions = [
   { label: 'No', value: false }
 ]
 
-const handleRegister = (event: FormSubmitEvent<Schema>) => register(event.data)
+const formRef = ref<Form<Schema>>()
+
+const handleRegister = (event: FormSubmitEvent<Schema>) => register(event.data, formRef.value)
 </script>
 
 <template>
@@ -71,6 +73,7 @@ const handleRegister = (event: FormSubmitEvent<Schema>) => register(event.data)
         variant="subtle"
       >
         <UForm
+          ref="formRef"
           :schema="RegisterSchema"
           :state="state"
           class="space-y-4"
