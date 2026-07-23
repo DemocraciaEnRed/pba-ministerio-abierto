@@ -85,10 +85,14 @@ export default defineNuxtConfig({
     }
   },
   icon: {
+    provider: 'server',
     serverBundle: {
       collections: ['lucide', 'simple-icons']
     },
-    provider: 'server',
+    clientBundle: {
+      scan: true,
+      includeCustomCollections: true
+    },
     customCollections: [
       {
         prefix: 'der',
