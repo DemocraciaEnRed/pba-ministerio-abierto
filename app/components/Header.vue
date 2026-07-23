@@ -76,6 +76,10 @@ watch(loggedIn, () => {
   refreshAuthSession()
 })
 
+const isParticipaMenuActive = computed(() => {
+  return route.path.startsWith('/audiencias') || route.path.startsWith('/consultas') || route.path.startsWith('/territorio') || route.path.startsWith('/dialogos') || route.path.startsWith('/observatorio')
+})
+
 const items = computed<NavigationMenuItem[]>(() => [
   {
     label: 'Inicio',
@@ -83,15 +87,9 @@ const items = computed<NavigationMenuItem[]>(() => [
     icon: 'lucide:home',
     active: route.path === '/'
   },
-  // {
-  //   label: 'Consultas',
-  //   to: '/consultas',
-  //   icon: 'der:logo',
-  //   active: route.path.startsWith('/consultas') && route.path === '/consultas'
-  // },
   {
     label: 'Participá',
-    active: route.path.startsWith('/audiencias') || route.path.startsWith('/consultas') || route.path.startsWith('/territorio') || route.path.startsWith('/dialogos') || route.path.startsWith('/observatorio'),
+    active: isParticipaMenuActive.value,
     children: [
       {
         label: 'Audiencias',
@@ -151,6 +149,80 @@ const items = computed<NavigationMenuItem[]>(() => [
   }
 ])
 
+const itemsMobile = computed<NavigationMenuItem[][]>(() => [
+[
+  {
+    label: 'Inicio',
+    to: '/',
+    icon: 'lucide:home',
+    active: route.path === '/'
+  },
+],
+[
+  {
+    label: 'Participá',
+    type: 'label',
+    ui: { label: 'font-medium text-primary text-base' }
+  },
+  {
+        label: 'Audiencias',
+        disabled: true,
+        icon: 'pba:audiencias-publicas',
+        description: 'Conocé y seguí las audiencias públicas abiertas a la comunidad',
+        active: route.path.startsWith('/audiencias')
+      },
+      {
+        label: 'Consultas',
+        disabled: true,
+        icon: 'pba:consultas-publicas',
+        description: 'Sumate a las consultas ciudadanas sobre proyectos de impacto',
+        active: route.path.startsWith('/consultas')
+      },
+      {
+        label: 'Diálogos',
+        to: '/dialogos',
+        icon: 'pba:obras',
+        description: 'Formá parte para conocer el avance de obras estratégicas',
+        active: route.path.startsWith('/dialogos')
+      },
+      {
+        label: 'Encuentros regionales',
+        disabled: true,
+        icon: 'pba:territorio',
+        description: 'Participá para construir la agenda de desarrollo de tu región',
+        active: route.path.startsWith('/territorio')
+      },
+      {
+        label: 'Observatorio',
+        disabled: true,
+        icon: 'pba:observatorio',
+        description: 'Accedé a información sobre este espacio institucional de la Obra Pública provincial',
+        active: route.path.startsWith('/observatorio')
+      }
+    ],
+    [
+  {
+    label: 'Más información',
+    icon: 'lucide:plus',
+    type: 'label',
+    ui: { label: 'font-medium text-primary text-base' }
+  },
+   {
+        label: 'Términos y condiciones',
+        to: '/acerca-de/terminos-y-condiciones',
+        description: 'Marco legal y condiciones para participar en la plataforma.',
+        active: route.path.startsWith('/acerca-de/terminos-y-condiciones')
+      },
+      {
+        label: 'Política de privacidad',
+        to: '/acerca-de/politica-de-privacidad',
+        description: 'Cómo protegemos y tratamos tus datos personales',
+        active: route.path.startsWith('/acerca-de/politica-de-privacidad')
+      }
+    ]
+   
+  ])
+
 const navigationMenuUi = {
   linkLabel: 'font-medium text-primary hover:text-primary',
   linkLeadingIcon: 'text-primary',
@@ -161,7 +233,9 @@ const navigationMenuUi = {
 </script>
 
 <template>
-  <UHeader>
+  <UHeader
+    mode="modal"
+  >
     <template #left>
       <NuxtLink to="/">
         <AppLogo class="w-auto h-12 shrink-0" />
@@ -169,10 +243,17 @@ const navigationMenuUi = {
     </template>
 
     <UNavigationMenu
-      :items="items"
-      :ui="navigationMenuUi"
-      content-orientation="vertical"
+    :items="items"
+    :ui="navigationMenuUi"
+    content-orientation="vertical"
     />
+    <template #body>
+      <UNavigationMenu
+        :items="itemsMobile"
+        :ui="navigationMenuUi"
+        orientation="vertical"
+        />
+    </template>
 
     <template #right>
       <UColorModeButton />
@@ -181,8 +262,11 @@ const navigationMenuUi = {
         to="/auth/login"
         label="Iniciar sesión"
         icon="lucide:log-in"
-        color="neutral"
+        color="primary"
         variant="subtle"
+        :ui="{
+          label: 'hidden lg:inline',
+        }"
       />
       <UDropdownMenu
         v-if="loggedIn"
@@ -194,9 +278,12 @@ const navigationMenuUi = {
           :avatar="userAvatarUrl ? { src: userAvatarUrl } : undefined"
           :icon="userAvatarUrl ? undefined : (loggedIn ? 'lucide:user-circle' : 'lucide:circle-user-round')"
           trailing-icon="lucide:chevron-down"
-          color="neutral"
+          color="primary"
           variant="ghost"
           :loading="loggedIn && loading"
+          :ui="{
+            label: 'hidden lg:inline',
+          }"
         />
       </UDropdownMenu>
     </template>

@@ -129,7 +129,7 @@ const sectionsAsPageCards: Array<PageCardProps> = [
           Tu voz cuenta. El desarrollo de la Provincia se logra entre todos y todas.
         </p>
       </div>
-      <div class="flex gap-3 mx-auto max-w-full lg:max-w-[90%]">
+      <div class="flex flex-wrap justify-center gap-3 mx-auto max-w-full lg:max-w-[90%]">
         <UPageCard
           v-for="(feature, index) in sectionsAsPageCards"
           :key="index"
@@ -138,7 +138,7 @@ const sectionsAsPageCards: Array<PageCardProps> = [
           spotlight
           spotlight-color="primary"
           variant="subtle"
-          class="flex-1 w-1/6"
+          class="w-full sm:w-[calc(50%-0.375rem)] lg:w-[calc(33.333%-0.5rem)] xl:w-[calc(20%-0.6rem)]"
           :class="feature.class ?? undefined"
           :to="feature.to"
           :target="feature.target"
