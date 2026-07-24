@@ -129,13 +129,25 @@ const totalSorted = computed(() => sortedItems.value.length)
       </div>
     </UCard>
 
-    <ConsultasComentariosLista
-      :comments="sortedItems"
-      :base-path="basePath"
-      :commenting-open="commentingOpen"
-      :can-manage="canManage"
-      :order="order"
-      :loading="status === 'pending'"
-    />
+    <!-- El hilo se resuelve solo en cliente (`server: false`), así que el
+         estado de carga difiere entre SSR y cliente. `ClientOnly` evita el
+         mismatch de hidratación mostrando un skeleton hasta montar. -->
+    <ClientOnly>
+      <ConsultasComentariosLista
+        :comments="sortedItems"
+        :base-path="basePath"
+        :commenting-open="commentingOpen"
+        :can-manage="canManage"
+        :order="order"
+        :loading="status === 'pending'"
+      />
+      <template #fallback>
+        <ConsultasComentariosLista
+          :comments="[]"
+          :base-path="basePath"
+          loading
+        />
+      </template>
+    </ClientOnly>
   </div>
 </template>

@@ -161,6 +161,7 @@ const topicSections = computed<NavigationMenuItem[]>(() => {
     :hero="hero"
     :cover="cover"
     :topic-sections="topicSections"
+    :topic-metadata="metadata"
     :breadcrumb="breadcrumb"
   >
     <UPage>

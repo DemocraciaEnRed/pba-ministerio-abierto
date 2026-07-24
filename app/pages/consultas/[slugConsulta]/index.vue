@@ -74,7 +74,7 @@ const cover = computed(() => ({
   altText: consultation.value?.coverAltText ?? null
 }))
 
-const metadata = computed<ConsultaHeroMetadata[]>(() => {
+const consultationMetadata = computed<ConsultaHeroMetadata[]>(() => {
   if (!consultation.value) return []
   const items: ConsultaHeroMetadata[] = [
     {
@@ -173,6 +173,7 @@ const commentingOpen = computed(() =>
     :hero="hero"
     :cover="cover"
     :consultation-sections="consultationSections"
+    :consultation-metadata="consultationMetadata"
   >
     <UPage>
       <template #left>
@@ -182,11 +183,11 @@ const commentingOpen = computed(() =>
           }"
         >
           <div
-            v-if="consultation && metadata.length"
+            v-if="consultation && consultationMetadata.length"
             class="space-y-2"
           >
             <UPageCard
-              v-for="(item, index) in metadata"
+              v-for="(item, index) in consultationMetadata"
               :key="index"
               v-bind="item"
               variant="subtle"

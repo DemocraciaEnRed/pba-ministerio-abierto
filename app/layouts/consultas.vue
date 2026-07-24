@@ -1,10 +1,12 @@
 <script setup lang="ts">
-import type { PageHeroProps, NavigationMenuItem, ThemeUI } from '@nuxt/ui'
+import type { PageHeroProps, NavigationMenuItem, ThemeUI, DropdownMenuItem } from '@nuxt/ui'
+import type { ConsultaHeroMetadata } from '~/types/consulta'
 
 const props = withDefaults(
   defineProps<{
     hero?: PageHeroProps
-    consultationSections?: NavigationMenuItem[]
+    consultationSections?: NavigationMenuItem[][]
+    consultationMetadata?: ConsultaHeroMetadata[]
     cover?: { url: string | null, altText?: string | null }
   }>(),
   {
@@ -13,6 +15,7 @@ const props = withDefaults(
       description: 'Participa en las consultas ciudadanas abiertas y conoce los resultados de las consultas pasadas.'
     }),
     consultationSections: () => [],
+    consultationMetadata: () => [],
     cover: () => ({ url: null })
   }
 )
@@ -62,6 +65,25 @@ const stickyTop = computed(() =>
     ? `calc(var(--ui-header-height) + ${navHeight.value}px)`
     : 'var(--ui-header-height)'
 )
+
+// Aplana los grupos del menú de navegación (izquierda/derecha) en grupos del
+// dropdown para móvil, preservando la separación visual entre cada grupo.
+const consultationSectionsMobile = computed<DropdownMenuItem[][]>(() =>
+  props.consultationSections
+    .filter(group => group.length)
+    .map(group =>
+      group.map(section => ({
+        label: section.label,
+        icon: section.icon,
+        to: section.to
+      }))
+    )
+);
+const drawerOpen = ref(false);
+const openDrawer = () => {
+  drawerOpen.value = true;
+};
+
 </script>
 
 <template>
@@ -75,8 +97,8 @@ const stickyTop = computed(() =>
           aria-hidden="true"
         >
           <img
-            :src="cover.url!"
-            :alt="cover.altText || ''"
+            :src="props.cover?.url!"
+            :alt="props.cover?.altText || ''"
             class="h-full w-full object-cover"
           >
           <div class="absolute inset-0 bg-linear-to-b from-black/55 via-black/45 to-black/70" />
@@ -93,10 +115,34 @@ const stickyTop = computed(() =>
         ref="navRef"
         class="sticky top-(--ui-header-height) z-10 border-b border-default bg-default/75 backdrop-blur"
       >
-        <UContainer>
+        <UContainer class="">
           <UNavigationMenu
             :items="consultationSections"
+            class="hidden lg:flex"
           />
+          <div class="lg:hidden py-1 flex justify-between items-center gap-2">
+            <UButton 
+              label="Metadatos"
+              icon="i-lucide-info"
+              variant="ghost"
+              color="neutral"
+              @click="openDrawer"
+            />
+            <UDropdownMenu
+              :items="consultationSectionsMobile"
+              :content="{ align: 'center' }"
+              arrow
+              :ui="{ content: 'w-56' }"
+            >
+              <UButton
+                label="Secciones"
+                icon="i-lucide-list"
+                trailing-icon="i-lucide-chevron-down"
+                variant="ghost"
+                color="neutral"
+              />
+            </UDropdownMenu>
+          </div>
         </UContainer>
       </div>
       <UContainer id="panel-estadisticas">
@@ -133,7 +179,35 @@ const stickyTop = computed(() =>
         </UContainer>
       </div>
     </UMain>
-
+    <UDrawer
+      v-model:open="drawerOpen"
+      title="Detalles del proceso"
+      description="Información del proceso participativo"
+      :close="{
+        color: 'primary',
+        variant: 'outline',
+        class: 'rounded-full'
+      }"
+      :ui="{
+        body: 'flex flex-col sm:grid sm:grid-cols-2 md:grid-cols-2 gap-2'
+      }"
+    >
+      <template #body>
+        <UPageCard
+          v-for="(item, index) in props.consultationMetadata"
+          :key="`metadata-mobile-${index}`"
+          v-bind="item"
+          variant="subtle"
+          :ui="{
+            wrapper: 'flex-row',
+            leading: 'mr-2 mb-0 mt-0.5',
+            container: 'sm:p-2.5',
+            title: 'text-sm',
+            description: 'text-xs'
+          }"
+        />
+      </template>
+    </UDrawer>
     <Footer />
   </UTheme>
 </template>

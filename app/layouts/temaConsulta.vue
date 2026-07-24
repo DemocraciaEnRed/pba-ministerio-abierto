@@ -1,10 +1,12 @@
 <script setup lang="ts">
-import type { NavigationMenuItem, PageHeroProps, ThemeUI } from '@nuxt/ui'
+import type { NavigationMenuItem, PageHeroProps, ThemeUI, DropdownMenuItem } from '@nuxt/ui'
+import type { ConsultaHeroMetadata } from '~/types/consulta'
 
 const props = withDefaults(
   defineProps<{
     hero?: PageHeroProps
     topicSections?: NavigationMenuItem[]
+    topicMetadata?: ConsultaHeroMetadata[]
     cover?: { url: string | null, altText?: string | null }
     // breadcrumb?: BreadcrumbItem[]
   }>(),
@@ -14,6 +16,7 @@ const props = withDefaults(
       description: 'Detalle del tema de participación de la consulta ciudadana.'
     }),
     topicSections: () => [],
+    topicMetadata: () => [],
     cover: () => ({ url: null })
     // breadcrumb: () => []
   }
@@ -64,6 +67,21 @@ const stickyTop = computed(() =>
     ? `calc(var(--ui-header-height) + ${navHeight.value}px)`
     : 'var(--ui-header-height)'
 )
+
+// Convierte las secciones del tema en items del dropdown para móvil.
+const topicSectionsMobile = computed<DropdownMenuItem[]>(() =>
+  props.topicSections.map(section => ({
+    label: section.label,
+    icon: section.icon,
+    to: section.to
+  }))
+)
+
+// Drawer con los metadatos del tema, disponible solo en móvil.
+const drawerOpen = ref(false)
+const openDrawer = () => {
+  drawerOpen.value = true
+}
 </script>
 
 <template>
@@ -107,7 +125,31 @@ const stickyTop = computed(() =>
         <UContainer>
           <UNavigationMenu
             :items="topicSections"
+            class="hidden lg:flex"
           />
+          <div class="lg:hidden py-1 flex justify-between items-center gap-2">
+            <UButton
+              label="Metadatos"
+              icon="i-lucide-info"
+              variant="ghost"
+              color="neutral"
+              @click="openDrawer"
+            />
+            <UDropdownMenu
+              :items="topicSectionsMobile"
+              :content="{ align: 'center' }"
+              arrow
+              :ui="{ content: 'w-56' }"
+            >
+              <UButton
+                label="Secciones"
+                icon="i-lucide-list"
+                trailing-icon="i-lucide-chevron-down"
+                variant="ghost"
+                color="neutral"
+              />
+            </UDropdownMenu>
+          </div>
         </UContainer>
       </div>
       <UContainer>
@@ -141,7 +183,35 @@ const stickyTop = computed(() =>
         </UContainer>
       </div>
     </UMain>
-
+    <UDrawer
+      v-model:open="drawerOpen"
+      title="Detalles del tema"
+      description="Información del tema de participación"
+      :close="{
+        color: 'primary',
+        variant: 'outline',
+        class: 'rounded-full'
+      }"
+      :ui="{
+        body: 'flex flex-col gap-2'
+      }"
+    >
+      <template #body>
+        <UPageCard
+          v-for="(item, index) in props.topicMetadata"
+          :key="`metadata-mobile-${index}`"
+          v-bind="item"
+          variant="subtle"
+          :ui="{
+            wrapper: 'flex-row',
+            leading: 'mr-2 mb-0 mt-0.5',
+            container: 'sm:p-2.5',
+            title: 'text-sm',
+            description: 'text-xs'
+          }"
+        />
+      </template>
+    </UDrawer>
     <Footer />
   </UTheme>
 </template>
