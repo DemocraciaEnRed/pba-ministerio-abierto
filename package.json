@@ -39,6 +39,8 @@
     "@nuxt/ui": "^4.10.0",
     "@prisma/adapter-mariadb": "^7.9.0",
     "@prisma/client": "^7.9.0",
+    "@tiptap/core": "3.24.0",
+    "@tiptap/vue-3": "3.24.0",
     "dayjs": "^1.11.21",
     "dotenv": "^17.4.2",
     "isomorphic-dompurify": "^3.19.0",

@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import type { EditorToolbarItem } from '@nuxt/ui'
+import type { EditorCustomHandlers, EditorToolbarItem } from '@nuxt/ui'
+import type { Editor } from '@tiptap/vue-3'
+import { ImageUpload } from './RichTextEditorImageUpload'
 
 const props = defineProps<{
   placeholder?: string
@@ -15,7 +17,16 @@ const value = computed({
   }
 })
 
-const toolbarItems: EditorToolbarItem[][] = [
+const customHandlers = {
+  imageUpload: {
+    canExecute: (editor: Editor) => editor.can().insertContent({ type: 'imageUpload' }),
+    execute: (editor: Editor) => editor.chain().focus().insertContent({ type: 'imageUpload' }),
+    isActive: (editor: Editor) => editor.isActive('imageUpload'),
+    isDisabled: undefined
+  }
+} satisfies EditorCustomHandlers
+
+const toolbarItems: EditorToolbarItem<typeof customHandlers>[][] = [
   [
     {
       icon: 'i-lucide-heading',
@@ -23,6 +34,7 @@ const toolbarItems: EditorToolbarItem[][] = [
       content: { align: 'start' },
       items: [
         { kind: 'paragraph', icon: 'i-lucide-type', label: 'Párrafo' },
+        { kind: 'heading', level: 1, icon: 'i-lucide-heading-1', label: 'Título 1' },
         { kind: 'heading', level: 2, icon: 'i-lucide-heading-2', label: 'Título 2' },
         { kind: 'heading', level: 3, icon: 'i-lucide-heading-3', label: 'Título 3' },
         { kind: 'heading', level: 4, icon: 'i-lucide-heading-4', label: 'Título 4' }
@@ -41,7 +53,8 @@ const toolbarItems: EditorToolbarItem[][] = [
     { kind: 'blockquote', icon: 'i-lucide-text-quote', tooltip: { text: 'Cita' } }
   ],
   [
-    { kind: 'link', icon: 'i-lucide-link', tooltip: { text: 'Enlace' } }
+    { kind: 'link', icon: 'i-lucide-link', tooltip: { text: 'Enlace' } },
+    { kind: 'imageUpload', icon: 'i-lucide-image', tooltip: { text: 'Imagen' } }
   ],
   [
     { kind: 'undo', icon: 'i-lucide-undo', tooltip: { text: 'Deshacer' } },
@@ -55,8 +68,9 @@ const toolbarItems: EditorToolbarItem[][] = [
     v-slot="{ editor }"
     v-model="value"
     content-type="markdown"
-    :image="false"
     :mention="false"
+    :extensions="[ImageUpload]"
+    :handlers="customHandlers"
     :placeholder="props.placeholder"
     class="w-full rounded-md ring ring-default divide-y divide-default"
     :ui="{ base: 'p-3 min-h-40 prose prose-sm dark:prose-invert max-w-none focus:outline-none' }"
@@ -66,5 +80,7 @@ const toolbarItems: EditorToolbarItem[][] = [
       :items="toolbarItems"
       class="p-1 flex flex-wrap gap-1"
     />
+
+    <UEditorDragHandle :editor="editor" />
   </UEditor>
 </template>
