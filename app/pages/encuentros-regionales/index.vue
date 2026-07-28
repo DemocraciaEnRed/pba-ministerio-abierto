@@ -228,12 +228,12 @@ async function onRegionSelect(regionSlug: string) {
     <UContainer>
       <UPage>
         <UPageBody>
-          <div class="flex gap-6">
-            <div class="w-3/12">
+          <div class="flex flex-col-reverse md:flex-row justify-center gap-6">
+            <div class="w-9/12 sm:w-6/12 mx-auto md:w-4/12 lg:w-3/12">
               <EncuentrosRegionalesMapSelector @select="onRegionSelect" />
             </div>
-            <div class="w-8/12">
-              <h1 class="text-2xl sm:text-3xl lg:text-4xl text-pretty tracking-tight font-extrabold text-primary uppercase text-left mb-4">
+            <div class="mx-auto w-full sm:w-10/12 md:w-7/12 lg:w-8/12">
+              <h1 class="text-center sm:text-left text-2xl sm:text-3xl lg:text-4xl text-pretty tracking-tight font-extrabold text-primary uppercase mb-4">
                 Encuentros
               </h1>
               <EncuentrosRegionalesConsultasCardLists />
