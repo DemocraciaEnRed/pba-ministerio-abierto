@@ -44,7 +44,7 @@ const participationStateLabel = computed(() => {
   const state = topic.value?.participationState
   if (state === 'scheduled') return 'Programado'
   if (state === 'open') return 'Abierto'
-  if (state === 'closed') return 'Cerrado'
+  if (state === 'closed') return 'Realizado'
   return null
 })
 

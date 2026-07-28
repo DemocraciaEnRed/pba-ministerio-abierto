@@ -151,6 +151,21 @@ function topicBadge(topic: ConsultationTopicSummary) {
             variant="subtle"
           />
         </UFieldGroup>
+        <UFieldGroup
+          v-if="consultation.region"
+          size="sm"
+        >
+          <UBadge
+            label="Región"
+            color="neutral"
+            variant="outline"
+          />
+          <UBadge
+            :label="consultation.region.name"
+            color="neutral"
+            variant="subtle"
+          />
+        </UFieldGroup>
         <UBadge
           v-for="category in consultation.categories"
           :key="`cat-${category.id}`"

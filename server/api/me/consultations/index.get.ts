@@ -19,6 +19,7 @@ export default defineEventHandler(async (event) => {
         consultation: {
           include: {
             section: true,
+            region: true,
             categoryAssignments: {
               include: { category: true },
               orderBy: [{ isPrimary: 'desc' }, { displayOrder: 'asc' }]

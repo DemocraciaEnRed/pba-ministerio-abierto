@@ -18,7 +18,7 @@ export type ConsultationStatusFilter = 'all' | ParticipationState | 'archived'
 export const participationStateIcons: Record<ParticipationState, string> = {
   scheduled: 'lucide:calendar-clock',
   open: 'lucide:circle-play',
-  closed: 'lucide:circle-x'
+  closed: 'lucide:lock'
 }
 
 /** Íconos (Lucide) de visibilidad, compartidos en todo el front. */
@@ -51,12 +51,12 @@ export const visibilityLabelsTema: Record<Visibility, string> = {
 }
 
 /**
- * Badge del estado temporal derivado (programada/abierta/cerrada) de una consulta.
+ * Badge del estado temporal derivado (programado/abierto/realizado) de una consulta.
  */
 export function participationStateBadgeConsulta(state: ParticipationState): EstadoBadge {
-  if (state === 'open') return { label: 'Abierta', color: 'success', icon: participationStateIcons.open }
-  if (state === 'scheduled') return { label: 'Programada', color: 'primary', icon: participationStateIcons.scheduled }
-  return { label: 'Cerrada', color: 'warning', icon: participationStateIcons.closed }
+  if (state === 'open') return { label: 'Abierto', color: 'success', icon: participationStateIcons.open }
+  if (state === 'scheduled') return { label: 'Programado', color: 'primary', icon: participationStateIcons.scheduled }
+  return { label: 'Realizado', color: 'warning', icon: participationStateIcons.closed }
 }
 
 /**
@@ -65,7 +65,7 @@ export function participationStateBadgeConsulta(state: ParticipationState): Esta
 export function participationStateBadgeTema(state: ParticipationState): EstadoBadge {
   if (state === 'open') return { label: 'Abierto', color: 'success', icon: participationStateIcons.open }
   if (state === 'scheduled') return { label: 'Programado', color: 'primary', icon: participationStateIcons.scheduled }
-  return { label: 'Cerrado', color: 'warning', icon: participationStateIcons.closed }
+  return { label: 'Realizado', color: 'warning', icon: participationStateIcons.closed }
 }
 
 /**

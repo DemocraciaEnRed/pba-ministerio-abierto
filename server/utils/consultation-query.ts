@@ -40,6 +40,8 @@ export function buildConsultationFilters(query: ConsultationsQueryInput, now: Da
     ...(query.featured !== undefined ? { featured: query.featured } : {}),
     ...(query.sectionSlug ? { section: { slug: query.sectionSlug } } : {}),
     ...(query.sectionIds ? { sectionId: { in: query.sectionIds } } : {}),
+    ...(query.regionSlug ? { region: { slug: query.regionSlug } } : {}),
+    ...(query.regionIds ? { regionId: { in: query.regionIds } } : {}),
     ...(query.categoryIds
       ? { categoryAssignments: { some: { categoryId: { in: query.categoryIds } } } }
       : {}),

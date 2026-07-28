@@ -33,6 +33,7 @@ type ConsultationEntity = {
   createdAt: Date
   updatedAt: Date
   section?: TaxonomyRelation | null
+  region?: TaxonomyRelation | null
   categoryAssignments?: { isPrimary: boolean, category: TaxonomyRelation }[]
   consultationTags?: { tag: TaxonomyRelation }[]
   topics?: TopicSummaryRelation[]
@@ -79,6 +80,7 @@ export interface PublicConsultationDTO {
   closedMessage: string | null
   resultsVisibility: ResultsVisibility
   section: ConsultationTaxonomyDTO | null
+  region: ConsultationTaxonomyDTO | null
   categories: ConsultationCategoryDTO[]
   tags: ConsultationTaxonomyDTO[]
   /** Portada para las cards públicas; `null` cuando no hay imagen cargada. */
@@ -140,6 +142,13 @@ export function serializeConsultation(
           id: consultation.section.id,
           slug: consultation.section.slug,
           name: consultation.section.name
+        }
+      : null,
+    region: consultation.region
+      ? {
+          id: consultation.region.id,
+          slug: consultation.region.slug,
+          name: consultation.region.name
         }
       : null,
     categories: (consultation.categoryAssignments ?? []).map(assignment => ({

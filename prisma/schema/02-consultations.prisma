@@ -32,6 +32,7 @@ model Consultation {
   closedMessage       String?   @db.Text
   resultsVisibility   ResultsVisibility @default(hidden)
   sectionId           Int?
+  regionId            Int?
   createdByUserId     Int?
   updatedByUserId     Int?
   createdAt           DateTime  @default(now())
@@ -40,6 +41,7 @@ model Consultation {
   createdBy User? @relation("ConsultationCreatedBy", fields: [createdByUserId], references: [id], onDelete: SetNull)
   updatedBy User? @relation("ConsultationUpdatedBy", fields: [updatedByUserId], references: [id], onDelete: SetNull)
   section   Section? @relation(fields: [sectionId], references: [id], onDelete: SetNull)
+  region    Region?  @relation(fields: [regionId], references: [id], onDelete: SetNull)
   topics    Topic[]
   memberships ConsultationMembership[]
   categoryAssignments ConsultationCategoryAssignment[]
@@ -51,6 +53,7 @@ model Consultation {
   @@index([visibility])
   @@index([featured])
   @@index([startsAt, endsAt])
+  @@index([regionId])
   @@index([sectionId])
 }
 

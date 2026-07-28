@@ -48,9 +48,18 @@ const comoHacemosPageSectionUi: ThemeUI['pageSection'] = {
   // container (default): 'flex flex-col lg:grid py-16 sm:py-24 lg:py-32 gap-8 sm:gap-16',
   // container (for horizontal): 'lg:grid-cols-2 lg:items-center',
   // container: 'flex flex-col lg:flex lg:flex-row-reverse gap-6 sm:gap-y-6 md:gap-y-6 md:gap-12 justify-center items-center mx-auto py-12 sm:py-16 md:py-16 lg:py-16',
-  container: 'flex flex-col sm:flex-col md:flex-row-reverse lg:flex lg:flex-row-reverse items-center md:items-start py-0 sm:py-0 md:py-0 lg:py-0 lg:max-w-8/12',
+  container: 'flex flex-col sm:flex-col md:flex-row-reverse lg:flex lg:flex-row-reverse items-center md:items-start lg:items-start py-0 sm:py-0 md:py-0 lg:py-0 lg:max-w-9/12 xl:max-w-8/12',
   body: ' space-y-6 mx-auto lg:mt-0',
   wrapper: 'w-full md:w-7/12 lg:w-8/12'
+}
+
+// Al hacer clic en una región del mapa, navega a la última consulta creada asignada a
+// esa región. Si la región no tiene ninguna consulta, el clic no tiene efecto.
+async function onRegionSelect(regionSlug: string) {
+  const { slug } = await $fetch(`/api/regions/${regionSlug}/latest-consultation`)
+  if (slug) {
+    await navigateTo(`/consultas/${slug}`)
+  }
 }
 </script>
 
@@ -118,7 +127,7 @@ const comoHacemosPageSectionUi: ThemeUI['pageSection'] = {
       :ui="comoHacemosPageSectionUi"
     >
       <template #default>
-        <div class="flex flex-col w-7/12 sm:w-6/12 md:w-5/12 lg:w-4/12 gap-4 hover:scale-103 transition-transform duration-300 sticky md:pt-5 top-(--ui-header-height)">
+        <div class="flex flex-col w-7/12 sm:w-6/12 md:w-5/12 lg:w-4/12 gap-4 hover:scale-103 transition-transform duration-300 sticky md:pt-5 lg:pt-3 top-(--ui-header-height)">
           <img
             src="https://democraciaenred.nyc3.digitaloceanspaces.com/projects/pba-ministerio-abierto/app/assets/encuentros-regionales/plan-estrategico-infraestructura-pba-cover.jpg"
             loading="lazy"
@@ -171,7 +180,7 @@ const comoHacemosPageSectionUi: ThemeUI['pageSection'] = {
                   >
                     <UButton
                       color="primary"
-                      variant="soft"
+                      variant="subtle"
                       icon="lucide:info"
                     />
                     <template #content>
@@ -184,9 +193,7 @@ const comoHacemosPageSectionUi: ThemeUI['pageSection'] = {
               </UAlert>
             </div>
             <UButton
-              :to="undefined"
-              disabled
-              variant="outline"
+              to="/encuentros-regionales/formulario"
               color="secondary"
               :ui="{ base: 'py-3 justify-center text-center text-xl flex lg:flex-col gap-4' }"
             >
@@ -213,7 +220,7 @@ const comoHacemosPageSectionUi: ThemeUI['pageSection'] = {
             </h1>
           </div>
           <div class="px-4 lg:px-6 bg-elevated/35 border border-default rounded-lg shadow-lg">
-            <EncuentrosRegionalesStepper />
+            <EncuentrosRegionalesAgendaTimeline />
           </div>
         </UPageBody>
       </UPage>
@@ -223,7 +230,7 @@ const comoHacemosPageSectionUi: ThemeUI['pageSection'] = {
         <UPageBody>
           <div class="flex gap-6">
             <div class="w-3/12">
-              <EncuentrosRegionalesMapSelector />
+              <EncuentrosRegionalesMapSelector @select="onRegionSelect" />
             </div>
             <div class="w-8/12">
               <h1 class="text-2xl sm:text-3xl lg:text-4xl text-pretty tracking-tight font-extrabold text-primary uppercase text-left mb-4">

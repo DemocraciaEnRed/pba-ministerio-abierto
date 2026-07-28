@@ -6,8 +6,11 @@ import { PrismaClient } from './generated/client'
 import { seedBaseUsers } from './seeds/base-users'
 import { seedConsultationsDemo } from './seeds/consultations-demo'
 import { seedInstitution } from './seeds/institution'
+import { seedRegions } from './seeds/regions'
+import { seedRegionalMeetingsAgenda } from './seeds/regional-meetings-agenda'
+import { seedRegionalMeetingsTestimonials } from './seeds/regional-meetings-testimonials'
 
-type SeedProfile = 'base' | 'institution' | 'demo'
+type SeedProfile = 'base' | 'institution' | 'regions' | 'regional-meetings' | 'regional-meetings-testimonials' | 'demo'
 
 interface SeedRunOptions {
   demoCount?: number
@@ -17,9 +20,12 @@ const seedProfiles: Record<
   SeedProfile,
   (prisma: PrismaClient, options: SeedRunOptions) => Promise<void>
 > = {
-  base: prisma => seedBaseUsers(prisma),
-  institution: prisma => seedInstitution(prisma),
-  demo: (prisma, options) => seedConsultationsDemo(prisma, { count: options.demoCount })
+  'base': prisma => seedBaseUsers(prisma),
+  'institution': prisma => seedInstitution(prisma),
+  'regions': prisma => seedRegions(prisma),
+  'regional-meetings': prisma => seedRegionalMeetingsAgenda(prisma),
+  'regional-meetings-testimonials': prisma => seedRegionalMeetingsTestimonials(prisma),
+  'demo': (prisma, options) => seedConsultationsDemo(prisma, { count: options.demoCount })
 }
 
 function buildPrismaClient() {
@@ -75,7 +81,7 @@ function parseSeedArgs(): ParsedSeedArgs {
   const rawProfile = values.profile?.trim()
 
   if (!rawProfile) {
-    return { profiles: ['base', 'institution'], options }
+    return { profiles: ['base', 'institution', 'regions', 'regional-meetings'], options }
   }
 
   const requested = rawProfile

@@ -1,0 +1,104 @@
+/// Ítem de agenda de los Encuentros Regionales. Hay exactamente uno por región
+/// (catálogo fijo de 8): se siembra y se edita (lugar/fecha/año/estado), pero no
+/// se crea ni elimina desde la app, y la región no cambia. La timeline pública se
+/// dibuja con estos datos.
+model RegionalMeetingAgendaItem {
+  id        Int      @id @default(autoincrement())
+  regionId  Int      @unique
+  /// Lugar del encuentro: texto libre (no un municipio del catálogo cerrado).
+  location  String
+  heldAt    DateTime
+  /// Marca de año al inicio del segmento en la timeline (opcional).
+  year      Int?
+  /// Si el encuentro ya se celebró (equivale a `done` en la timeline).
+  held      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  region Region @relation(fields: [regionId], references: [id], onDelete: Restrict)
+
+  @@index([heldAt])
+}
+
+/// Grupo de testimonios ("encuentro" a fines editoriales). ABM completo desde el
+/// panel. Puede asociarse opcionalmente a una región para tematizar color/título.
+/// Contiene a lo sumo 3 testimonios (regla de negocio validada en el handler).
+model RegionalMeetingTestimonialGroup {
+  id           Int      @id @default(autoincrement())
+  name         String
+  municipality String
+  heldAt       DateTime
+  regionId     Int?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  region       Region?                      @relation(fields: [regionId], references: [id], onDelete: SetNull)
+  testimonials RegionalMeetingTestimonial[]
+
+  @@index([regionId])
+}
+
+/// Testimonio individual de un participante. Pertenece a un grupo (máximo 3 por
+/// grupo). Se crea/edita/elimina como parte del grupo.
+model RegionalMeetingTestimonial {
+  id           Int      @id @default(autoincrement())
+  groupId      Int
+  body         String   @db.Text
+  authorName   String
+  municipality String
+  displayOrder Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  group RegionalMeetingTestimonialGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@index([groupId, displayOrder])
+}
+
+/// Aporte ciudadano al Plan Estratégico de Infraestructura, enviado desde el
+/// formulario público de Encuentros Regionales (sin login). Solo se crea vía el
+/// POST público; toda lectura es exclusiva de platform-admin (no hay vista
+/// pública que liste ni exponga los aportes). Es inmutable: no se edita ni borra.
+model RegionalMeetingSubmission {
+  id           Int      @id @default(autoincrement())
+  firstName    String
+  lastName     String
+  email        String
+  phone        String
+  provincia    String
+  municipio    String?
+  /// Institución u organización que representa (opcional). El "¿representás una
+  /// institución?" del formulario se deriva de este campo (no se persiste el flag).
+  organization String?
+  /// Selección del eje temático (árbol hardcodeado en el front, guardado como
+  /// texto legible). `ejeTematico` es el eje padre; `subejeTematico` el sub-eje.
+  ejeTematico    String
+  subejeTematico String?
+  ideaProyecto String?  @db.Text
+  comentarios  String?  @db.Text
+  /// Archivo adjunto opcional (PDF/Word, ≤8MB). Se sirve solo a platform-admin
+  /// mediante un endpoint protegido, nunca por URL pública.
+  attachmentAssetId Int?
+  createdAt    DateTime @default(now())
+
+  attachmentAsset Asset?                          @relation("RegionalMeetingSubmissionAttachment", fields: [attachmentAssetId], references: [id], onDelete: SetNull)
+  links           RegionalMeetingSubmissionLink[]
+
+  @@index([createdAt])
+  @@index([email])
+  @@index([attachmentAssetId])
+}
+
+/// Enlace en la nube asociado a un aporte (texto libre para archivos que la
+/// ciudadanía comparte por URL). El orden no importa: se listan como llegan.
+model RegionalMeetingSubmissionLink {
+  id           Int      @id @default(autoincrement())
+  submissionId Int
+  url          String   @db.Text
+  title        String?
+  createdAt    DateTime @default(now())
+
+  submission RegionalMeetingSubmission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+
+  @@index([submissionId])
+}

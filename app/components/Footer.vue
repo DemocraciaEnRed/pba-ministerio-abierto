@@ -135,14 +135,6 @@ const footerColumns: FooterColumn[] = [
             alt="Ministerio Abierto"
             class=""
           >
-          <div class="flex flex-col gap-2 items-start justify-start">
-            <p class="text-toned text-lg">
-              <b>Ministerio de Infraestructura y Servicios Públicos</b>
-            </p>
-            <p class="text-sm text-muted">
-              Provincia de Buenos Aires
-            </p>
-          </div>
           <div class="flex flex-wrap gap-1 items-center justify-start">
             <UButton
               v-for="link in socialLinks"
@@ -151,6 +143,7 @@ const footerColumns: FooterColumn[] = [
               :to="link.to"
               :aria-label="link.label"
               target="_blank"
+              size="lg"
               color="primary"
               variant="ghost"
             />

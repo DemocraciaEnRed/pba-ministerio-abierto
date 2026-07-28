@@ -25,6 +25,23 @@ export function formatDateShort(value: string | null | undefined): string {
 }
 
 /**
+ * Día y mes en español, p. ej. "19 de marzo" (sin año). Se usa en la timeline
+ * de Encuentros Regionales, donde el año se muestra por separado.
+ */
+export function formatDayMonth(value: string | null | undefined): string {
+  if (!value) return 'Sin definir'
+  return dayjs(value).format('D [de] MMMM')
+}
+
+/**
+ * Fecha larga sin hora, p. ej. "19 de marzo de 2026".
+ */
+export function formatDateLong(value: string | null | undefined): string {
+  if (!value) return 'Sin definir'
+  return dayjs(value).format('D [de] MMMM [de] YYYY')
+}
+
+/**
  * Fecha relativa al momento actual, p. ej. "en 3 días" / "hace 2 horas".
  */
 export function fromNow(value: string | null | undefined): string {

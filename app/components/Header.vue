@@ -79,7 +79,7 @@ watch(loggedIn, () => {
 const participaRoutePrefixes = [
   '/audiencias-publicas',
   '/consultas-publicas',
-  '/territorio',
+  '/encuentros-regionales',
   '/dialogos',
   '/observatorio'
 ] as const

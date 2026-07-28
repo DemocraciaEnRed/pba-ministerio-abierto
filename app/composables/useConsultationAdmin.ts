@@ -14,6 +14,7 @@ export interface AdminConsultationSummary {
   closedMessage: string | null
   resultsVisibility: 'hidden' | 'participants_only' | 'public'
   section: { id: number, slug: string, name: string } | null
+  region: { id: number, slug: string, name: string } | null
   categories: { id: number, slug: string, name: string, isPrimary: boolean }[]
   tags: { id: number, slug: string, name: string }[]
   /** Portada de la consulta; `null` cuando no hay imagen cargada. */

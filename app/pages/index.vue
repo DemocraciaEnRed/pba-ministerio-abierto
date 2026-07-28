@@ -48,13 +48,13 @@ const sectionsAsPageCards: Array<PageCardProps> = [
   {
     to: '/audiencias-publicas',
     icon: 'pba:audiencias-publicas',
-    title: 'Audiencias Públicas',
+    title: 'Audiencias públicas',
     description: 'Conocé y seguí las audiencias públicas abiertas a la comunidad.'
   },
   {
     to: '/consultas-publicas',
     icon: 'pba:consultas-publicas',
-    title: 'Consultas Públicas',
+    title: 'Consultas públicas',
     description: 'Sumate a las consultas ciudadanas sobre proyectos de impacto.'
   },
   {

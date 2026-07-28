@@ -24,6 +24,7 @@ export interface ConsultationDetail {
   closedMessage: string | null
   resultsVisibility: ResultsVisibility
   section: ConsultationTaxonomy | null
+  region: ConsultationTaxonomy | null
   categories: ConsultationCategory[]
   tags: ConsultationTaxonomy[]
   /** Portada de la consulta para el hero; `null` cuando no hay imagen cargada. */
@@ -177,6 +178,7 @@ export interface PublicConsultationListItem {
   closedMessage: string | null
   resultsVisibility: ResultsVisibility
   section: ConsultationTaxonomy | null
+  region: ConsultationTaxonomy | null
   categories: ConsultationCategory[]
   tags: ConsultationTaxonomy[]
   /** Portada para la card; `null` cuando no hay imagen cargada. */
@@ -210,6 +212,7 @@ export interface AdminConsultationListItem {
   createdAt: string
   updatedAt: string
   section: ConsultationTaxonomy | null
+  region: ConsultationTaxonomy | null
   categories: ConsultationCategory[]
   tags: ConsultationTaxonomy[]
   topics?: ConsultationTopicSummary[]

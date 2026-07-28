@@ -17,6 +17,21 @@ model Section {
   @@index([isActive, displayOrder])
 }
 
+/// Región de la Provincia de Buenos Aires. Catálogo fijo del sistema:
+/// se siembra una vez (seed) y no se edita ni elimina desde la app (sin ABM).
+/// Siempre se lista/ordena alfabéticamente por `name`.
+model Region {
+  id        Int      @id @default(autoincrement())
+  slug      String   @unique
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  consultations     Consultation[]
+  agendaItem        RegionalMeetingAgendaItem?
+  testimonialGroups RegionalMeetingTestimonialGroup[]
+}
+
 model Category {
   id          Int      @id @default(autoincrement())
   sectionId   Int

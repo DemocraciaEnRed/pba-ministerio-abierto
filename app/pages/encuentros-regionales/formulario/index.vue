@@ -65,13 +65,12 @@ const themeUi: ThemeUI = {
             </p>
             <UAlert
               title="Las preguntas marcadas con * son obligatorias"
-              color="neutral"
+              color="warning"
               icon="lucide:info"
               variant="soft"
               class="mt-6"
             />
           </div>
-          <USeparator class="my-2" />
           <EncuentrosRegionalesAportesForm />
         </UPageBody>
       </UPage>

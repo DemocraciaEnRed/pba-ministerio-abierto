@@ -38,7 +38,8 @@ const fotosDialogos = [
   '/dialogos03.jpg',
   '/dialogos04.jpg',
   '/dialogos05.jpg',
-  '/dialogos06.jpg'
+  '/dialogos06.jpg',
+  '/dialogos07.jpg'
 ]
 
 const themeUi: ThemeUI = {

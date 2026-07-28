@@ -60,6 +60,8 @@ export const ConsultationsQuerySchema = z.object({
     .optional(),
   sectionSlug: slugField.optional(),
   sectionIds: idListField,
+  regionSlug: slugField.optional(),
+  regionIds: idListField,
   categoryIds: idListField,
   tagIds: idListField,
   page: z.coerce.number().int('La página debe ser un entero').min(1, 'La página mínima es 1').default(1),
@@ -130,6 +132,10 @@ export const SetConsultationSectionSchema = z.object({
   sectionId: z.int().positive('La sección debe ser un ID válido').nullable()
 })
 
+export const SetConsultationRegionSchema = z.object({
+  regionId: z.int().positive('La región debe ser un ID válido').nullable()
+})
+
 export const AssignConsultationMemberSchema = z.object({
   userId: z.int().positive('El usuario debe ser un ID válido'),
   role: z.enum(['consultation_admin']).default('consultation_admin')
@@ -151,4 +157,5 @@ export type UpdateConsultationFeaturedInput = z.output<typeof UpdateConsultation
 export type SetConsultationCategoriesInput = z.output<typeof SetConsultationCategoriesSchema>
 export type SetConsultationTagsInput = z.output<typeof SetConsultationTagsSchema>
 export type SetConsultationSectionInput = z.output<typeof SetConsultationSectionSchema>
+export type SetConsultationRegionInput = z.output<typeof SetConsultationRegionSchema>
 export type AssignConsultationMemberInput = z.output<typeof AssignConsultationMemberSchema>

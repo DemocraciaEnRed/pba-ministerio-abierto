@@ -32,9 +32,9 @@ const filterOptions = [
   { label: 'Oculta', value: 'hidden' },
   { label: 'Visible', value: 'visible' },
   { label: 'Archivada', value: 'archived' },
-  { label: 'Programada', value: 'scheduled' },
-  { label: 'Abierta', value: 'open' },
-  { label: 'Cerrada', value: 'closed' }
+  { label: 'Programado', value: 'scheduled' },
+  { label: 'Abierto', value: 'open' },
+  { label: 'Realizado', value: 'closed' }
 ] satisfies { label: string, value: ConsultationFilter }[]
 
 const perPageOptions = [

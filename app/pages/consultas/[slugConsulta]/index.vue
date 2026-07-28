@@ -108,6 +108,15 @@ const consultationMetadata = computed<ConsultaHeroMetadata[]>(() => {
     })
   }
 
+  if (consultation.value.region) {
+    items.push({
+      title: 'Región',
+      description: consultation.value.region.name,
+      icon: 'lucide:map-pin',
+      variant: 'subtle'
+    })
+  }
+
   if (consultation.value.categories.length) {
     items.push({
       title: 'Categorías',

@@ -23,6 +23,22 @@ export function isAllowedGalleryImageMime(mimeType: string): boolean {
   return (GALLERY_ALLOWED_MIME_TYPES as readonly string[]).includes(mimeType)
 }
 
+/**
+ * Adjunto del formulario de aportes de Encuentros Regionales: un documento
+ * PDF o Word, hasta 8 MB. Se sirve solo a platform-admin por un endpoint
+ * protegido (nunca por URL pública).
+ */
+export const SUBMISSION_ATTACHMENT_MAX_SIZE_BYTES = 8 * MB
+export const SUBMISSION_ATTACHMENT_ALLOWED_MIME_TYPES = [
+  'application/pdf',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+] as const
+
+export function isAllowedSubmissionAttachmentMime(mimeType: string): boolean {
+  return (SUBMISSION_ATTACHMENT_ALLOWED_MIME_TYPES as readonly string[]).includes(mimeType)
+}
+
 const mimeByMediaType: Record<MediaType, readonly string[]> = {
   image: ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml'],
   document: [

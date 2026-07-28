@@ -94,7 +94,7 @@ const themeUi: ThemeUI = {
             </p>
             <p class="leading-7 text-neutral-700 dark:text-neutral-300">
               La
-              <Ulink
+              <ULink
                 href="https://normas.gba.gob.ar/documentos/VWEe8uGx.html"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -102,7 +102,7 @@ const themeUi: ThemeUI = {
                 external
               >
                 Ley N° 13.569
-              </Ulink>
+              </ULink>
               regula la realización de las audiencias públicas convocadas por el Poder Ejecutivo o Legislativo de la Provincia de Buenos Aires.
             </p>
             <UAccordion

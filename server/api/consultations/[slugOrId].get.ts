@@ -15,6 +15,7 @@ export default defineEventHandler(async (event) => {
     identifier,
     {
       section: true,
+      region: true,
       categoryAssignments: {
         include: { category: true },
         orderBy: [{ isPrimary: 'desc' }, { displayOrder: 'asc' }, { id: 'asc' }]

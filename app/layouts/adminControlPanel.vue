@@ -22,6 +22,13 @@ const itemsNavigationMenu = computed<NavigationMenuItem[][]>(() => [
       to: '/admin/consultas',
       icon: 'i-lucide-message-square',
       active: route.path.startsWith('/admin/consultas')
+    },
+    {
+      label: 'Encuentros Regionales',
+      to: '/encuentros-regionales/panel',
+      icon: 'i-lucide-map-pinned',
+      active: route.path.startsWith('/encuentros-regionales/panel'),
+      trailingIcon: 'i-lucide-external-link'
     }
   ],
   [

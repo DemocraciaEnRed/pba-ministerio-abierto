@@ -10,14 +10,14 @@ import {
   isValidBuenosAiresMunicipality
 } from '#shared/data/argentina'
 
-const emailField = z
+export const emailField = z
   .string()
   .trim()
   .toLowerCase()
   .pipe(z.email('Correo electrónico inválido'))
 
 /** Campo de texto opcional que convierte cadenas vacías en `null`. */
-const optionalText = (max: number) =>
+export const optionalText = (max: number) =>
   z
     .string()
     .trim()
@@ -31,7 +31,7 @@ const optionalText = (max: number) =>
  * así que solo se ingresan código de área y número. Se normaliza quitando
  * separadores y se guarda en formato `+54XXXXXXXXXX`.
  */
-const phoneField = z
+export const phoneField = z
   .string()
   .trim()
   .min(1, 'Ingresá tu número de teléfono')

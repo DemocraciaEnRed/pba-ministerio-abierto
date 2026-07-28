@@ -2,9 +2,13 @@
 import type { BadgeProps } from '@nuxt/ui'
 import type { PublicConsultationListItem } from '~/types/consulta'
 
-const props = defineProps<{
-  consultation: PublicConsultationListItem
-}>()
+const props = withDefaults(
+  defineProps<{
+    consultation: PublicConsultationListItem
+    orientation?: 'vertical' | 'horizontal'
+  }>(),
+  { orientation: 'vertical' }
+)
 
 /** Estado combinado (visibilidad + estado temporal) como badge. */
 const badge = computed<BadgeProps>(() => {
@@ -26,6 +30,11 @@ const topicsLabel = computed(() => {
   if (count === null || count === undefined) return null
   return `${count} ${count === 1 ? 'tema' : 'temas'}`
 })
+
+// En horizontal el pie va en el slot `authors` (queda a la derecha, junto al
+// contenido); en vertical va en `footer` (debajo). Slot dinámico para no
+// duplicar el markup.
+const footerSlot = computed(() => (props.orientation === 'horizontal' ? 'authors' : 'footer'))
 </script>
 
 <template>
@@ -34,12 +43,15 @@ const topicsLabel = computed(() => {
     :description="description"
     :badge="badge"
     :to="to"
-    orientation="vertical"
+    :orientation="orientation"
     variant="subtle"
     class="group h-full"
   >
     <template #header>
-      <div class="relative aspect-video overflow-hidden rounded-t-lg">
+      <div
+        class="relative aspect-video overflow-hidden"
+        :class="orientation === 'horizontal' ? 'sm:rounded-l-lg' : 'rounded-t-lg'"
+      >
         <img
           v-if="consultation.coverUrl"
           :src="consultation.coverUrl"
@@ -58,9 +70,12 @@ const topicsLabel = computed(() => {
       </div>
     </template>
 
-    <template #footer>
+    <template #[footerSlot]>
       <USeparator class="mb-1" />
-      <div class="flex flex-col gap-2 px-6 py-2">
+      <div
+        class="flex flex-col gap-2"
+        :class="orientation === 'horizontal' ? '' : 'px-6 py-2'"
+      >
         <div
           v-if="consultation.categories.length > 0 || consultation.tags.length > 0"
           class="flex flex-wrap gap-1.5"
@@ -93,6 +108,16 @@ const topicsLabel = computed(() => {
               class="size-3.5"
             />
             {{ consultation.section.name }}
+          </span>
+          <span
+            v-if="consultation.region"
+            class="inline-flex items-center gap-1"
+          >
+            <UIcon
+              name="lucide:map-pin"
+              class="size-3.5"
+            />
+            {{ consultation.region.name }}
           </span>
           <span
             v-if="topicsLabel"
