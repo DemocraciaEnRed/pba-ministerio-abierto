@@ -6,5 +6,7 @@
     "strings": "on"
   },
   "tailwindCSS.classAttributes": ["class", "ui"],
-  "tailwindCSS.classFunctions": ["defineAppConfig"]
+  "tailwindCSS.classFunctions": ["defineAppConfig"],
+  "editor.indentSize": 2,
+  "editor.tabSize": 2,
 }
