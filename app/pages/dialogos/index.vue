@@ -29,7 +29,7 @@ const faqItems = ref<AccordionItem[]>([
   }
 ])
 
-const openFaq = ref<string[]>(['como-funcionan'])
+const openFaq = ref<string[]>([])
 
 const baseS3Url = 'https://democraciaenred.nyc3.digitaloceanspaces.com/projects/pba-ministerio-abierto/app/assets/fotos-dialogos'
 const fotosDialogos = [
@@ -51,6 +51,11 @@ const themeUi: ThemeUI = {
     // Default description: 'text-lg sm:text-xl/8 text-muted',
     description: 'text-white text-shadow-lg',
     wrapper: 'max-w-2xl text-center lg:text-left lg:ml-0 lg:mr-full'
+  },
+  accordion: {
+    label: 'text-2xl font-bold text-primary',
+    body: 'leading-7 text-neutral-700 dark:text-neutral-300',
+    trigger: 'hover:cursor-pointer'
   }
 }
 </script>
@@ -66,7 +71,7 @@ const themeUi: ThemeUI = {
         <p class="">
           Espacios participativos para conocer las intervenciones del<br>
           <span class="block font-semibold md:inline">Ministerio de Infraestructura y Servicios Públicos</span>
-          en tu región
+          en tu región.
         </p>
       </template>
       <UIcon
@@ -74,7 +79,6 @@ const themeUi: ThemeUI = {
         class="size-40 shrink-0 text-white sm:size-40 md:size-52 lg:size-60"
       />
     </UPageHero>
-    <USeparator />
     <UContainer>
       <UPage>
         <UPageBody>
@@ -93,22 +97,13 @@ const themeUi: ThemeUI = {
               que apunte a mejorar el impacto de la intervención, a favorecer el acceso a la información y a
               contribuir a la generación de confianza.
             </p>
-          </div>
-          <USeparator
-            class="my-6"
-          />
-          <div class="max-w-3xl mx-auto py-12">
             <UAccordion
               v-model="openFaq"
               type="multiple"
               :items="faqItems"
-              :ui="{ label: 'text-2xl font-bold text-primary', body: 'leading-7 text-neutral-700 dark:text-neutral-300' }"
               class="w-full"
             />
           </div>
-          <USeparator
-            class="my-6"
-          />
           <UCarousel
             v-slot="{ item, index }"
             :items="fotosDialogos"
