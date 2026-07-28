@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { EditorCustomHandlers, EditorToolbarItem } from '@nuxt/ui'
+import type { EditorCustomHandlers, EditorToolbarItem } from '#ui/types'
 import type { Editor } from '@tiptap/vue-3'
 import { ImageUpload } from './RichTextEditorImageUpload'
 
