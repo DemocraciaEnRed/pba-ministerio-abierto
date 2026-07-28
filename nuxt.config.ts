@@ -7,7 +7,29 @@ export default defineNuxtConfig({
 
   css: ['~/assets/css/main.css'],
   ui: {
-    prose: true
+    prose: true,
+    theme: {
+      // Colores semánticos disponibles en el prop `color` de los componentes.
+      // Se listan los defaults de Nuxt UI + una entrada por región. La paleta
+      // concreta de cada uno se asigna en app/app.config.ts (ui.colors).
+      colors: [
+        'primary',
+        'secondary',
+        'info',
+        'success',
+        'warning',
+        'error',
+        'region-metropolitana',
+        'region-fluvial',
+        'region-noroeste',
+        'region-este',
+        'region-centro-sur',
+        'region-sudoeste',
+        'region-costa-maritima',
+        'region-norte',
+        'region-centro-norte'
+      ]
+    }
   },
 
   runtimeConfig: {
@@ -83,6 +105,24 @@ export default defineNuxtConfig({
         braceStyle: '1tbs'
       }
     }
+  },
+  fonts: {
+    provider: 'google',
+    defaults: {
+      // Encode Sans en Google no expone itálica; si se pide `italic` devuelve 400.
+      styles: ['normal'],
+      weights: [400, 500, 600, 700],
+      subsets: ['latin', 'latin-ext']
+    },
+    families: [
+      {
+        name: 'Encode Sans',
+        provider: 'google',
+        styles: ['normal'],
+        weights: ['100 900'],
+        subsets: ['latin', 'latin-ext', 'vietnamese']
+      }
+    ]
   },
   icon: {
     provider: 'server',

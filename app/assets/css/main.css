@@ -28,7 +28,140 @@
   --color-pba-alt-800: oklch(0.325 0.124 2.18);
   --color-pba-alt-900: oklch(0.237 0.089 2.14);
   --color-pba-alt-950: oklch(0.186 0.072 2.66);
+
+  /* region-metropolitana #e7a6b0 */
+  --color-region-metropolitana: oklch(78.94% 0.07774 8.807);
+  --color-region-metropolitana-50: oklch(100% 0 none);
+  --color-region-metropolitana-100: oklch(100% 0 none);
+  --color-region-metropolitana-200: oklch(100% 0 none);
+  --color-region-metropolitana-300: oklch(94.014% 0.02 5.996);
+  --color-region-metropolitana-400: oklch(86.48% 0.0485 6.8781);
+  --color-region-metropolitana-500: oklch(78.94% 0.07774 8.807);
+  --color-region-metropolitana-600: oklch(69.04% 0.12107 10.869);
+  --color-region-metropolitana-700: oklch(60.131% 0.16319 14.207);
+  --color-region-metropolitana-800: oklch(51.859% 0.1666 16.791);
+  --color-region-metropolitana-900: oklch(42.496% 0.13318 16.424);
+  --color-region-metropolitana-950: oklch(37.616% 0.11562 16.527);
+
+  /* region-fluvial #f6baa2 */
+  --color-region-fluvial: oklch(83.766% 0.07728 42.793);
+  --color-region-fluvial-50: oklch(100% 0 none);
+  --color-region-fluvial-100: oklch(100% 0 none);
+  --color-region-fluvial-200: oklch(100% 0 none);
+  --color-region-fluvial-300: oklch(96.617% 0.01463 44.181);
+  --color-region-fluvial-400: oklch(90.241% 0.0453 43.911);
+  --color-region-fluvial-500: oklch(83.766% 0.07728 42.793);
+  --color-region-fluvial-600: oklch(75.486% 0.12364 42.274);
+  --color-region-fluvial-700: oklch(68.145% 0.16869 41.006);
+  --color-region-fluvial-800: oklch(61.034% 0.18684 38.824);
+  --color-region-fluvial-900: oklch(50.078% 0.15091 38.979);
+  --color-region-fluvial-950: oklch(44.62% 0.13264 39.04);
+
+  /* region-noroeste #6575b6 */
+  --color-region-noroeste: oklch(57.767% 0.10202 272.36);
+  --color-region-noroeste-50: oklch(92.313% 0.01655 274.81);
+  --color-region-noroeste-100: oklch(88.459% 0.02504 275.88);
+  --color-region-noroeste-200: oklch(80.889% 0.04297 275.03);
+  --color-region-noroeste-300: oklch(73.403% 0.06076 273.1);
+  --color-region-noroeste-400: oklch(65.671% 0.08063 273.38);
+  --color-region-noroeste-500: oklch(57.767% 0.10202 272.36);
+  --color-region-noroeste-600: oklch(48.236% 0.10632 271.5);
+  --color-region-noroeste-700: oklch(39.709% 0.0842 271.71);
+  --color-region-noroeste-800: oklch(30.697% 0.06053 272.1);
+  --color-region-noroeste-900: oklch(20.973% 0.03433 273.03);
+  --color-region-noroeste-950: oklch(15.7% 0.01951 274.31);
+
+  /* region-este #ffe1a4 */
+  --color-region-este: oklch(92.049% 0.08426 84.626);
+  --color-region-este-50: oklch(100% 0 none);
+  --color-region-este-100: oklch(100% 0 none);
+  --color-region-este-200: oklch(100% 0 none);
+  --color-region-este-300: oklch(99.172% 0.00854 84.572);
+  --color-region-este-400: oklch(95.426% 0.04682 83.943);
+  --color-region-este-500: oklch(92.049% 0.08426 84.626);
+  --color-region-este-600: oklch(87.713% 0.12888 83.671);
+  --color-region-este-700: oklch(83.616% 0.15913 79.97);
+  --color-region-este-800: oklch(79.335% 0.16843 73.656);
+  --color-region-este-900: oklch(65.701% 0.13927 73.966);
+  --color-region-este-950: oklch(58.813% 0.12409 74.966);
+
+  /* region-centro-sur #d9e9da */
+  --color-region-centro-sur: oklch(91.791% 0.02632 147.13);
+  --color-region-centro-sur-50: oklch(100% 0 none);
+  --color-region-centro-sur-100: oklch(100% 0 none);
+  --color-region-centro-sur-200: oklch(100% 0 none);
+  --color-region-centro-sur-300: oklch(100% 0 none);
+  --color-region-centro-sur-400: oklch(97.397% 0.00844 145.51);
+  --color-region-centro-sur-500: oklch(91.791% 0.02632 147.13);
+  --color-region-centro-sur-600: oklch(83.922% 0.05182 146.85);
+  --color-region-centro-sur-700: oklch(76.334% 0.07794 146.43);
+  --color-region-centro-sur-800: oklch(68.45% 0.10423 145.85);
+  --color-region-centro-sur-900: oklch(59.403% 0.1059 145.18);
+  --color-region-centro-sur-950: oklch(53.926% 0.09439 145.8);
+
+  /* region-sudoeste #fff2ba */
+  --color-region-sudoeste: oklch(95.804% 0.0729 96.559);
+  --color-region-sudoeste-50: oklch(100% 0 none);
+  --color-region-sudoeste-100: oklch(100% 0 none);
+  --color-region-sudoeste-200: oklch(100% 0 none);
+  --color-region-sudoeste-300: oklch(100% 0 none);
+  --color-region-sudoeste-400: oklch(98.292% 0.03051 96.855);
+  --color-region-sudoeste-500: oklch(95.804% 0.0729 96.559);
+  --color-region-sudoeste-600: oklch(92.689% 0.12427 96.324);
+  --color-region-sudoeste-700: oklch(90.13% 0.16196 95.718);
+  --color-region-sudoeste-800: oklch(87.716% 0.17731 92.875);
+  --color-region-sudoeste-900: oklch(77.159% 0.15782 91.887);
+  --color-region-sudoeste-950: oklch(69.588% 0.14234 91.906);
+ 
+  /* region-costa-maritima #75b95e */
+  --color-region-costa-maritima: oklch(71.912% 0.1423 138.28);
+  --color-region-costa-maritima-50: oklch(94.252% 0.02926 137.38);
+  --color-region-costa-maritima-100: oklch(91.519% 0.04074 138.46);
+  --color-region-costa-maritima-200: oklch(86.598% 0.06735 137.73);
+  --color-region-costa-maritima-300: oklch(81.738% 0.09297 137.87);
+  --color-region-costa-maritima-400: oklch(76.625% 0.11832 138.04);
+  --color-region-costa-maritima-500: oklch(71.912% 0.1423 138.28);
+  --color-region-costa-maritima-600: oklch(62.573% 0.13829 138.44);
+  --color-region-costa-maritima-700: oklch(50.81% 0.10963 138.56);
+  --color-region-costa-maritima-800: oklch(38.38% 0.07823 138.24);
+  --color-region-costa-maritima-900: oklch(24.77% 0.04369 138.54);
+  --color-region-costa-maritima-950: oklch(17.461% 0.02526 137.21);
+
+  /* region-norte #8ec7dd */
+  --color-region-norte: oklch(79.807% 0.06647 223.93);
+  --color-region-norte-50: oklch(100% 0 none);
+  --color-region-norte-100: oklch(100% 0 none);
+  --color-region-norte-200: oklch(96.652% 0.01136 217.54);
+  --color-region-norte-300: oklch(90.963% 0.0298 223.78);
+  --color-region-norte-400: oklch(85.412% 0.04866 221.62);
+  --color-region-norte-500: oklch(79.807% 0.06647 223.93);
+  --color-region-norte-600: oklch(72.443% 0.08901 224.88);
+  --color-region-norte-700: oklch(64.901% 0.10502 227.92);
+  --color-region-norte-800: oklch(54.21% 0.08588 227.07);
+  --color-region-norte-900: oklch(42.698% 0.06588 227.18);
+  --color-region-norte-950: oklch(36.509% 0.05464 227.78);
+
+  /* region-centro-norte #979fcd */
+  --color-region-centro-norte: oklch(71.261% 0.06774 276.86);
+  --color-region-centro-norte-50: oklch(100% 0 none);
+  --color-region-centro-norte-100: oklch(100% 0 none);
+  --color-region-centro-norte-200: oklch(94.22% 0.01345 281.56);
+  --color-region-centro-norte-300: oklch(86.712% 0.02926 277.19);
+  --color-region-centro-norte-400: oklch(78.987% 0.04847 278.64);
+  --color-region-centro-norte-500: oklch(71.261% 0.06774 276.86);
+  --color-region-centro-norte-600: oklch(60.356% 0.09677 275.56);
+  --color-region-centro-norte-700: oklch(49.974% 0.11682 273.82);
+  --color-region-centro-norte-800: oklch(41.75% 0.09385 274.01);
+  --color-region-centro-norte-900: oklch(33.102% 0.0694 274.31);
+  --color-region-centro-norte-950: oklch(28.447% 0.05719 275.23);
+
 }
+
+/* Safelist: las clases bg-region-* se arman dinámicamente en runtime
+   (p. ej. en TestimonialsList.vue con `bg-region-${slug}/10`), por lo que
+   Tailwind no puede detectarlas al escanear el código. Se listan aquí para
+   forzar su generación. */
+@source inline("{,dark:}bg-region-{metropolitana,fluvial,noroeste,este,centro-sur,sudoeste,costa-maritima,norte,centro-norte}{,/10,/20}");
 
 :root {
   --ui-primary: var(--color-pba-600);
@@ -38,4 +171,19 @@
 .dark {
   --ui-primary: var(--color-pba-500);
   --ui-secondary: var(--color-pba-alt-500);
+}
+.header-background-encuentros-regionales{
+  background-image: url('https://democraciaenred.nyc3.digitaloceanspaces.com/projects/pba-ministerio-abierto/app/assets/encuentros-regionales/bg-header.png');
+  background-size: cover;
+  background-position: center;
+}
+.header-background-audiencias-publicas{
+  background-image: url('https://democraciaenred.nyc3.digitaloceanspaces.com/projects/pba-ministerio-abierto/app/assets/audiencias-publicas/bg-header.png');
+  background-size: cover;
+  background-position: center;
+}
+.header-background-consultas-publicas{
+  background-image: url('https://democraciaenred.nyc3.digitaloceanspaces.com/projects/pba-ministerio-abierto/app/assets/consultas-publicas/bg-header.png');
+  background-size: cover;
+  background-position: center;
 }
