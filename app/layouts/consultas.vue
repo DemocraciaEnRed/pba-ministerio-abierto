@@ -78,12 +78,11 @@ const consultationSectionsMobile = computed<DropdownMenuItem[][]>(() =>
         to: section.to
       }))
     )
-);
-const drawerOpen = ref(false);
+)
+const drawerOpen = ref(false)
 const openDrawer = () => {
-  drawerOpen.value = true;
-};
-
+  drawerOpen.value = true
+}
 </script>
 
 <template>
@@ -121,7 +120,7 @@ const openDrawer = () => {
             class="hidden lg:flex"
           />
           <div class="lg:hidden py-1 flex justify-between items-center gap-2">
-            <UButton 
+            <UButton
               label="Metadatos"
               icon="i-lucide-info"
               variant="ghost"
