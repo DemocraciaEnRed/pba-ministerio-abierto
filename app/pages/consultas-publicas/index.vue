@@ -101,7 +101,6 @@ const themeUi: ThemeUI = {
         </UPageBody>
       </UPage>
     </UContainer>
-    <USeparator />
   </UTheme>
 </template>
 
