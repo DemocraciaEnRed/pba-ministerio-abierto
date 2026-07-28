@@ -166,7 +166,6 @@ const comoHacemosPageSectionUi: ThemeUI['pageSection'] = {
                 <template #actions>
                   <UPopover
                     mode="hover"
-                    :close-delay="250"
                     enable-touch
                     arrow
                   >
@@ -185,8 +184,9 @@ const comoHacemosPageSectionUi: ThemeUI['pageSection'] = {
               </UAlert>
             </div>
             <UButton
-              to="https://docs.google.com/document/d/1gruvB4EHw6z6yESUJNGmwK0Tori7dPKN/edit"
-              target="_blank"
+              :to="undefined"
+              disabled
+              variant="outline"
               color="secondary"
               :ui="{ base: 'py-3 justify-center text-center text-xl flex lg:flex-col gap-4' }"
             >
