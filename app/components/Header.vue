@@ -76,9 +76,21 @@ watch(loggedIn, () => {
   refreshAuthSession()
 })
 
+const participaRoutePrefixes = [
+  '/audiencias-publicas',
+  '/consultas-publicas',
+  '/territorio',
+  '/dialogos',
+  '/observatorio'
+] as const
+
 const isParticipaMenuActive = computed(() => {
-  return route.path.startsWith('/audiencias') || route.path.startsWith('/consultas') || route.path.startsWith('/territorio') || route.path.startsWith('/dialogos') || route.path.startsWith('/observatorio')
+  return participaRoutePrefixes.some(prefix => route.path.startsWith(prefix))
 })
+
+const isPathExclusivelyActive = (path: string) => {
+  return route.path === path
+}
 
 const items = computed<NavigationMenuItem[]>(() => [
   {
@@ -93,17 +105,17 @@ const items = computed<NavigationMenuItem[]>(() => [
     children: [
       {
         label: 'Audiencias públicas',
-        disabled: true,
+        to: '/audiencias-publicas',
         icon: 'pba:audiencias-publicas',
         description: 'Conocé y seguí las audiencias públicas abiertas a la comunidad.',
-        active: route.path.startsWith('/audiencias')
+        active: route.path.startsWith('/audiencias-publicas')
       },
       {
         label: 'Consultas públicas',
-        disabled: true,
+        to: '/consultas-publicas',
         icon: 'pba:consultas-publicas',
         description: 'Sumate a las consultas ciudadanas sobre proyectos de impacto.',
-        active: route.path.startsWith('/consultas')
+        active: route.path.startsWith('/consultas-publicas')
       },
       {
         label: 'Obras y proyectos en diálogo',
@@ -114,13 +126,13 @@ const items = computed<NavigationMenuItem[]>(() => [
       },
       {
         label: 'Encuentros Regionales',
-        disabled: true,
+        to: '/encuentros-regionales',
         icon: 'pba:encuentros-regionales',
         description: 'Participá para construir la agenda de desarrollo de tu región.',
         active: route.path.startsWith('/encuentros-regionales')
       },
       {
-        label: 'Observatorio',
+        label: 'Observatorio de Obras y Servicios Públicos',
         disabled: true,
         icon: 'pba:observatorio',
         description: 'Accedé a información sobre este espacio institucional de la Obra Pública provincial',
@@ -137,13 +149,13 @@ const items = computed<NavigationMenuItem[]>(() => [
         label: 'Términos y condiciones',
         to: '/acerca-de/terminos-y-condiciones',
         description: 'Marco legal y condiciones para participar en la plataforma.',
-        active: route.path.startsWith('/acerca-de/terminos-y-condiciones')
+        active: isPathExclusivelyActive('/acerca-de/terminos-y-condiciones')
       },
       {
         label: 'Política de privacidad',
         to: '/acerca-de/politica-de-privacidad',
         description: 'Cómo protegemos y tratamos tus datos personales.',
-        active: route.path.startsWith('/acerca-de/politica-de-privacidad')
+        active: isPathExclusivelyActive('/acerca-de/politica-de-privacidad')
       }
     ]
   }
@@ -166,38 +178,43 @@ const itemsMobile = computed<NavigationMenuItem[][]>(() => [
     },
     {
       label: 'Audiencias públicas',
-      disabled: true,
+      to: '/audiencias-publicas',
       icon: 'pba:audiencias-publicas',
       description: 'Conocé y seguí las audiencias públicas abiertas a la comunidad.',
-      active: route.path.startsWith('/audiencias')
+      active: isPathExclusivelyActive('/audiencias-publicas')
     },
     {
       label: 'Consultas públicas',
-      disabled: true,
+      to: '/consultas-publicas',
       icon: 'pba:consultas-publicas',
       description: 'Sumate a las consultas ciudadanas sobre proyectos de impacto.',
-      active: route.path.startsWith('/consultas')
+      active: isPathExclusivelyActive('/consultas-publicas')
     },
     {
       label: 'Obras y proyectos en diálogo',
       to: '/dialogos',
       icon: 'pba:dialogos',
       description: 'Formá parte para conocer el avance de obras estratégicas.',
-      active: route.path.startsWith('/dialogos')
+      active: isPathExclusivelyActive('/dialogos')
     },
     {
       label: 'Encuentros Regionales',
-      disabled: true,
+      to: '/encuentros-regionales',
       icon: 'pba:encuentros-regionales',
       description: 'Participá para construir la agenda de desarrollo de tu región.',
-      active: route.path.startsWith('/encuentros-regionales')
+      active: isPathExclusivelyActive('/encuentros-regionales')
     },
     {
-      label: 'Observatorio',
+      label: 'Observatorio de Obras y Servicios Públicos',
       disabled: true,
       icon: 'pba:observatorio',
       description: 'Accedé a información sobre este espacio institucional de la Obra Pública provincial.',
-      active: route.path.startsWith('/observatorio')
+      active: isPathExclusivelyActive('/observatorio'),
+      badge: {
+        label: 'Próximamente',
+        color: 'primary',
+        variant: 'subtle'
+      }
     }
   ],
   [
@@ -211,13 +228,13 @@ const itemsMobile = computed<NavigationMenuItem[][]>(() => [
       label: 'Términos y condiciones',
       to: '/acerca-de/terminos-y-condiciones',
       description: 'Marco legal y condiciones para participar en la plataforma.',
-      active: route.path.startsWith('/acerca-de/terminos-y-condiciones')
+      active: isPathExclusivelyActive('/acerca-de/terminos-y-condiciones')
     },
     {
       label: 'Política de privacidad',
       to: '/acerca-de/politica-de-privacidad',
       description: 'Cómo protegemos y tratamos tus datos personales.',
-      active: route.path.startsWith('/acerca-de/politica-de-privacidad')
+      active: isPathExclusivelyActive('/acerca-de/politica-de-privacidad')
     }
   ]
 
@@ -265,7 +282,7 @@ const navigationMenuUi = {
     </template>
 
     <template #right>
-      <UColorModeButton />
+      <UColorModeButton color="primary" />
       <UButton
         v-if="!loggedIn"
         to="/auth/login"
@@ -280,6 +297,7 @@ const navigationMenuUi = {
       <UDropdownMenu
         v-if="loggedIn"
         :items="userMenuItems"
+        arrow
         :content="{ align: 'end' }"
       >
         <UButton

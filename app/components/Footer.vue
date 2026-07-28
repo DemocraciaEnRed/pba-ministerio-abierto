@@ -47,22 +47,25 @@ const footerColumns: FooterColumn[] = [
         label: 'Inicio'
       },
       {
-        label: 'Audiencias públicas'
+        label: 'Audiencias públicas',
+        to: '/audiencias-publicas'
       },
       {
-        label: 'Consultas públicas'
+        label: 'Consultas públicas',
+        to: '/consultas-publicas'
       },
       {
-        label: 'Encuentros regionales'
+        label: 'Encuentros regionales',
+        to: '/encuentros-regionales'
       },
       {
-        label: 'Obras y proyectos en diálogo'
+        label: 'Obras y proyectos en diálogo',
+        to: '/dialogos'
       },
       {
-        label: 'Observatorio'
-      },
-      {
-        label: 'Acerca de'
+        label: 'Observatorio de Obras y Servicios Públicos',
+        disabled: true,
+        class: 'opacity-60 cursor-not-allowed pointer-events-none'
       }
     ]
   },
@@ -80,7 +83,7 @@ const footerColumns: FooterColumn[] = [
         target: '_blank'
       },
       {
-        label: 'Boletin Oficial',
+        label: 'Boletín Oficial',
         to: 'https://boletinoficial.gba.gob.ar/',
         target: '_blank'
       },
