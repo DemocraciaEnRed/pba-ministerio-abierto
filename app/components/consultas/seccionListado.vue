@@ -143,19 +143,21 @@ const consultations = computed(() => data.value?.items ?? [])
             :loading="categoriesStatus === 'pending'"
             :ui="{ label: 'text-sm' }"
           />
-          <!-- Etiquetas -->
-          <USeparator
-            label="Etiquetas"
-            position="start"
-          />
-          <UListbox
-            v-model="filters.tagIds"
-            :items="tagItems"
-            value-key="value"
-            size="sm"
-            multiple
-            :loading="tagsStatus === 'pending'"
-          />
+          <template v-if="tagItems.length > 0">
+            <!-- Etiquetas -->
+            <USeparator
+              label="Etiquetas"
+              position="start"
+            />
+            <UListbox
+              v-model="filters.tagIds"
+              :items="tagItems"
+              value-key="value"
+              size="sm"
+              multiple
+              :loading="tagsStatus === 'pending'"
+            />
+          </template>
         </UPageAside>
       </template>
 
