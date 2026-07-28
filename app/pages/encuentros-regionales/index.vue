@@ -70,18 +70,18 @@ async function onRegionSelect(regionSlug: string) {
       reverse
     >
       <template #header>
-        <h1 class="text-xl font-medium text-white text-shadow-lg uppercase mb-2">
+        <h1 class="text-md sm:text-lg font-medium text-white text-shadow-lg uppercase mb-3">
           Encuentros Regionales
         </h1>
         <div class="flex items-stretch gap-1">
-          <p class="font-extrabold text-4xl text-white text-shadow-lg uppercase">
+          <p class="font-bold sm:font-extrabold text-xl sm:text-4xl text-white text-shadow-lg uppercase max-sm:leading-tight">
             ¿
           </p>
-          <p class="font-extrabold text-4xl text-white text-shadow-lg uppercase">
+          <p class="font-bold sm:font-extrabold text-xl sm:text-4xl text-white text-shadow-lg uppercase max-sm:leading-tight">
             Cuánto<br>futuro<br>cabe en la<br>provincia?
           </p>
-          <div class="self-stretch border-l-white border-l-4 mx-5" />
-          <p class="font-extralight text-2xl text-white text-shadow-lg uppercase">
+          <div class="self-stretch border-l-white border-l-3 mx-3 sm:mx-5" />
+          <p class="font-light sm:font-extralight text-lg sm:text-2xl text-white text-shadow-lg uppercase max-sm:leading-tight">
             DIÁLOGO<br>Y PARTICIPACIÓN<br>PARA DISEÑAR<br>UNA AGENDA<br>DE DESARROLLO
           </p>
         </div>
