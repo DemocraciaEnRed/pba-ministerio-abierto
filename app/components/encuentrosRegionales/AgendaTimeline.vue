@@ -31,67 +31,7 @@ const items = computed(() => data.value ?? [])
     </div>
 
     <template v-else>
-      <!-- Timeline horizontal (lg+) -->
-      <div class="hidden lg:grid grid-flow-col auto-cols-fr overflow-x-auto">
-        <div
-          v-for="item in items"
-          :key="item.id"
-          class=" flex flex-col items-stretch hover:bg-primary/5  dark:hover:bg-secondary/10 rounded-lg px-1 transition-all duration-300"
-        >
-          <!-- Marca de año -->
-          <div>
-            <div class="h-12 flex items-center">
-              <template v-if="item.year">
-                <span class="w-1 h-6 bg-neutral-900 dark:bg-neutral-100 mr-2" />
-                <span class="text-lg font-bold">{{ item.year }}</span>
-              </template>
-            </div>
-            <!-- Segmento de color -->
-            <div
-              class="h-4 rounded-sm border border-accented"
-              :class="`bg-region-${item.region.slug}`"
-            />
-          </div>
-
-          <!-- Detalle -->
-          <div class="mt-3 text-center leading-tight space-y-2 items-center w-full flex flex-col h-full">
-            <p class="text-muted">
-              Región
-              <span class="block font-bold text-lg text-highlighted">{{ item.region.name }}</span>
-            </p>
-            <div class="w-5 border-t border-accented mx-auto" />
-            <div class="flex flex-col justify-center items-center gap-1 w-full p-0.5">
-              <div class="flex justify-between items-center gap-1 px-1 w-full border border-accented bg-accented/15 rounded-sm p-1">
-                <UIcon
-                  name="lucide:pin"
-                  class="min-w-4 size-4 text-muted"
-                />
-                <p class="text-right text-xs xl:text-sm font-medium">
-                  {{ item.location }}
-                </p>
-              </div>
-              <div class="flex justify-between items-center gap-1 px-1 w-full border border-accented bg-accented/15 rounded-sm p-0.5">
-                <UIcon
-                  name="lucide:calendar"
-                  class="min-w-4 size-4 text-muted"
-                />
-                <p class="text-right text-xs xl:text-sm font-medium">
-                  {{ formatDayMonth(item.heldAt) }}
-                </p>
-              </div>
-            </div>
-            <!-- Cuando se completa, se muestra este check -->
-            <UIcon
-              v-if="item.held"
-              name="lucide:circle-check"
-              class="size-8 text-success mb-3"
-            />
-          </div>
-        </div>
-      </div>
-
-      <!-- Mobile (columna vertical) y tablet (grilla de tarjetas) -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-1 lg:hidden">
+      <div class="grid lg:grid-cols-2 gap-2">
         <div
           v-for="item in items"
           :key="item.id"
@@ -110,21 +50,26 @@ const items = computed(() => data.value ?? [])
                   Región
                   <span class="font-bold text-lg text-highlighted">{{ item.region.name }}</span>
                 </p>
-                <UIcon
-                  v-if="item.held"
-                  name="lucide:circle-check"
-                  class="size-5 ml-2 text-success"
-                />
               </div>
-              <span
-                v-if="item.year"
-                class="shrink-0 rounded-full bg-neutral-900 dark:bg-neutral-100 p-2.5 py-0.5 text-sm font-bold text-white dark:text-neutral-900"
-              >
-                {{ item.year }}
-              </span>
+              <div class="flex gap-2">
+                <UBadge
+                  v-if="item.held"
+                  icon="lucide:circle-check"
+                  label="Realizado"
+                  color="success"
+                  variant="subtle"
+                  class="rounded-full"
+                />
+                <span
+                  v-if="item.year"
+                  class="shrink-0 rounded-full bg-neutral-900 dark:bg-neutral-100 p-2.5 py-0.5 text-sm font-bold text-white dark:text-neutral-900"
+                >
+                  {{ item.year }}
+                </span>
+              </div>
             </div>
 
-            <div class="flex sm:flex-col gap-1 w-full">
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-1 lg:grid-cols-1 xl:grid-cols-2 gap-1 w-full">
               <div class="flex items-center justify-between gap-2 px-3 w-full border border-accented bg-accented/15 rounded-sm p-0.5">
                 <UIcon
                   name="lucide:pin"

@@ -12,19 +12,25 @@ interface ConsultationsResponse {
 // (nunca hay más consultas que regiones), pero paginamos en cliente de a 4.
 const PER_PAGE = 4
 
-const selectedStatusFilter = ref<StatusFilter>('scheduled')
+const selectedStatusFilter = ref<StatusFilter>('open')
 const consultasStatuses = ref<TabsItem[]>([
   {
-    label: 'Programados',
-    value: 'scheduled'
+    label: 'Abiertos',
+    value: 'open',
+    icon: 'lucide:circle-play',
+    badge: undefined
   },
   {
-    label: 'Abiertos',
-    value: 'open'
+    label: 'Programados',
+    value: 'scheduled',
+    icon: 'lucide:calendar-days',
+    badge: undefined
   },
   {
     label: 'Realizados',
-    value: 'closed'
+    value: 'closed',
+    icon: 'lucide:lock',
+    badge: undefined
   }
 ])
 

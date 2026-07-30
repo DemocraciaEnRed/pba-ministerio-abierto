@@ -4,27 +4,34 @@ import type { ThemeUI } from '@nuxt/ui/runtime/types/theme.js'
 const ejesTematicosDescripciones = ref([
   {
     title: 'Conectividad y logística',
-    description: 'Corredores viales para el desarrollo, seguridad vial, rehabilitación y mantenimiento, apoyo logístico a la producción local y caminos rurales'
+    description: 'Corredores viales para el desarrollo, seguridad vial, rehabilitación y mantenimiento, apoyo logístico a la producción local y caminos rurales',
+    icon: 'lucide:route'
+
   },
   {
     title: 'Infraestructura para los sistemas de ciudades',
-    description: 'Infraestructura urbana, productiva, para el transporte, ambiental, institucional, comunitaria y cultural.'
+    description: 'Infraestructura urbana, productiva, para el transporte, ambiental, institucional, comunitaria y cultural.',
+    icon: 'lucide:building-2'
   },
   {
     title: 'Gestión integrada de los recursos hídricos',
-    description: 'Gestión de cuencas, adaptación productiva a extremos climáticos, riesgo hídrico en ciudades, agua y saneamiento'
+    description: 'Gestión de cuencas, adaptación productiva a extremos climáticos, riesgo hídrico en ciudades, agua y saneamiento',
+    icon: 'lucide:droplets'
   },
   {
     title: 'Infraestructura del cuidado',
-    description: 'Red del Cuidado para infancias, personas con discapacidad, personas mayores, mujeres y diversidades, juventudes'
+    description: 'Red del Cuidado para infancias, personas con discapacidad, personas mayores, mujeres y diversidades, juventudes',
+    icon: 'lucide:heart-handshake'
   },
   {
     title: 'Energía accesible y sostenible',
-    description: 'Energía eléctrica, gas, energías renovables y eficiencia energética.'
+    description: 'Energía eléctrica, gas, energías renovables y eficiencia energética.',
+    icon: 'lucide:zap'
   },
   {
     title: 'Juventudes',
-    description: 'Promoción del desarrollo integral a través de la educación y el trabajo.'
+    description: 'Futuro del trabajo, oferta educativa, condiciones necesarias para el arraigo, infraestructuras para su desarrollo integral',
+    icon: 'lucide:users'
   }
 ])
 
@@ -44,13 +51,13 @@ const themeUi: ThemeUI = {
   }
 }
 const comoHacemosPageSectionUi: ThemeUI['pageSection'] = {
-  root: 'bg-accented/25 dark:bg-accented/10 py-12 sm:py-12 md:py-12 lg:py-12 flex flex-col gap-6 sm:gap-y-6 md:gap-y-6 md:gap-12 justify-center items-center',
+  root: 'bg-accented/25 dark:bg-accented/10 py-12 sm:py-12 md:py-12 lg:py-12 flex flex-col gap-6 sm:gap-y-6 md:gap-y-6 justify-center items-center',
   // container (default): 'flex flex-col lg:grid py-16 sm:py-24 lg:py-32 gap-8 sm:gap-16',
   // container (for horizontal): 'lg:grid-cols-2 lg:items-center',
   // container: 'flex flex-col lg:flex lg:flex-row-reverse gap-6 sm:gap-y-6 md:gap-y-6 md:gap-12 justify-center items-center mx-auto py-12 sm:py-16 md:py-16 lg:py-16',
-  container: 'flex flex-col sm:flex-col md:flex-row-reverse lg:flex lg:flex-row-reverse items-center md:items-start lg:items-start py-0 sm:py-0 md:py-0 lg:py-0 lg:max-w-9/12 xl:max-w-8/12',
+  container: 'flex flex-col sm:flex-col md:flex-row-reverse lg:flex lg:flex-row-reverse items-center md:items-start lg:items-start py-0 sm:py-0 md:py-0 lg:py-0 sm:gap-7',
   body: ' space-y-6 mx-auto lg:mt-0',
-  wrapper: 'w-full md:w-7/12 lg:w-8/12'
+  wrapper: 'w-full xl:w-9/12'
 }
 
 // Al hacer clic en una región del mapa, navega a la última consulta creada asignada a
@@ -70,7 +77,7 @@ async function onRegionSelect(regionSlug: string) {
       reverse
     >
       <template #header>
-        <h1 class="text-md sm:text-lg font-medium text-white text-shadow-lg uppercase mb-3">
+        <h1 class="text-md sm:text-lg font-medium text-white text-shadow-lg uppercase mb-3 text-center sm:text-left">
           Encuentros Regionales
         </h1>
         <div class="flex items-stretch gap-1">
@@ -117,20 +124,36 @@ async function onRegionSelect(regionSlug: string) {
       :ui="comoHacemosPageSectionUi"
     >
       <template #default>
-        <div class="flex flex-col w-7/12 sm:w-6/12 md:w-5/12 lg:w-4/12 gap-4 hover:scale-103 transition-transform duration-300">
-          <img
-            src="https://democraciaenred.nyc3.digitaloceanspaces.com/projects/pba-ministerio-abierto/app/assets/encuentros-regionales/plan-estrategico-infraestructura-pba-cover.jpg"
-            loading="lazy"
-            class="h-auto rounded-lg shadow-lg border border-default"
-            alt="Plan Estratégico de Infraestructura de la Provincia de Buenos Aires"
+        <div class="flex flex-col w-9/12 sm:w-7/12 md:w-6/12 xl:w-3/12 gap-4">
+          <ULink
+            to="https://drive.google.com/file/d/1Rjpm0XVlGnGd05ZjOrb5FDbhrMNw6UPn/view"
+            target="_blank"
+            external
           >
+            <img
+              src="https://democraciaenred.nyc3.digitaloceanspaces.com/projects/pba-ministerio-abierto/app/assets/encuentros-regionales/plan-estrategico-infraestructura-pba-cover.jpg"
+              loading="lazy"
+              class="h-auto rounded-lg shadow-lg border border-default hover:scale-103 transition-transform duration-300"
+              alt="Plan Estratégico de Infraestructura de la Provincia de Buenos Aires"
+            >
+          </ULink>
           <UButton
             to="https://drive.google.com/file/d/1Rjpm0XVlGnGd05ZjOrb5FDbhrMNw6UPn/view"
             target="_blank"
             color="secondary"
-            :ui="{ base: 'py-3 justify-center text-center text-md lg:text-xl relative' }"
+            icon="lucide:download"
+            :ui="{ base: 'py-3 justify-center text-center text-md font-bold lg:text-xl relative hover:scale-103 transition-transform duration-300' }"
           >
-            <span class="font-bold">DESCARGÁ EL DOCUMENTO RESUMEN</span>
+            DESCARGÁ EL DOCUMENTO RESUMEN
+          </UButton>
+          <UButton
+            to="/encuentros-regionales/formulario"
+            target="_blank"
+            color="secondary"
+            icon="lucide:notebook-pen"
+            :ui="{ base: 'py-3 justify-center text-center text-md font-bold lg:text-xl relative hover:scale-103 transition-transform duration-300' }"
+          >
+            SUMÁ TUS APORTES
           </UButton>
         </div>
       </template>
@@ -138,7 +161,7 @@ async function onRegionSelect(regionSlug: string) {
         <h1 class="text-2xl sm:text-3xl lg:text-4xl text-pretty tracking-tight font-extrabold text-primary uppercase">
           ¿CÓMO LO HACEMOS?
         </h1>
-        <div class="max-w-5xl space-y-6 mx-auto">
+        <div class="space-y-6">
           <p class="leading-7 text-neutral-700 dark:text-neutral-300">
             Poniendo en común el <span class="font-bold text-highlighted">Plan Estratégico de Infraestructura</span>, que se organiza en cinco ejes de gestión, con los que
             abordan las necesidades y los desafíos territoriales en cuanto al desarrollo de la infraestructura y el acceso a
@@ -149,90 +172,70 @@ async function onRegionSelect(regionSlug: string) {
             A partir de estos ejes temáticos, en cada encuentro regional se debate e intercambia en <span class="font-bold text-highlighted">mesas participativas</span> para
             sumar aportes al PEI. A su vez, hay un espacio destinado específicamente a las <span class="font-bold text-highlighted">juventudes</span>.
           </p>
-          <h3 class="text-xl font-bold text-primary">
+          <h3 class="text-xl sm:text-2xl lg:text-3xl font-bold text-primary">
             Ejes Temáticos
           </h3>
-          <div class="flex flex-col lg:flex-row gap-2">
-            <div class="grid grid-cols-1 sm:grid-cols-2 w-full gap-2">
-              <UAlert
-                v-for="eje in ejesTematicosDescripciones"
-                :key="eje.title"
-                :title="eje.title"
-                variant="subtle"
-                color="neutral"
-                orientation="horizontal"
-              >
-                <template #actions>
-                  <UPopover
-                    mode="hover"
-                    enable-touch
-                    arrow
-                  >
-                    <UButton
-                      color="primary"
-                      variant="subtle"
-                      icon="lucide:info"
-                    />
-                    <template #content>
-                      <div class="max-w-xs m-4 inline-flex text-center">
-                        {{ eje.description }}
-                      </div>
-                    </template>
-                  </UPopover>
-                </template>
-              </UAlert>
-            </div>
-            <UButton
-              to="/encuentros-regionales/formulario"
-              color="secondary"
-              :ui="{ base: 'py-3 justify-center text-center text-xl flex lg:flex-col gap-4' }"
-            >
-              <UIcon
-                name="lucide:notebook-pen"
-                class="size-8 lg:size-13 shrink-0 text-highlight md:mb-2"
-              />
-              <span class="font-bold">SUMÁ TUS APORTES</span>
-            </UButton>
+          <div class="grid grid-cols-1 sm:grid-cols-2 w-full gap-2">
+            <UAlert
+              v-for="eje in ejesTematicosDescripciones"
+              :key="eje.title"
+              :title="eje.title"
+              :description="eje.description"
+              :icon="eje.icon"
+              variant="subtle"
+              color="neutral"
+              orientation="horizontal"
+              :ui="{
+                title: 'text-md sm:text-lg font-bold text-primary',
+                description: 'leading-7 text-base',
+                icon: 'size-6 sm:size-7 text-primary pt-2',
+                root: 'items-start'
+              }"
+            />
           </div>
         </div>
       </template>
     </UPageSection>
-    <USeparator />
-    <UContainer>
-      <UPage>
-        <UPageBody>
-          <div class="space-y-2">
-            <h1 class="text-2xl sm:text-3xl lg:text-4xl text-pretty tracking-tight font-extrabold text-primary uppercase text-center">
-              Participá de los encuentros regionales
-            </h1>
-            <h1 class="text-xl sm:text-2xl lg:text-3xl text-pretty tracking-tight font-light text-highlighted uppercase text-center">
-              Agenda
-            </h1>
-          </div>
-          <div class="px-4 lg:px-6 bg-elevated/35 border border-default rounded-lg shadow-lg">
-            <EncuentrosRegionalesAgendaTimeline />
-          </div>
-        </UPageBody>
-      </UPage>
-    </UContainer>
     <UContainer>
       <UPage>
         <UPageBody>
           <div class="flex flex-col-reverse md:flex-row justify-center gap-6">
-            <div class="w-9/12 sm:w-6/12 mx-auto md:w-4/12 lg:w-3/12">
+            <div class="w-9/12 sm:w-6/12 mx-auto md:w-8/12 lg:w-6/12">
               <EncuentrosRegionalesMapSelector @select="onRegionSelect" />
             </div>
-            <div class="mx-auto w-full sm:w-10/12 md:w-7/12 lg:w-8/12">
-              <div class="space-y-6">
-                <h1 class="text-center sm:text-left text-2xl sm:text-3xl lg:text-4xl text-pretty tracking-tight font-extrabold text-primary uppercase mb-4">
-                  ACCEDÉ A LA INFORMACIÓN DE CADA JORNADA
+            <div class="w-full space-y-6">
+              <div class="space-y-2">
+                <h1 class="text-2xl sm:text-3xl lg:text-4xl text-pretty tracking-tight font-extrabold text-primary uppercase text-left">
+                  Participá de los encuentros regionales
                 </h1>
-                <p class="leading-7 text-neutral-700 dark:text-neutral-300">
-                  Al clickear en cada región, encontrarás los documentos de cada encuentro y los espacios de participación para que te inscribas, dejes tus aportes y proyectos, y hagas comentarios.
-                </p>
+                <h1 class="text-xl sm:text-2xl lg:text-3xl text-pretty tracking-tight font-light text-highlighted uppercase text-left">
+                  Agenda
+                </h1>
               </div>
-              <EncuentrosRegionalesConsultasCardLists />
+              <div class="px-4 lg:px-6 bg-elevated/35 border border-default rounded-lg shadow-lg">
+                <EncuentrosRegionalesAgendaTimeline />
+              </div>
             </div>
+          </div>
+          <div class="max-w-5xl space-y-6 mx-auto">
+            <h1 class="text-2xl sm:text-3xl lg:text-4xl text-pretty tracking-tight font-extrabold text-primary">
+              Regionalización de la PBA en el marco del PEI
+            </h1>
+            <p class="leading-7 text-neutral-700 dark:text-neutral-300">
+              En la Provincia, los criterios de regionalización son múltiples y suelen ser utilizados por distintos organismos para <span class="font-bold text-highlighted">planificar políticas públicas</span>. En este caso, se toma como base la propuesta publicada por el Ministerio de Economía bonaerense en el estudio "Programación del Desarrollo Territorial. Diagnóstico preliminar y líneas de acción (2011-2012)", que delimitó regiones económico-productivas desde una perspectiva político-administrativa.
+            </p>
+            <p class="leading-7 text-neutral-700 dark:text-neutral-300">
+              A partir de este esquema, se introdujeron ajustes orientados a favorecer la complementariedad productiva y social, con el objetivo de que sirvan como <span class="font-bold text-highlighted">insumo para la construcción de iniciativas de infraestructura integrales</span> que superen la capacidad de acción aislada de cada gobierno local. Esta organización territorial no restringe la realización de intervenciones fuera de sus límites; por el contrario, pretende articular esfuerzos para potenciar el desarrollo territorial y la eficacia de las políticas públicas, respetando las especificidades locales.
+            </p>
+            <p class="leading-7 text-neutral-700 dark:text-neutral-300">
+              El criterio adoptado agrupó municipios en regiones homogéneas y compactas desde el punto de vista socioeconómico, dando como resultado una división del territorio en las <span class="font-bold text-highlighted">9 regiones</span> indicadas en el mapa disponible en este sitio.
+            </p>
+          </div>
+          <div class="mx-auto w-full sm:w-10/12 md:w-7/12 lg:w-8/12">
+            <h1 class="text-center sm:text-left text-2xl sm:text-3xl lg:text-4xl text-pretty tracking-tight font-extrabold text-primary uppercase mb-4">
+              Encuentros
+            </h1>
+            <EncuentrosRegionalesConsultasCardLists />
           </div>
         </UPageBody>
       </UPage>
@@ -242,23 +245,12 @@ async function onRegionSelect(regionSlug: string) {
         <LazyEncuentrosRegionalesNumbersAlcance />
       </UContainer>
     </div>
-    <UContainer>
-      <UPage>
-        <UPageBody>
-          <h1 class="text-2xl sm:text-3xl lg:text-4xl text-pretty tracking-tight font-extrabold text-primary uppercase text-center">
-            CONOCÉ MAS
-          </h1>
-          <div class="max-w-5xl space-y-6 mx-auto py-12 sm:py-16 md:py-16 lg:py-16">
-            <EncuentrosRegionalesConoceMas />
-          </div>
-        </UPageBody>
-      </UPage>
-    </UContainer>
+
     <USeparator />
     <UContainer>
       <div class="max-w-5xl space-y-6 mx-auto py-12 sm:py-16 md:py-16 lg:py-16">
         <h1 class="text-2xl sm:text-3xl lg:text-4xl text-pretty tracking-tight font-extrabold text-primary uppercase text-center">
-          ¿Por qué <span class="font-black text-highlighted">sumarte</span>?
+          ¿Por qué sumarte?
         </h1>
         <EncuentrosRegionalesTestimonialsList />
       </div>
