@@ -22,7 +22,7 @@ const cardTheme: ComputedRef<PageCardProps['ui']> = computed(() => ({
       spotlight-color="primary"
       variant="subtle"
       title="3"
-      description="Eventos realizados"
+      description="Encuentros realizados"
       :ui="cardTheme"
     />
     <UPageCard
