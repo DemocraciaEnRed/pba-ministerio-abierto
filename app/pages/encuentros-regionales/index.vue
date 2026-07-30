@@ -125,7 +125,7 @@ async function onRegionSelect(regionSlug: string) {
             alt="Plan Estratégico de Infraestructura de la Provincia de Buenos Aires"
           >
           <UButton
-            to="https://docs.google.com/document/d/1gruvB4EHw6z6yESUJNGmwK0Tori7dPKN/edit"
+            to="https://drive.google.com/file/d/1Rjpm0XVlGnGd05ZjOrb5FDbhrMNw6UPn/view"
             target="_blank"
             color="secondary"
             :ui="{ base: 'py-3 justify-center text-center text-md lg:text-xl relative' }"
