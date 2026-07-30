@@ -94,10 +94,7 @@ async function onRegionSelect(regionSlug: string) {
     <UContainer>
       <UPage>
         <UPageBody>
-          <h1 class="text-2xl sm:text-3xl lg:text-4xl text-pretty tracking-tight font-extrabold text-primary uppercase text-center">
-            ¿Cuánto futuro cabe en la provincia?
-          </h1>
-          <div class="max-w-5xl space-y-6 mx-auto">
+          <div class="max-w-3xl space-y-6 mx-auto">
             <p class="leading-7 text-neutral-700 dark:text-neutral-300">
               El Ministerio de Infraestructura y Servicios Públicos de la Provincia de Buenos Aires puso en marcha estos
               encuentros -destinados a las ocho regiones del interior bonaerense- para sumar aportes al <span class="font-bold text-highlighted">
@@ -107,15 +104,8 @@ async function onRegionSelect(regionSlug: string) {
             <p class="leading-7 text-neutral-700 dark:text-neutral-300">
               A través de estas <span class="font-bold text-highlighted">jornadas presenciales</span> y de los <span class="font-bold text-highlighted">espacios de participación</span> disponibles en esta plataforma,
               construiremos una <span class="font-bold text-highlighted">agenda de infraestructura</span> que refleje las necesidades y oportunidades de cada región
-              junto a
-              organizaciones sociales y comunitarias, entidades productivas, empresas, cooperativas, mutuales,
-              universidades, instituciones deportivas, gobiernos locales, referentes territoriales y la sociedad civil."
-            </p>
-            <p class="leading-7 text-neutral-700 dark:text-neutral-300">
-              Durante estos encuentros se propone incorporar el saber territorial de cada obra o proyecto de la
-              comunidad involucrada a la mirada técnica del Ministerio, generando una instancia de gobierno abierto
-              que apunte a mejorar el impacto de la intervención, a favorecer el acceso a la información y a
-              contribuir a la generación de confianza.
+              junto a organizaciones sociales y comunitarias, entidades productivas, empresas, cooperativas, mutuales,
+              universidades, instituciones deportivas, gobiernos locales, referentes territoriales y la sociedad civil.
             </p>
           </div>
         </UPageBody>
