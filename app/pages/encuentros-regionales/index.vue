@@ -117,7 +117,7 @@ async function onRegionSelect(regionSlug: string) {
       :ui="comoHacemosPageSectionUi"
     >
       <template #default>
-        <div class="flex flex-col w-7/12 sm:w-6/12 md:w-5/12 lg:w-4/12 gap-4 hover:scale-103 transition-transform duration-300 sticky md:pt-5 lg:pt-3 top-(--ui-header-height)">
+        <div class="flex flex-col w-7/12 sm:w-6/12 md:w-5/12 lg:w-4/12 gap-4 hover:scale-103 transition-transform duration-300">
           <img
             src="https://democraciaenred.nyc3.digitaloceanspaces.com/projects/pba-ministerio-abierto/app/assets/encuentros-regionales/plan-estrategico-infraestructura-pba-cover.jpg"
             loading="lazy"
@@ -223,9 +223,14 @@ async function onRegionSelect(regionSlug: string) {
               <EncuentrosRegionalesMapSelector @select="onRegionSelect" />
             </div>
             <div class="mx-auto w-full sm:w-10/12 md:w-7/12 lg:w-8/12">
-              <h1 class="text-center sm:text-left text-2xl sm:text-3xl lg:text-4xl text-pretty tracking-tight font-extrabold text-primary uppercase mb-4">
-                Encuentros
-              </h1>
+              <div class="space-y-6">
+                <h1 class="text-center sm:text-left text-2xl sm:text-3xl lg:text-4xl text-pretty tracking-tight font-extrabold text-primary uppercase mb-4">
+                  ACCEDÉ A LA INFORMACIÓN DE CADA JORNADA
+                </h1>
+                <p class="leading-7 text-neutral-700 dark:text-neutral-300">
+                  Al clickear en cada región, encontrarás los documentos de cada encuentro y los espacios de participación para que te inscribas, dejes tus aportes y proyectos, y hagas comentarios.
+                </p>
+              </div>
               <EncuentrosRegionalesConsultasCardLists />
             </div>
           </div>
