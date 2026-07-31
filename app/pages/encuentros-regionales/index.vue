@@ -233,8 +233,11 @@ async function onRegionSelect(regionSlug: string) {
           </div>
           <div class="mx-auto w-full sm:w-10/12 md:w-7/12 lg:w-8/12">
             <h1 class="text-center sm:text-left text-2xl sm:text-3xl lg:text-4xl text-pretty tracking-tight font-extrabold text-primary uppercase mb-4">
-              Encuentros
+              ACCEDÉ A LA INFORMACIÓN DE CADA JORNADA
             </h1>
+            <p class="text-center sm:text-left leading-7 text-neutral-700 dark:text-neutral-300 mb-6">
+              Al clickear en cada región, encontrarás los documentos de cada encuentro y los espacios de participación para que te inscribas, dejes tus aportes y proyectos, y hagas comentarios.
+            </p>
             <EncuentrosRegionalesConsultasCardLists />
           </div>
         </UPageBody>
