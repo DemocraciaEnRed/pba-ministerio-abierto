@@ -24,6 +24,21 @@ model RegionalMeetingAgendaItem {
   @@index([heldAt])
 }
 
+/// Métrica de alcance de los Encuentros Regionales. Catálogo fijo (4): se
+/// siembra y se edita (etiqueta/valor), pero no se crea ni elimina desde la app.
+/// `value` es texto para admitir formatos como "1.050" o "+40".
+model RegionalMeetingMetric {
+  id           Int      @id @default(autoincrement())
+  key          String   @unique
+  label        String
+  value        String
+  displayOrder Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([displayOrder])
+}
+
 /// Grupo de testimonios ("encuentro" a fines editoriales). ABM completo desde el
 /// panel. Puede asociarse opcionalmente a una región para tematizar color/título.
 /// Contiene a lo sumo 3 testimonios (regla de negocio validada en el handler).

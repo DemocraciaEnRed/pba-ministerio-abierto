@@ -56,6 +56,12 @@ const itemsNavigationMenu = computed<NavigationMenuItem[][]>(() => [
       to: '/encuentros-regionales/panel/testimonios',
       icon: 'i-lucide-quote',
       active: route.path.startsWith('/encuentros-regionales/panel/testimonios')
+    },
+    {
+      label: 'Métricas',
+      to: '/encuentros-regionales/panel/metricas',
+      icon: 'i-lucide-chart-no-axes-column',
+      active: route.path.startsWith('/encuentros-regionales/panel/metricas')
     }
   ]
 ])

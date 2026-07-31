@@ -76,6 +76,21 @@ export const UpdateAgendaItemSchema = z.object({
   registrationUrl: registrationUrlField.default(null)
 })
 
+// --- Métricas ---
+
+export const UpdateMetricSchema = z.object({
+  label: z
+    .string()
+    .trim()
+    .min(1, 'La etiqueta es requerida')
+    .max(80, 'La etiqueta no puede superar los 80 caracteres'),
+  value: z
+    .string()
+    .trim()
+    .min(1, 'El valor es requerido')
+    .max(20, 'El valor no puede superar los 20 caracteres')
+})
+
 // --- Testimonios ---
 
 const testimonialItemSchema = z.object({
@@ -190,6 +205,7 @@ export const CreateRegionalMeetingSubmissionSchema = z
   })
 
 export type UpdateAgendaItemInput = z.output<typeof UpdateAgendaItemSchema>
+export type UpdateMetricInput = z.output<typeof UpdateMetricSchema>
 export type TestimonialItemInput = z.output<typeof testimonialItemSchema>
 export type CreateTestimonialGroupInput = z.output<typeof CreateTestimonialGroupSchema>
 export type UpdateTestimonialGroupInput = z.output<typeof UpdateTestimonialGroupSchema>

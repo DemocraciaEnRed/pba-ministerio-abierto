@@ -8,9 +8,10 @@ import { seedConsultationsDemo } from './seeds/consultations-demo'
 import { seedInstitution } from './seeds/institution'
 import { seedRegions } from './seeds/regions'
 import { seedRegionalMeetingsAgenda } from './seeds/regional-meetings-agenda'
+import { seedRegionalMeetingsMetrics } from './seeds/regional-meetings-metrics'
 import { seedRegionalMeetingsTestimonials } from './seeds/regional-meetings-testimonials'
 
-type SeedProfile = 'base' | 'institution' | 'regions' | 'regional-meetings' | 'regional-meetings-testimonials' | 'demo'
+type SeedProfile = 'base' | 'institution' | 'regions' | 'regional-meetings' | 'regional-meetings-metrics' | 'regional-meetings-testimonials' | 'demo'
 
 interface SeedRunOptions {
   demoCount?: number
@@ -24,6 +25,7 @@ const seedProfiles: Record<
   'institution': prisma => seedInstitution(prisma),
   'regions': prisma => seedRegions(prisma),
   'regional-meetings': prisma => seedRegionalMeetingsAgenda(prisma),
+  'regional-meetings-metrics': prisma => seedRegionalMeetingsMetrics(prisma),
   'regional-meetings-testimonials': prisma => seedRegionalMeetingsTestimonials(prisma),
   'demo': (prisma, options) => seedConsultationsDemo(prisma, { count: options.demoCount })
 }
@@ -81,7 +83,7 @@ function parseSeedArgs(): ParsedSeedArgs {
   const rawProfile = values.profile?.trim()
 
   if (!rawProfile) {
-    return { profiles: ['base', 'institution', 'regions', 'regional-meetings'], options }
+    return { profiles: ['base', 'institution', 'regions', 'regional-meetings', 'regional-meetings-metrics'], options }
   }
 
   const requested = rawProfile
