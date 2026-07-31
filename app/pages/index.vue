@@ -191,7 +191,9 @@ const themeUi: ThemeUI = {
             <h3 class="text-md md:text-lg xl:text-xl text-primary font-bold leading-tight">
               {{ feature.title }}
             </h3>
-            <p class="hidden sm:block text-sm">{{ feature.description }}</p>
+            <p class="hidden sm:block text-sm">
+              {{ feature.description }}
+            </p>
           </div>
         </UPageCard>
       </div>
