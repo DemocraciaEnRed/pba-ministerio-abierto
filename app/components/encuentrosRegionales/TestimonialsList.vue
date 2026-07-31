@@ -48,24 +48,23 @@ const groups = computed(() =>
   >
     Cargando testimonios...
   </div>
-
   <UCarousel
     v-else
     v-slot="{ item: group }"
     :items="groups"
-    arrows
     dots
+    auto-height
     :ui="{
       viewport: 'overflow-hidden p-2',
-      container: 'items-start ms-0',
+      container: 'items-start ms-0 transition-[height]',
       item: 'basis-full ps-0'
     }"
     class="w-full"
   >
-    <section class="space-y-4 w-full px-4">
+    <section class="space-y-2 w-full px-4">
       <div
         class="text-center"
-        :class="['rounded-lg p-4', `${group.bodyBackgroundColor}`]"
+        :class="['rounded-lg p-2', `${group.bodyBackgroundColor}`]"
       >
         <p class="font-semibold">
           Participantes del Encuentro {{ group.name }}
@@ -74,8 +73,7 @@ const groups = computed(() =>
           {{ [group.municipality, formatDateLong(group.heldAt)].filter(Boolean).join(' | ') }}
         </p>
       </div>
-
-      <UPageColumns>
+      <div class="flex flex-col sm:flex-row gap-2 sm:gap-2">
         <UPageCard
           v-for="testimonial in group.testimonials"
           :key="`testimonial-${testimonial.id}`"
@@ -92,7 +90,7 @@ const groups = computed(() =>
             />
           </template>
         </UPageCard>
-      </UPageColumns>
+      </div>
     </section>
   </UCarousel>
 </template>
