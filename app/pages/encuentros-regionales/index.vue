@@ -231,18 +231,24 @@ async function onRegionSelect(regionSlug: string) {
               El criterio adoptado agrupó municipios en regiones homogéneas y compactas desde el punto de vista socioeconómico, dando como resultado una división del territorio en las <span class="font-bold text-highlighted">9 regiones</span> indicadas en el mapa disponible en este sitio.
             </p>
           </div>
-          <div class="mx-auto w-full sm:w-10/12 md:w-7/12 lg:w-8/12">
-            <h1 class="text-center sm:text-left text-2xl sm:text-3xl lg:text-4xl text-pretty tracking-tight font-extrabold text-primary uppercase mb-4">
-              ACCEDÉ A LA INFORMACIÓN DE CADA JORNADA
-            </h1>
-            <p class="text-center sm:text-left leading-7 text-neutral-700 dark:text-neutral-300 mb-6">
-              Al clickear en cada región, encontrarás los documentos de cada encuentro y los espacios de participación para que te inscribas, dejes tus aportes y proyectos, y hagas comentarios.
-            </p>
-            <EncuentrosRegionalesConsultasCardLists />
-          </div>
         </UPageBody>
       </UPage>
     </UContainer>
+    <USeparator
+      icon="pba:encuentros-regionales"
+      :ui="{ icon: 'size-18 text-primary' }"
+    />
+    <div class="py-12 sm:py-16 md:py-16 lg:py-16">
+      <UContainer class="w-full lg:max-w-5xl 2xl:max-w-6xl">
+        <h1 class="text-center sm:text-left text-2xl sm:text-3xl lg:text-4xl text-pretty tracking-tight font-extrabold text-primary uppercase mb-4">
+          ACCEDÉ A LA INFORMACIÓN DE CADA JORNADA
+        </h1>
+        <p class="text-center sm:text-left leading-7 text-neutral-700 dark:text-neutral-300 mb-6">
+          Al clickear en cada región, encontrarás los documentos de cada encuentro y los espacios de participación para que te inscribas, dejes tus aportes y proyectos, y hagas comentarios.
+        </p>
+        <EncuentrosRegionalesConsultasCardLists />
+      </UContainer>
+    </div>
     <div class="bg-accented/25 dark:bg-accented/10 py-12 sm:py-16 md:py-16 lg:py-16 drop-shadow-md">
       <UContainer>
         <LazyEncuentrosRegionalesNumbersAlcance />

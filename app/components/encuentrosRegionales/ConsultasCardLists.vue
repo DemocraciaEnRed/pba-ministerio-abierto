@@ -92,14 +92,18 @@ watch(selectedStatusFilter, () => {
       </UPageCard>
 
       <template v-else-if="consultations.length > 0">
-        <div class="space-y-4">
+        <UBlogPosts
+          orientation="vertical"
+          class="space-y-4"
+          :ui="{ base: 'sm:grid sm:grid-cols-2 lg:flex lg:flex-col gap-8 lg:gap-y-16' }"
+        >
           <ConsultasConsultaCard
             v-for="consultation in paginatedConsultations"
             :key="consultation.id"
             :consultation="consultation"
             orientation="horizontal"
           />
-        </div>
+        </UBlogPosts>
 
         <div
           v-if="consultations.length > PER_PAGE"
