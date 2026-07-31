@@ -1,7 +1,18 @@
 <script setup lang="ts">
+type AgendaRegionSlug
+  = | 'metropolitana'
+    | 'fluvial'
+    | 'noroeste'
+    | 'este'
+    | 'centro-sur'
+    | 'sudoeste'
+    | 'costa-maritima'
+    | 'norte'
+    | 'centro-norte'
+
 interface AgendaRegion {
   id: number
-  slug: string
+  slug: AgendaRegionSlug
   name: string
 }
 
