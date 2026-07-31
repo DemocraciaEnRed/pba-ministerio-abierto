@@ -119,7 +119,7 @@ const consultationMetadata = computed<ConsultaHeroMetadata[]>(() => {
 
   if (consultation.value.categories.length) {
     items.push({
-      title: 'Categorías',
+      title: 'Ejes de gestión',
       description: consultation.value.categories.map(category => category.name).join(', '),
       icon: 'lucide:tags',
       variant: 'subtle'

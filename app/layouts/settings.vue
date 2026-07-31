@@ -29,7 +29,7 @@ const items = computed<NavigationMenuItem[]>(() => [
     active: route.path.startsWith('/admin/secciones')
   },
   {
-    label: 'Categorías',
+    label: 'Ejes de gestión',
     to: '/admin/categorias',
     icon: 'i-lucide-folders',
     active: route.path.startsWith('/admin/categorias')

@@ -37,7 +37,7 @@ export default defineEventHandler(async (event) => {
     if (getPrismaErrorCode(error) === 'P2002') {
       throw createError({
         statusCode: 409,
-        message: 'Ya existe una categoría con ese slug en esta sección'
+        message: 'Ya existe un eje de gestión con ese slug en esta sección'
       })
     }
 

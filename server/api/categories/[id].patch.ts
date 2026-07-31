@@ -3,7 +3,7 @@ import { parsePositiveIntParam } from '~~/server/utils/http/params'
 import { serializeCategory } from '~~/server/utils/serializers/category'
 
 export default defineEventHandler(async (event) => {
-  const categoryId = parsePositiveIntParam(event, 'id', 'categoría')
+  const categoryId = parsePositiveIntParam(event, 'id', 'eje de gestión')
   const body = await parseBody(event, PatchCategorySchema)
   const ctx = await getAuthContext(event)
   await assertCan(ctx, 'update', { type: 'platform' })
@@ -16,7 +16,7 @@ export default defineEventHandler(async (event) => {
   if (!existing) {
     throw createError({
       statusCode: 404,
-      message: 'Categoría no encontrada'
+      message: 'Eje de gestión no encontrado'
     })
   }
 

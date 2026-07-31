@@ -61,13 +61,13 @@ function formatDate(value: string | null | undefined): string {
 
 const formatLabel = computed(() => consultation.value?.consultationFormat === 'single' ? 'Única' : 'Múltiple')
 
-// Recordatorio no bloqueante: falta clasificar la consulta (sección/categorías/etiquetas).
+// Recordatorio no bloqueante: falta clasificar la consulta (sección/ejes de gestión/etiquetas).
 const missingClassification = computed(() => {
   const c = consultation.value
   if (!c) return [] as string[]
   const missing: string[] = []
   if (!c.section) missing.push('sección')
-  if (!c.categories?.length) missing.push('categorías')
+  if (!c.categories?.length) missing.push('ejes de gestión')
   if (!c.tags?.length) missing.push('etiquetas')
   return missing
 })

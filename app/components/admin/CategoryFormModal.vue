@@ -68,8 +68,8 @@ const sectionItems = computed(() =>
 
 const activeDescription = computed(() =>
   state.isActive
-    ? 'La categoría se muestra en la plataforma.'
-    : 'La categoría queda oculta en la plataforma.'
+    ? 'El eje de gestión se muestra en la plataforma.'
+    : 'El eje de gestión queda oculto en la plataforma.'
 )
 
 function hydrate() {
@@ -138,7 +138,7 @@ async function onSubmit(event: FormSubmitEvent<CreateCategoryInput>) {
     }
 
     toast.add({
-      title: isEdit.value ? 'Categoría actualizada' : 'Categoría creada',
+      title: isEdit.value ? 'Eje de gestión actualizado' : 'Eje de gestión creado',
       color: 'success'
     })
 
@@ -161,7 +161,7 @@ async function onSubmit(event: FormSubmitEvent<CreateCategoryInput>) {
 <template>
   <USlideover
     v-model:open="isOpen"
-    :title="isEdit ? 'Editar categoría' : 'Nueva categoría'"
+    :title="isEdit ? 'Editar eje de gestión' : 'Nuevo eje de gestión'"
     description="Gestioná clasificación institucional y orden de visualización."
     :dismissible="!saving"
     :ui="{ content: 'max-w-xl' }"
@@ -256,7 +256,7 @@ async function onSubmit(event: FormSubmitEvent<CreateCategoryInput>) {
         <UButton
           type="submit"
           :form="formId"
-          :label="isEdit ? 'Guardar cambios' : 'Crear categoría'"
+          :label="isEdit ? 'Guardar cambios' : 'Crear eje de gestión'"
           icon="i-lucide-save"
           :loading="saving"
         />

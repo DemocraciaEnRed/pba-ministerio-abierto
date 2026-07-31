@@ -109,16 +109,16 @@ export const UpdateConsultationFeaturedSchema = z.object({
 
 export const SetConsultationCategoriesSchema = z.object({
   categories: z.array(z.object({
-    categoryId: z.int().positive('La categoría debe ser un ID válido'),
+    categoryId: z.int().positive('El eje de gestión debe ser un ID válido'),
     isPrimary: z.boolean().default(false),
     displayOrder: z.int().min(0, 'El orden no puede ser negativo').default(0)
-  })).max(20, 'No podés asignar más de 20 categorías')
+  })).max(20, 'No podés asignar más de 20 ejes de gestión')
 }).superRefine((value, ctx) => {
   const primaryCount = value.categories.filter(category => category.isPrimary).length
   if (primaryCount > 1) {
     ctx.addIssue({
       code: 'custom',
-      message: 'Solo puede haber una categoría principal',
+      message: 'Solo puede haber un eje de gestión principal',
       path: ['categories']
     })
   }
