@@ -34,7 +34,7 @@ const toolbarItems: EditorToolbarItem<typeof customHandlers>[][] = [
       content: { align: 'start' },
       items: [
         { kind: 'paragraph', icon: 'i-lucide-type', label: 'Párrafo' },
-        { kind: 'heading', level: 1, icon: 'i-lucide-heading-1', label: 'Título 1' },
+        // { kind: 'heading', level: 1, icon: 'i-lucide-heading-1', label: 'Título 1' },
         { kind: 'heading', level: 2, icon: 'i-lucide-heading-2', label: 'Título 2' },
         { kind: 'heading', level: 3, icon: 'i-lucide-heading-3', label: 'Título 3' },
         { kind: 'heading', level: 4, icon: 'i-lucide-heading-4', label: 'Título 4' }
