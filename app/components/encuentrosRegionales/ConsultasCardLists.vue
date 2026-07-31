@@ -94,8 +94,7 @@ watch(selectedStatusFilter, () => {
       <template v-else-if="consultations.length > 0">
         <UBlogPosts
           orientation="vertical"
-          class="space-y-4"
-          :ui="{ base: 'sm:grid sm:grid-cols-2 lg:flex lg:flex-col gap-8 lg:gap-y-16' }"
+          :ui="{ base: 'sm:grid sm:grid-cols-2 lg:flex lg:flex-col gap-4 lg:gap-y-4' }"
         >
           <ConsultasConsultaCard
             v-for="consultation in paginatedConsultations"

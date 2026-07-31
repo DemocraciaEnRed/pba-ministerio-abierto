@@ -196,6 +196,7 @@ async function onRegionSelect(regionSlug: string) {
         </div>
       </template>
     </UPageSection>
+    <USeparator />
     <UContainer>
       <UPage>
         <UPageBody>
@@ -249,12 +250,12 @@ async function onRegionSelect(regionSlug: string) {
         <EncuentrosRegionalesConsultasCardLists />
       </UContainer>
     </div>
+    <USeparator />
     <div class="bg-accented/25 dark:bg-accented/10 py-12 sm:py-16 md:py-16 lg:py-16 drop-shadow-md">
       <UContainer>
         <LazyEncuentrosRegionalesNumbersAlcance />
       </UContainer>
     </div>
-
     <USeparator />
     <UContainer>
       <div class="max-w-5xl space-y-6 mx-auto py-12 sm:py-16 md:py-16 lg:py-16">
