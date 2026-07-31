@@ -54,13 +54,26 @@ const authorNameField = z
   .min(1, 'El nombre es requerido')
   .max(120, 'El nombre no puede superar los 120 caracteres')
 
+const registrationUrlField = z
+  .string()
+  .trim()
+  .max(500, 'El enlace no puede superar los 500 caracteres')
+  .nullable()
+  .transform(value => (value ? value : null))
+  .refine(
+    value => value === null || z.url().safeParse(value).success,
+    'Ingresá un enlace válido (debe empezar con http:// o https://)'
+  )
+
 // --- Agenda ---
 
 export const UpdateAgendaItemSchema = z.object({
   location: locationField,
   heldAt: heldAtField,
   year: yearField.default(null),
-  held: z.boolean().default(false)
+  held: z.boolean().default(false),
+  highlighted: z.boolean().default(false),
+  registrationUrl: registrationUrlField.default(null)
 })
 
 // --- Testimonios ---

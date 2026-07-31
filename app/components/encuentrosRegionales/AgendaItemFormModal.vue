@@ -8,6 +8,8 @@ export interface AdminAgendaItem {
   heldAt: string
   year: number | null
   held: boolean
+  highlighted: boolean
+  registrationUrl: string | null
   region: {
     id: number
     slug: string
@@ -38,13 +40,17 @@ interface AgendaFormState {
   heldAt: string | null
   year: number | null
   held: boolean
+  highlighted: boolean
+  registrationUrl: string
 }
 
 const state = reactive<AgendaFormState>({
   location: '',
   heldAt: null,
   year: null,
-  held: false
+  held: false,
+  highlighted: false,
+  registrationUrl: ''
 })
 
 const isOpen = computed({
@@ -65,6 +71,8 @@ function hydrate() {
   state.heldAt = values?.heldAt ?? null
   state.year = values?.year ?? null
   state.held = values?.held ?? false
+  state.highlighted = values?.highlighted ?? false
+  state.registrationUrl = values?.registrationUrl ?? ''
   formRef.value?.clear()
 }
 
@@ -84,7 +92,9 @@ async function onSubmit() {
         location: state.location,
         heldAt: state.heldAt,
         year: state.year,
-        held: state.held
+        held: state.held,
+        highlighted: state.highlighted,
+        registrationUrl: state.registrationUrl.trim() || null
       }
     })
 
@@ -113,7 +123,7 @@ async function onSubmit() {
   <USlideover
     v-model:open="isOpen"
     title="Editar ítem de agenda"
-    description="La región es fija. Podés editar el lugar, la fecha, el año y si ya se celebró."
+    description="La región es fija. Podés editar el lugar, la fecha, el año, si ya se celebró y cómo se destaca en la timeline."
     :dismissible="!saving"
     :ui="{ content: 'max-w-xl' }"
   >
@@ -173,6 +183,27 @@ async function onSubmit() {
           name="held"
         >
           <USwitch v-model="state.held" />
+        </UFormField>
+
+        <UFormField
+          label="Destacar en la agenda"
+          name="highlighted"
+          help="Resalta el ítem con un borde de color en la timeline pública."
+        >
+          <USwitch v-model="state.highlighted" />
+        </UFormField>
+
+        <UFormField
+          label="URL de inscripción"
+          name="registrationUrl"
+          help="Opcional. Si está vacía, el botón «Inscribite» no se muestra."
+        >
+          <UInput
+            v-model="state.registrationUrl"
+            type="url"
+            placeholder="https://…"
+            class="w-full"
+          />
         </UFormField>
       </UForm>
     </template>

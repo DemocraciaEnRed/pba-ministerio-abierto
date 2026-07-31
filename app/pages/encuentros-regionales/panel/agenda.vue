@@ -38,7 +38,7 @@ const headerButtons = computed<ButtonProps[]>(() => [
   <div>
     <UPageHeader
       title="Agenda"
-      description="Editá la agenda de los Encuentros Regionales: lugar, fecha, año y si ya se celebró. Hay un ítem por región y no se pueden crear ni eliminar."
+      description="Editá la agenda de los Encuentros Regionales: lugar, fecha, año, si ya se celebró y cómo se destaca en la timeline. Hay un ítem por región y no se pueden crear ni eliminar."
       :links="headerButtons"
     />
     <UPageBody>
@@ -63,6 +63,12 @@ const headerButtons = computed<ButtonProps[]>(() => [
             <th class="text-center">
               Estado
             </th>
+            <th class="text-center">
+              Destacado
+            </th>
+            <th class="text-center">
+              Inscripción
+            </th>
             <th>Acciones</th>
           </tr>
         </template>
@@ -86,6 +92,25 @@ const headerButtons = computed<ButtonProps[]>(() => [
                 :color="item.held ? 'success' : 'neutral'"
                 variant="outline"
               />
+            </td>
+            <td class="text-center">
+              <UBadge
+                v-if="item.highlighted"
+                label="Destacado"
+                color="secondary"
+                variant="subtle"
+              />
+              <span v-else>—</span>
+            </td>
+            <td class="text-center">
+              <UBadge
+                v-if="item.registrationUrl"
+                icon="lucide:link"
+                label="Con enlace"
+                color="primary"
+                variant="subtle"
+              />
+              <span v-else>—</span>
             </td>
             <td>
               <UButton

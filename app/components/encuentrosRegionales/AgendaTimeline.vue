@@ -11,6 +11,8 @@ interface AgendaItem {
   heldAt: string
   year: number | null
   held: boolean
+  highlighted: boolean
+  registrationUrl: string | null
   region: AgendaRegion
 }
 
@@ -34,13 +36,14 @@ const items = computed(() => data.value ?? [])
       <div class="grid lg:grid-cols-2 gap-2">
         <div
           v-for="item in items"
-          :key="item.id"
-          class="relative flex overflow-hidden border border-transparent rounded-sm hover:border-accented transition-all duration-300"
+          :key="`agenda-item-${item.id}`"
+          class="relative flex overflow-hidden border rounded-md transition-all duration-300"
+          :class="item.highlighted ? `border-region-${item.region.slug} bg-region-${item.region.slug}/10` : 'border-transparent hover:border-accented'"
         >
           <!-- Franja de color (lateral en mobile/tablet) -->
           <div
-            class="w-2 shrink-0 rounded-md"
-            :class="`bg-region-${item.region.slug}`"
+            class="w-2.5 shrink-0 rounded-md"
+            :class="`bg-region-${item.region.slug} ${item.highlighted ? 'rounded-none' : null}`"
           />
 
           <div class="flex flex-col gap-2 p-4 w-full leading-tight">
@@ -89,6 +92,20 @@ const items = computed(() => data.value ?? [])
                 </p>
               </div>
             </div>
+
+            <UButton
+              v-if="item.registrationUrl"
+              :to="item.registrationUrl"
+              target="_blank"
+              external
+              rel="noopener noreferrer"
+              label="Inscribite"
+              icon="lucide:external-link"
+              :color="item.highlighted ? `region-${item.region.slug}` : 'secondary'"
+              size="sm"
+              variant="solid"
+              block
+            />
           </div>
         </div>
       </div>
