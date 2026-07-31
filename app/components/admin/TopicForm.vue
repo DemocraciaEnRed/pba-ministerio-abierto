@@ -8,6 +8,7 @@ export interface TopicFormInitialValues {
   title: string
   summary: string | null
   body: string | null
+  commentsGuidance: string | null
   mechanismType: MechanismType | null
   participationStartsAt: string | null
   participationEndsAt: string | null
@@ -20,6 +21,7 @@ export interface TopicFormPayload {
   title: string
   summary: string | null
   body: string | null
+  commentsGuidance: string | null
   mechanismType: MechanismType | null
   participationStartsAt: string | null
   participationEndsAt: string | null
@@ -54,6 +56,7 @@ const form = reactive({
   title: '',
   summary: '',
   body: '' as string | null,
+  commentsGuidance: '' as string | null,
   mechanismType: null as MechanismType | null,
   participationStartsAt: null as string | null,
   participationEndsAt: null as string | null,
@@ -96,6 +99,7 @@ function hydrate(values: TopicFormInitialValues | null) {
   form.title = values?.title ?? ''
   form.summary = values?.summary ?? ''
   form.body = values?.body ?? ''
+  form.commentsGuidance = values?.commentsGuidance ?? ''
   form.mechanismType = values?.mechanismType ?? null
   form.participationStartsAt = values?.participationStartsAt ?? null
   form.participationEndsAt = values?.participationEndsAt ?? null
@@ -123,6 +127,7 @@ function buildPayload(): TopicFormPayload {
     title: form.title.trim(),
     summary: (form.summary ?? '').trim() || null,
     body: (form.body ?? '').trim() || null,
+    commentsGuidance: (form.commentsGuidance ?? '').trim() || null,
     mechanismType: form.mechanismType,
     participationStartsAt: form.participationStartsAt,
     participationEndsAt: form.participationEndsAt,
@@ -332,6 +337,18 @@ const titleMax = 180
         <RichTextEditor
           v-model="form.body"
           placeholder="Escribí el contenido del tema…"
+        />
+      </UFormField>
+
+      <UFormField
+        label="Guía para los comentarios"
+        description="Texto opcional que se muestra debajo del título «Comentarios» para orientar la conversación (por ejemplo, preguntas disparadoras). Admite formato enriquecido (Markdown)."
+        :error="errors.commentsGuidance"
+        class="md:col-span-2"
+      >
+        <RichTextEditor
+          v-model="form.commentsGuidance"
+          placeholder="Ej.: ¿Qué aspectos de esta propuesta te parecen prioritarios?"
         />
       </UFormField>
 

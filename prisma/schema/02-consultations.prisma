@@ -30,6 +30,8 @@ model Consultation {
   endsAt              DateTime?
   publishedAt         DateTime?
   closedMessage       String?   @db.Text
+  /// Texto opcional (Markdown) que orienta la conversación debajo del título "Comentarios".
+  commentsGuidance    String?   @db.Text
   resultsVisibility   ResultsVisibility @default(hidden)
   sectionId           Int?
   regionId            Int?

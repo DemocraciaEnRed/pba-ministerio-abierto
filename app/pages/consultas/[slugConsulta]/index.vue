@@ -267,6 +267,11 @@ const commentingOpen = computed(() =>
       </UCarousel>
     </template>
     <template #consultas-comentarios>
+      <MarkdownProse
+        v-if="consultation?.commentsGuidance"
+        :content="consultation.commentsGuidance"
+        class="mb-6"
+      />
       <ConsultasComentariosSeccion
         v-if="consultation"
         :consultation-slug="String(route.params.slugConsulta)"

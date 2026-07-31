@@ -50,6 +50,7 @@ const initialValues = computed<ConsultationFormInitialValues | null>(() => {
     startsAt: consultation.value.startsAt,
     endsAt: consultation.value.endsAt,
     closedMessage: consultation.value.closedMessage,
+    commentsGuidance: consultation.value.commentsGuidance,
     resultsVisibility: consultation.value.resultsVisibility
   }
 })
