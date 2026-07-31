@@ -47,7 +47,7 @@ const faqItems = ref<AccordionItem[]>([
   }
 ])
 
-const openFaq = ref<string[]>(['como-funcionan'])
+const openFaq = ref<string[]>([])
 
 const themeUi: ThemeUI = {
   pageHero: {

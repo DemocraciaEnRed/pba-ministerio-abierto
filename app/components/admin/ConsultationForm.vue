@@ -13,6 +13,7 @@ export interface ConsultationFormInitialValues {
   startsAt: string | null
   endsAt: string | null
   closedMessage: string | null
+  commentsGuidance: string | null
   resultsVisibility: ResultsVisibility
 }
 
@@ -25,6 +26,7 @@ export interface ConsultationFormPayload {
   startsAt: string | null
   endsAt: string | null
   closedMessage: string | null
+  commentsGuidance: string | null
   resultsVisibility: ResultsVisibility
   adjustTopics: boolean
 }
@@ -62,6 +64,7 @@ const form = reactive({
   startsAt: null as string | null,
   endsAt: null as string | null,
   closedMessage: '' as string | null,
+  commentsGuidance: '' as string | null,
   resultsVisibility: 'public' as ResultsVisibility
 })
 
@@ -102,6 +105,7 @@ function hydrate(values: ConsultationFormInitialValues | null) {
   form.startsAt = values?.startsAt ?? null
   form.endsAt = values?.endsAt ?? null
   form.closedMessage = values?.closedMessage ?? ''
+  form.commentsGuidance = values?.commentsGuidance ?? ''
   form.resultsVisibility = 'public'
   slugTouched.value = Boolean(values?.slug)
 }
@@ -128,6 +132,7 @@ function buildPayload(): ConsultationFormPayload {
     startsAt: form.startsAt,
     endsAt: form.endsAt,
     closedMessage: (form.closedMessage ?? '').trim() || null,
+    commentsGuidance: (form.commentsGuidance ?? '').trim() || null,
     resultsVisibility: form.resultsVisibility,
     // El ajuste no es opcional: si hay temas fuera de la ventana, se recortan al guardar.
     adjustTopics: topicChanges.value.length > 0
@@ -381,6 +386,18 @@ const titleMax = 180
         <RichTextEditor
           v-model="form.closedMessage"
           placeholder="Ej.: ¡Gracias por participar! Los resultados se publicarán próximamente."
+        />
+      </UFormField>
+
+      <UFormField
+        label="Guía para los comentarios"
+        description="Texto opcional que se muestra debajo del título «Comentarios» para orientar la conversación (por ejemplo, preguntas disparadoras). Admite formato enriquecido (Markdown)."
+        :error="errors.commentsGuidance"
+        class="md:col-span-2"
+      >
+        <RichTextEditor
+          v-model="form.commentsGuidance"
+          placeholder="Ej.: ¿Qué obras priorizarías en tu barrio? Contános tu experiencia."
         />
       </UFormField>
 

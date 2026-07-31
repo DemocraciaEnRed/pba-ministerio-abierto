@@ -77,7 +77,7 @@ const themeUi: ThemeUI = {
         </p>
       </template> -->
       <UIcon
-        name="pba:audiencias-publicas"
+        name="pba:consultas-publicas"
         class="size-40 shrink-0 text-white sm:size-40 md:size-52 lg:size-60"
       />
     </UPageHero>

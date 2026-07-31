@@ -9,7 +9,7 @@ function getPrismaErrorCode(error: unknown): string | null {
 }
 
 export default defineEventHandler(async (event) => {
-  const categoryId = parsePositiveIntParam(event, 'id', 'categoría')
+  const categoryId = parsePositiveIntParam(event, 'id', 'eje de gestión')
   const ctx = await getAuthContext(event)
   await assertCan(ctx, 'delete', { type: 'platform' })
 
@@ -21,7 +21,7 @@ export default defineEventHandler(async (event) => {
   if (!existing) {
     throw createError({
       statusCode: 404,
-      message: 'Categoría no encontrada'
+      message: 'Eje de gestión no encontrado'
     })
   }
 
@@ -33,7 +33,7 @@ export default defineEventHandler(async (event) => {
     if (getPrismaErrorCode(error) === 'P2003') {
       throw createError({
         statusCode: 409,
-        message: 'No se puede eliminar una categoría en uso por consultas'
+        message: 'No se puede eliminar un eje de gestión en uso por consultas'
       })
     }
 

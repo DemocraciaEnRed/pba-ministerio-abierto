@@ -12,6 +12,8 @@ model Topic {
   summary                               String?   @db.Text
   body                                  String?   @db.Text
   questionText                          String?   @db.Text
+  /// Texto opcional (Markdown) que orienta la conversación debajo del título "Comentarios".
+  commentsGuidance                      String?   @db.Text
   displayOrder                          Int       @default(0)
   participationStartsAt                 DateTime
   participationEndsAt                   DateTime?

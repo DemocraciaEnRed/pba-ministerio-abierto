@@ -153,7 +153,7 @@ const themeUi: ThemeUI = {
           Tu voz cuenta. El desarrollo de la Provincia se logra entre todos y todas.
         </p>
       </div>
-      <div class="flex flex-wrap justify-center gap-3 mx-auto max-w-full xl:max-w-[90%] mt-10">
+      <div class="flex flex-wrap justify-center gap-3 mx-auto max-w-full mt-10">
         <UPageCard
           v-for="(feature, index) in sectionsAsPageCards"
           :key="index"
@@ -161,7 +161,7 @@ const themeUi: ThemeUI = {
           spotlight
           spotlight-color="primary"
           variant="subtle"
-          class="w-full sm:w-[calc(50%-0.375rem)] lg:w-[calc(33.333%-0.5rem)] xl:w-[calc(20%-0.6rem)]"
+          class="w-[calc(50%-0.5rem)] sm:w-[calc(50%-0.5rem)] md:w-[calc(33.333%-0.5rem)] lg:w-[calc(18%-0.5rem)] xl:w-[calc(18%-0.5rem)]"
           :class="feature.class ?? undefined"
           :to="feature.to"
           :target="feature.target"
@@ -170,21 +170,28 @@ const themeUi: ThemeUI = {
             container: 'p-3 sm:p-3'
           }"
         >
-          <div class="flex-1 flex flex-col justify-evenly sm:min-h-80 md:min-h-75 lg:min-h-90 xl:min-h-100 items-center text-center">
+          <div class="flex-1 flex flex-col justify-evenly lg:min-h-80 items-center text-center">
             <UIcon
               :name="feature.icon"
-              class="size-45 text-primary"
+              class="size-20 lg:size-40 xl:size-45 text-primary"
+            />
+            <UIcon
+              v-show="feature.to"
+              name="lucide:arrow-up-right"
+              class="size-4 text-primary absolute top-3 right-3"
             />
             <UBadge
               v-if="!feature.to"
               color="primary"
               variant="subtle"
               label="Próximamente"
+              class="sm:absolute sm:top-3 sm:right-3"
+              size="sm"
             />
-            <h3 class="text-xl text-primary font-bold">
+            <h3 class="text-md md:text-lg xl:text-xl text-primary font-bold leading-tight">
               {{ feature.title }}
             </h3>
-            <p>{{ feature.description }}</p>
+            <p class="hidden sm:block text-sm">{{ feature.description }}</p>
           </div>
         </UPageCard>
       </div>

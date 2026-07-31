@@ -146,7 +146,7 @@ async function onSubmit(event: FormSubmitEvent<CreateSectionInput>) {
   <USlideover
     v-model:open="isOpen"
     :title="isEdit ? 'Editar sección' : 'Nueva sección'"
-    description="Contenedores de nivel superior que agrupan consultas y sus categorías."
+    description="Contenedores de nivel superior que agrupan consultas y sus ejes de gestión."
     :dismissible="!saving"
     :ui="{ content: 'max-w-xl' }"
   >

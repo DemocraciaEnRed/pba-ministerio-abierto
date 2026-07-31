@@ -7,7 +7,7 @@ definePageMeta({
   middleware: 'platform-admin'
 })
 
-usePrivatePageSeo('Categorías')
+usePrivatePageSeo('Ejes de gestión')
 
 const toast = useToast()
 
@@ -55,7 +55,7 @@ async function confirmRemove() {
   try {
     await $fetch(`/api/categories/${deleteTarget.value.id}`, { method: 'DELETE' })
     toast.add({
-      title: 'Categoría eliminada',
+      title: 'Eje de gestión eliminado',
       color: 'success'
     })
     confirmOpen.value = false
@@ -97,14 +97,14 @@ const pageActions = computed<ButtonProps[]>(() => [
 <template>
   <UPage>
     <UPageHeader
-      title="Categorías"
+      title="Ejes de gestión"
       description="Gestioná clasificación institucional y orden de visualización."
       :links="pageActions"
     />
 
     <UPageBody>
       <UPageCard v-if="status === 'pending'">
-        Cargando categorías...
+        Cargando ejes de gestión...
       </UPageCard>
 
       <AppTable
@@ -153,7 +153,7 @@ const pageActions = computed<ButtonProps[]>(() => [
             </td>
             <td class="text-center">
               <UBadge
-                :label="category.isActive ? 'Activa' : 'Inactiva'"
+                :label="category.isActive ? 'Activo' : 'Inactivo'"
                 :color="category.isActive ? 'success' : 'neutral'"
                 variant="outline"
               />
@@ -190,8 +190,8 @@ const pageActions = computed<ButtonProps[]>(() => [
         <template #empty>
           <UEmpty
             icon="lucide:folder-open"
-            title="No hay categorías"
-            description="Creá la primera categoría con el botón de arriba."
+            title="No hay ejes de gestión"
+            description="Creá el primer eje de gestión con el botón de arriba."
           />
         </template>
       </AppTable>
@@ -206,7 +206,7 @@ const pageActions = computed<ButtonProps[]>(() => [
 
     <ConfirmModal
       v-model:open="confirmOpen"
-      title="Eliminar categoría"
+      title="Eliminar eje de gestión"
       :description="deleteTarget ? `¿Seguro que querés eliminar «${deleteTarget.name}»? Esta acción no se puede deshacer.` : ''"
       confirm-label="Eliminar"
       confirm-color="error"

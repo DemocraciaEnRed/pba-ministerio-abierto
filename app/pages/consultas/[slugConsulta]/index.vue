@@ -119,7 +119,7 @@ const consultationMetadata = computed<ConsultaHeroMetadata[]>(() => {
 
   if (consultation.value.categories.length) {
     items.push({
-      title: 'Categorías',
+      title: 'Ejes de gestión',
       description: consultation.value.categories.map(category => category.name).join(', '),
       icon: 'lucide:tags',
       variant: 'subtle'
@@ -267,6 +267,11 @@ const commentingOpen = computed(() =>
       </UCarousel>
     </template>
     <template #consultas-comentarios>
+      <MarkdownProse
+        v-if="consultation?.commentsGuidance"
+        :content="consultation.commentsGuidance"
+        class="mb-6"
+      />
       <ConsultasComentariosSeccion
         v-if="consultation"
         :consultation-slug="String(route.params.slugConsulta)"

@@ -135,7 +135,7 @@ const items = computed<NavigationMenuItem[]>(() => [
         label: 'Observatorio de Obras y Servicios Públicos',
         disabled: true,
         icon: 'pba:observatorio',
-        description: 'Accedé a información sobre este espacio institucional de la Obra Pública provincial',
+        description: 'Accedé a información sobre este espacio institucional de la Obra Pública provincial.',
         active: route.path.startsWith('/observatorio')
       }
     ]

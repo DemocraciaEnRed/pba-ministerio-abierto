@@ -1,10 +1,19 @@
 <script setup lang="ts">
 import type { PageCardProps } from '@nuxt/ui'
 
-// 3 encuentros regionales realizados
-// 27 municipios alcanzados
-// 1.050 participantes totales
-// 42 proyectos ciudadanos recibidos
+interface Metric {
+  id: number
+  key: string
+  label: string
+  value: string
+  displayOrder: number
+}
+
+const { data } = await useFetch<Metric[]>('/api/regional-meetings/metrics', {
+  default: () => []
+})
+
+const metrics = computed(() => data.value ?? [])
 
 const cardTheme: ComputedRef<PageCardProps['ui']> = computed(() => ({
   root: 'w-full hover:scale-105 transition-transform duration-300',
@@ -16,37 +25,18 @@ const cardTheme: ComputedRef<PageCardProps['ui']> = computed(() => ({
 </script>
 
 <template>
-  <div class="grid grid-cols-1 sm:grid-cols-2 lg:flex lg:flex-row gap-4 px-16">
+  <div
+    v-if="metrics.length"
+    class="grid grid-cols-1 sm:grid-cols-2 lg:flex lg:flex-row gap-4 px-16"
+  >
     <UPageCard
+      v-for="metric in metrics"
+      :key="metric.id"
       spotlight
       spotlight-color="primary"
       variant="subtle"
-      title="3"
-      description="Eventos realizados"
-      :ui="cardTheme"
-    />
-    <UPageCard
-      spotlight
-      spotlight-color="primary"
-      variant="subtle"
-      title="27"
-      description="Municipios alcanzados"
-      :ui="cardTheme"
-    />
-    <UPageCard
-      spotlight
-      spotlight-color="primary"
-      variant="subtle"
-      title="1.050"
-      description="Participantes totales"
-      :ui="cardTheme"
-    />
-    <UPageCard
-      spotlight
-      spotlight-color="primary"
-      variant="subtle"
-      title="42"
-      description="Proyectos ciudadanos recibidos"
+      :title="metric.value"
+      :description="metric.label"
       :ui="cardTheme"
     />
   </div>

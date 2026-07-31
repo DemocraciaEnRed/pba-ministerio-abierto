@@ -44,7 +44,8 @@ const footerColumns: FooterColumn[] = [
     label: 'Secciones',
     children: [
       {
-        label: 'Inicio'
+        label: 'Inicio',
+        to: '/'
       },
       {
         label: 'Audiencias públicas',

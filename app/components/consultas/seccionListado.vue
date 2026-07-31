@@ -129,9 +129,9 @@ const consultations = computed(() => data.value?.items ?? [])
             value-key="value"
             color="primary"
           />
-          <!-- Categorías -->
+          <!-- Ejes de gestión -->
           <USeparator
-            label="Categorias"
+            label="Ejes de gestión"
             position="start"
           />
           <UListbox

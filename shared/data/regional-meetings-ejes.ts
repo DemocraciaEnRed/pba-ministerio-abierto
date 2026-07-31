@@ -15,6 +15,12 @@ export interface EjeTematicoNode {
 }
 
 export const EJES_TEMATICOS: EjeTematicoNode[] = [
+  // Opción transversal: no tiene sub-ejes porque abarca al Plan completo.
+  {
+    value: 'todo-el-plan',
+    label: 'Mi aporte es para todo el Plan',
+    icon: 'lucide:layers'
+  },
   {
     value: 'conectividad-y-logistica',
     label: 'Conectividad y logística',

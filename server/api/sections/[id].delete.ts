@@ -32,7 +32,7 @@ export default defineEventHandler(async (event) => {
   if (categoriesInSection > 0) {
     throw createError({
       statusCode: 409,
-      message: 'No se puede eliminar una sección con categorías. Movelas o eliminalas primero.'
+      message: 'No se puede eliminar una sección con ejes de gestión. Movelos o eliminalos primero.'
     })
   }
 

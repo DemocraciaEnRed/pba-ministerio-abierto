@@ -12,12 +12,31 @@ model RegionalMeetingAgendaItem {
   year      Int?
   /// Si el encuentro ya se celebró (equivale a `done` en la timeline).
   held      Boolean  @default(false)
+  /// Resalta el ítem en la timeline pública.
+  highlighted Boolean @default(false)
+  /// Destino del botón "Inscribite"; si es null el botón no se muestra.
+  registrationUrl String? @db.VarChar(500)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   region Region @relation(fields: [regionId], references: [id], onDelete: Restrict)
 
   @@index([heldAt])
+}
+
+/// Métrica de alcance de los Encuentros Regionales. Catálogo fijo (4): se
+/// siembra y se edita (etiqueta/valor), pero no se crea ni elimina desde la app.
+/// `value` es texto para admitir formatos como "1.050" o "+40".
+model RegionalMeetingMetric {
+  id           Int      @id @default(autoincrement())
+  key          String   @unique
+  label        String
+  value        String
+  displayOrder Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([displayOrder])
 }
 
 /// Grupo de testimonios ("encuentro" a fines editoriales). ABM completo desde el

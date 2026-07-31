@@ -424,7 +424,7 @@ async function handleSubmit(event: FormSubmitEvent<Schema>) {
           <UFormField
             name="ejeTematico"
             label="¿A qué eje temático querés sumar aportes?"
-            help="Desplegá un eje y elegí el subtema al que corresponde tu aporte."
+            help="Desplegá un eje y elegí el subtema al que corresponde tu aporte, o marcá que tu aporte es para todo el Plan."
             required
           >
             <UTree

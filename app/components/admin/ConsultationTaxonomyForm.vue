@@ -92,7 +92,7 @@ const tagItems = computed(() =>
 const primaryItems = computed(() => {
   const selected = (categories.value ?? []).filter(category => selectedCategoryIds.value.includes(category.id))
   return [
-    { label: 'Sin categoría principal', value: 0 },
+    { label: 'Sin eje de gestión principal', value: 0 },
     ...selected.map(category => ({ label: category.name, value: category.id }))
   ]
 })
@@ -129,7 +129,7 @@ async function save() {
     })
 
     toast.add({
-      title: 'Sección, categorías y etiquetas actualizadas',
+      title: 'Sección, ejes de gestión y etiquetas actualizados',
       color: 'success'
     })
     emit('saved')
@@ -148,8 +148,8 @@ async function save() {
 
 <template>
   <UCard
-    title="Sección, categorías y etiquetas"
-    description="Seguí el orden: elegí la sección, luego sus categorías, la categoría principal y las etiquetas."
+    title="Sección, ejes de gestión y etiquetas"
+    description="Seguí el orden: elegí la sección, luego sus ejes de gestión, el eje de gestión principal y las etiquetas."
   >
     <div class="space-y-6">
       <UFormField
@@ -168,8 +168,8 @@ async function save() {
 
       <UFormField
         orientation="vertical"
-        label="Categorías"
-        :description="selectedSectionId === 0 ? 'Elegí primero una sección para ver sus categorías.' : 'Clasificá la consulta con una o varias categorías de la sección.'"
+        label="Ejes de gestión"
+        :description="selectedSectionId === 0 ? 'Elegí primero una sección para ver sus ejes de gestión.' : 'Clasificá la consulta con uno o varios ejes de gestión de la sección.'"
       >
         <USelectMenu
           v-model="selectedCategoryIds"
@@ -178,7 +178,7 @@ async function save() {
           multiple
           :disabled="selectedSectionId === 0"
           :loading="categoriesStatus === 'pending'"
-          :placeholder="selectedSectionId === 0 ? 'Seleccioná una sección primero' : 'Elegí categorías'"
+          :placeholder="selectedSectionId === 0 ? 'Seleccioná una sección primero' : 'Elegí ejes de gestión'"
           class="w-full"
         />
       </UFormField>
@@ -186,8 +186,8 @@ async function save() {
       <UFormField
         v-if="selectedCategoryIds.length"
         orientation="vertical"
-        label="Categoría principal"
-        description="La categoría destacada de la consulta (opcional)."
+        label="Eje de gestión principal"
+        description="El eje de gestión destacado de la consulta (opcional)."
       >
         <USelect
           v-model="primaryCategoryId"
@@ -217,7 +217,7 @@ async function save() {
     <template #footer>
       <div class="flex justify-end">
         <UButton
-          label="Guardar sección, categorías y etiquetas"
+          label="Guardar sección, ejes de gestión y etiquetas"
           icon="i-lucide-save"
           :loading="saving"
           @click="save"

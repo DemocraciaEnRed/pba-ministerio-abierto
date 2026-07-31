@@ -11,7 +11,7 @@ function getPrismaErrorCode(error: unknown): string | null {
 }
 
 export default defineEventHandler(async (event) => {
-  const categoryId = parsePositiveIntParam(event, 'id', 'categoría')
+  const categoryId = parsePositiveIntParam(event, 'id', 'eje de gestión')
   const body = await parseBody(event, UpdateCategorySchema)
   const ctx = await getAuthContext(event)
   await assertCan(ctx, 'update', { type: 'platform' })
@@ -24,7 +24,7 @@ export default defineEventHandler(async (event) => {
   if (!existing) {
     throw createError({
       statusCode: 404,
-      message: 'Categoría no encontrada'
+      message: 'Eje de gestión no encontrado'
     })
   }
 
@@ -51,7 +51,7 @@ export default defineEventHandler(async (event) => {
     if (getPrismaErrorCode(error) === 'P2002') {
       throw createError({
         statusCode: 409,
-        message: 'Ya existe otra categoría con ese slug en esta sección'
+        message: 'Ya existe otro eje de gestión con ese slug en esta sección'
       })
     }
 

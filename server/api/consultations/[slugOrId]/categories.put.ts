@@ -23,7 +23,7 @@ export default defineEventHandler(async (event) => {
   if (uniqueCategoryIds.length !== body.categories.length) {
     throw createError({
       statusCode: 422,
-      message: 'No podés repetir categorías en la asignación'
+      message: 'No podés repetir ejes de gestión en la asignación'
     })
   }
 
@@ -39,7 +39,7 @@ export default defineEventHandler(async (event) => {
     if (existingCategories.length !== uniqueCategoryIds.length) {
       throw createError({
         statusCode: 422,
-        message: 'Alguna categoría no existe o está inactiva'
+        message: 'Algún eje de gestión no existe o está inactivo'
       })
     }
   }

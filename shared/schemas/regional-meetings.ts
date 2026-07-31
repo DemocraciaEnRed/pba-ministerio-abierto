@@ -54,13 +54,41 @@ const authorNameField = z
   .min(1, 'El nombre es requerido')
   .max(120, 'El nombre no puede superar los 120 caracteres')
 
+const registrationUrlField = z
+  .string()
+  .trim()
+  .max(500, 'El enlace no puede superar los 500 caracteres')
+  .nullable()
+  .transform(value => (value ? value : null))
+  .refine(
+    value => value === null || z.url().safeParse(value).success,
+    'Ingresá un enlace válido (debe empezar con http:// o https://)'
+  )
+
 // --- Agenda ---
 
 export const UpdateAgendaItemSchema = z.object({
   location: locationField,
   heldAt: heldAtField,
   year: yearField.default(null),
-  held: z.boolean().default(false)
+  held: z.boolean().default(false),
+  highlighted: z.boolean().default(false),
+  registrationUrl: registrationUrlField.default(null)
+})
+
+// --- Métricas ---
+
+export const UpdateMetricSchema = z.object({
+  label: z
+    .string()
+    .trim()
+    .min(1, 'La etiqueta es requerida')
+    .max(80, 'La etiqueta no puede superar los 80 caracteres'),
+  value: z
+    .string()
+    .trim()
+    .min(1, 'El valor es requerido')
+    .max(20, 'El valor no puede superar los 20 caracteres')
 })
 
 // --- Testimonios ---
@@ -177,6 +205,7 @@ export const CreateRegionalMeetingSubmissionSchema = z
   })
 
 export type UpdateAgendaItemInput = z.output<typeof UpdateAgendaItemSchema>
+export type UpdateMetricInput = z.output<typeof UpdateMetricSchema>
 export type TestimonialItemInput = z.output<typeof testimonialItemSchema>
 export type CreateTestimonialGroupInput = z.output<typeof CreateTestimonialGroupSchema>
 export type UpdateTestimonialGroupInput = z.output<typeof UpdateTestimonialGroupSchema>

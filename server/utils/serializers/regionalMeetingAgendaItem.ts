@@ -12,6 +12,8 @@ type AgendaItemEntity = {
   heldAt: Date
   year: number | null
   held: boolean
+  highlighted: boolean
+  registrationUrl: string | null
   createdAt: Date
   updatedAt: Date
   region: AgendaItemRegion
@@ -29,6 +31,8 @@ export interface PublicRegionalMeetingAgendaItemDTO {
   heldAt: string
   year: number | null
   held: boolean
+  highlighted: boolean
+  registrationUrl: string | null
   region: AgendaItemRegionDTO
 }
 
@@ -49,6 +53,8 @@ export function serializeRegionalMeetingAgendaItem(
     heldAt: item.heldAt.toISOString(),
     year: item.year,
     held: item.held,
+    highlighted: item.highlighted,
+    registrationUrl: item.registrationUrl,
     region: {
       id: item.region.id,
       slug: item.region.slug,

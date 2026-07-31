@@ -90,7 +90,7 @@ const pageActions = computed<ButtonProps[]>(() => [
   <UPage>
     <UPageHeader
       title="Secciones"
-      description="Contenedores de nivel superior que agrupan consultas y sus categorías."
+      description="Contenedores de nivel superior que agrupan consultas y sus ejes de gestión."
       :links="pageActions"
     />
 

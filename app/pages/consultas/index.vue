@@ -209,9 +209,9 @@ const consultations = computed(() => data.value?.items ?? [])
             multiple
             :loading="sectionsStatus === 'pending'"
           />
-          <!-- Categories -->
+          <!-- Ejes de gestión -->
           <USeparator
-            label="Categorias"
+            label="Ejes de gestión"
             position="start"
           />
           <UListbox

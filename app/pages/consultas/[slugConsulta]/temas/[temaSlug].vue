@@ -254,6 +254,11 @@ const topicSections = computed<NavigationMenuItem[]>(() => {
       </p>
     </template>
     <template #tema-comentarios>
+      <MarkdownProse
+        v-if="tema?.commentsGuidance"
+        :content="tema.commentsGuidance"
+        class="mb-6"
+      />
       <ConsultasComentariosSeccion
         v-if="tema"
         :consultation-slug="consultationSlug"
