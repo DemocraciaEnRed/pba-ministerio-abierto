@@ -78,7 +78,7 @@ const toolbarItems: EditorToolbarItem<typeof customHandlers>[][] = [
     <UEditorToolbar
       :editor="editor"
       :items="toolbarItems"
-      class="p-1 flex flex-wrap gap-1"
+      class="p-2 flex flex-wrap gap-1 bg-accented/15"
     />
 
     <UEditorDragHandle :editor="editor" />

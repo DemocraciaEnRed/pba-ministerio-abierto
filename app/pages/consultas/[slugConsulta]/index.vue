@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { PageHeroProps, NavigationMenuItem } from '@nuxt/ui'
+import type { PageHeroProps, NavigationMenuItem, PageAnchor } from '@nuxt/ui'
 import type { ConsultaHeroMetadata, ConsultationDetail, ConsultationTopic, GalleryImage } from '~/types/consulta'
 
 definePageMeta({
@@ -34,6 +34,10 @@ interface ConsultationDetailResponse {
   gallery: GalleryImage[]
 }
 
+type InteractivePageAnchor = Omit<PageAnchor, 'onClick'> & {
+  onClick?: (event: MouseEvent) => void
+}
+
 // Endpoint de vista (BFF): compone consulta + temas + enlaces en una sola
 // llamada, en lugar de tres pedidos independientes.
 // `useRequestFetch` reenvía la cookie de sesión durante el SSR para que el
@@ -46,6 +50,7 @@ const { data: detail, status, error } = await useAsyncData(
 
 const consultation = computed(() => detail.value?.consultation ?? null)
 const temas = computed<ConsultationTopic[]>(() => detail.value?.topics ?? [])
+const parsedBody = computed(() => parseMarkdown(consultation.value?.body))
 
 usePageSeo(() => ({
   title: consultation.value?.title,
@@ -174,6 +179,51 @@ const commentingOpen = computed(() =>
   consultation.value?.visibility === 'visible'
   && consultation.value?.participationState === 'open'
 )
+
+const { scrollTo } = useScrollTo()
+
+function createScrollAnchor(label: string, icon: PageAnchor['icon'], id: string): InteractivePageAnchor {
+  return {
+    label,
+    icon,
+    href: `#${id}`,
+    onClick: (event: MouseEvent) => {
+      event.preventDefault()
+      scrollTo(id)
+    }
+  }
+}
+
+const consultationPageAnchors: ComputedRef<InteractivePageAnchor[]> = computed(() => {
+  const anchors: InteractivePageAnchor[] = [createScrollAnchor('Volver arriba', 'lucide:arrow-up', 'page-hero')]
+
+  if (consultation.value?.closedMessage) {
+    anchors.push(createScrollAnchor('Mensaje de cierre', 'lucide:message-square', 'mensaje-cierre'))
+  }
+  if (archivos.value.length) {
+    anchors.push(createScrollAnchor('Archivos', 'lucide:paperclip', 'archivos'))
+  }
+  if (enlaces.value.length) {
+    anchors.push(createScrollAnchor('Enlaces relevantes', 'lucide:link', 'enlaces'))
+  }
+  if (galeria.value.length) {
+    anchors.push(createScrollAnchor('Galería', 'lucide:images', 'galeria'))
+  }
+  if (temas.value.length) {
+    anchors.push(createScrollAnchor('Temas de participación', 'lucide:list', 'temas'))
+  }
+  anchors.push(createScrollAnchor('Comentarios', 'lucide:message-square', 'comentarios'))
+
+  if (consultation.value?.canManage) {
+    anchors.push({
+      label: 'Administrar',
+      icon: 'lucide:settings',
+      to: `/consultas/${route.params.slugConsulta}/panel`,
+      target: '_blank'
+    })
+  }
+  return anchors
+})
 </script>
 
 <template>
@@ -186,11 +236,7 @@ const commentingOpen = computed(() =>
   >
     <UPage>
       <template #left>
-        <UPageAside
-          :ui="{
-            root: 'lg:top-(--consultas-sticky-top,var(--ui-header-height)) lg:max-h-[calc(100vh-var(--consultas-sticky-top,var(--ui-header-height)))]'
-          }"
-        >
+        <UPageAside>
           <div
             v-if="consultation && consultationMetadata.length"
             class="space-y-2"
@@ -209,6 +255,30 @@ const commentingOpen = computed(() =>
               }"
             />
           </div>
+        </UPageAside>
+      </template>
+      <template
+        #right
+      >
+        <UPageAside>
+          <UContentToc
+            title="En esta página"
+            :links="parsedBody.toc"
+            highlight
+            highlight-color="primary"
+            highlight-variant="circuit"
+            :ui="{
+              root: 'px-0 sm:px-0 lg:px-0 md:px-0',
+              container: 'pt-0 sm:pt-0 lg:py-0'
+            }"
+          >
+            <template #bottom>
+              <UPageAnchors
+                title="Navegación rápida"
+                :links="consultationPageAnchors"
+              />
+            </template>
+          </UContentToc>
         </UPageAside>
       </template>
       <UPageBody id="top">
@@ -236,18 +306,29 @@ const commentingOpen = computed(() =>
           <MarkdownProse
             v-if="consultation.body"
             :content="consultation.body"
+            :parsed="parsedBody"
           />
           <UCard
             v-if="consultation.closedMessage"
+            id="mensaje-cierre"
             variant="subtle"
             title="Mensaje de cierre"
           >
             <MarkdownProse :content="consultation.closedMessage" />
           </UCard>
 
-          <ConsultasArchivosCard :attachments="archivos" />
-          <ConsultasEnlacesCard :links="enlaces" />
-          <ConsultasGaleriaCard :images="galeria" />
+          <ConsultasArchivosCard
+            id="archivos"
+            :attachments="archivos"
+          />
+          <ConsultasEnlacesCard
+            id="enlaces"
+            :links="enlaces"
+          />
+          <ConsultasGaleriaCard
+            id="galeria"
+            :images="galeria"
+          />
         </div>
       </UPageBody>
     </UPage>
@@ -258,13 +339,33 @@ const commentingOpen = computed(() =>
       <UCarousel
         v-slot="{ item }"
         :items="temas"
-        arrows
         dots
         align="start"
-        :ui="{ item: 'basis-full md:basis-1/2 lg:basis-1/3' }"
+        :ui="{ item: 'basis-full md:basis-1/2 lg:basis-1/3 xl:basis-1/4' }"
       >
         <ConsultasTemaCard :tema="item" />
       </UCarousel>
+    </template>
+    <template #mobile-navigation>
+      <div class="space-y-8">
+        <UContentToc
+          v-if="parsedBody.toc.length"
+          title="En esta página"
+          :links="parsedBody.toc"
+          default-open
+          :ui="{
+            root: 'static z-auto mx-0 max-h-none overflow-visible bg-transparent px-0 backdrop-blur-none',
+            container: 'border-0 p-0',
+            content: 'overflow-visible'
+          }"
+        />
+        <div>
+          <p class="mb-2 text-sm font-semibold text-highlighted">
+            Navegación rápida
+          </p>
+          <UPageAnchors :links="consultationPageAnchors" />
+        </div>
+      </div>
     </template>
     <template #consultas-comentarios>
       <MarkdownProse

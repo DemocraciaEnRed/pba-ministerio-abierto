@@ -8,6 +8,7 @@ export default defineNuxtConfig({
   css: ['~/assets/css/main.css'],
   ui: {
     prose: true,
+    content: true,
     theme: {
       // Colores semánticos disponibles en el prop `color` de los componentes.
       // Se listan los defaults de Nuxt UI + una entrada por región. La paleta
