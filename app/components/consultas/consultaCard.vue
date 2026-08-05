@@ -24,10 +24,10 @@ const description = computed(() =>
   props.consultation.summary || props.consultation.body || 'Sin descripción breve.'
 )
 
-/** Etiqueta "N tema(s)" cuando el endpoint provee el conteo. */
+/** Etiqueta "N tema(s)"; se omite si no hay conteo o la consulta no tiene temas. */
 const topicsLabel = computed(() => {
   const count = props.consultation.topicsCount
-  if (count === null || count === undefined) return null
+  if (!count) return null
   return `${count} ${count === 1 ? 'tema' : 'temas'}`
 })
 

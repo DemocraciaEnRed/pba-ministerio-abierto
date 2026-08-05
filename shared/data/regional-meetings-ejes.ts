@@ -24,7 +24,7 @@ export const EJES_TEMATICOS: EjeTematicoNode[] = [
   {
     value: 'conectividad-y-logistica',
     label: 'Conectividad y logística',
-    icon: 'lucide:route',
+    icon: 'lucide:road',
     children: [
       { value: 'corredores-viales-para-el-desarrollo', label: 'Corredores viales para el desarrollo' },
       { value: 'seguridad-vial', label: 'Seguridad vial' },

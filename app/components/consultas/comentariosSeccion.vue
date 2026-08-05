@@ -85,7 +85,7 @@ const totalSorted = computed(() => sortedItems.value.length)
       icon="i-lucide-lock"
       color="neutral"
       variant="subtle"
-      title="La participación está cerrada"
+      title="Instancia participativa finalizada"
     />
 
     <UAlert

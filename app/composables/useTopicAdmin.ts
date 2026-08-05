@@ -6,6 +6,7 @@ export interface AdminTopicSummary {
   summary: string | null
   body: string | null
   questionText: string | null
+  commentsEnabled: boolean
   commentsGuidance: string | null
   displayOrder: number
   participationStartsAt: string | null

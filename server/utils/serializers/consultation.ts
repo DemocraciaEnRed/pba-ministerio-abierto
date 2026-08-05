@@ -27,6 +27,7 @@ type ConsultationEntity = {
   endsAt: Date | null
   publishedAt: Date | null
   closedMessage: string | null
+  commentsEnabled: boolean
   commentsGuidance: string | null
   resultsVisibility: ResultsVisibility
   createdByUserId: number | null
@@ -79,6 +80,7 @@ export interface PublicConsultationDTO {
   endsAt: string | null
   publishedAt: string | null
   closedMessage: string | null
+  commentsEnabled: boolean
   commentsGuidance: string | null
   resultsVisibility: ResultsVisibility
   section: ConsultationTaxonomyDTO | null
@@ -138,6 +140,7 @@ export function serializeConsultation(
     endsAt: consultation.endsAt?.toISOString() ?? null,
     publishedAt: consultation.publishedAt?.toISOString() ?? null,
     closedMessage: consultation.closedMessage,
+    commentsEnabled: consultation.commentsEnabled,
     commentsGuidance: consultation.commentsGuidance,
     resultsVisibility: consultation.resultsVisibility,
     section: consultation.section

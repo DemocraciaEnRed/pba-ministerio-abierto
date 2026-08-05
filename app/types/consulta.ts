@@ -22,6 +22,7 @@ export interface ConsultationDetail {
   endsAt: string | null
   publishedAt: string | null
   closedMessage: string | null
+  commentsEnabled: boolean
   commentsGuidance: string | null
   resultsVisibility: ResultsVisibility
   section: ConsultationTaxonomy | null
@@ -54,6 +55,7 @@ export interface ConsultationTopic {
   summary: string | null
   body: string | null
   questionText: string | null
+  commentsEnabled: boolean
   commentsGuidance: string | null
   displayOrder: number
   participationStartsAt: string | null

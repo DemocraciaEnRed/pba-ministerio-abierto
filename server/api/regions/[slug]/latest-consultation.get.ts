@@ -5,6 +5,7 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, message: 'Región no especificada' })
   }
 
+  // Se conserva para reutilización futura, aunque el mapa ya no navega automáticamente a esta consulta.
   const ctx = await getAuthContext(event)
   const userId = ctx.user?.id ?? null
 

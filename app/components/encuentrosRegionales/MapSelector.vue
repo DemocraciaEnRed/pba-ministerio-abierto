@@ -5,9 +5,13 @@ interface RegionInfo {
   name: string
 }
 
-const emit = defineEmits<{
-  select: [slug: string]
-}>()
+interface RegionBadgePoint {
+  x: number
+  y: number
+}
+
+const mapWidth = 515
+const mapHeight = 737
 
 // Metadatos de cada región, indexados por el slug que coincide con el id/inkscape:label de cada <g> del mapa.
 const regions: Record<string, RegionInfo> = {
@@ -24,9 +28,27 @@ const regions: Record<string, RegionInfo> = {
 
 const wrapper = ref<HTMLElement | null>(null)
 const hovered = ref<string | null>(null)
-const pointer = ref({ x: 0, y: 0 })
 
-const currentRegion = computed(() => (hovered.value ? regions[hovered.value] ?? null : null))
+const regionBadgePoints: Record<string, RegionBadgePoint> = {
+  'centro-sur': { x: 276.819, y: 378.605 },
+  'fluvial': { x: 317.951, y: 55.481 },
+  'este': { x: 432.12363, y: 294.74377 },
+  'noroeste': { x: 89.649, y: 265.916 },
+  'norte': { x: 221.791, y: 107.03 },
+  'costa-maritima': { x: 346.12973, y: 469.22537 },
+  'centro-norte': { x: 268.924, y: 225.853 },
+  'sudoeste': { x: 81.822533, y: 472.95688 },
+  'region-metropolitana': { x: 382.137, y: 150.751 }
+}
+
+const regionBadges = computed(() =>
+  Object.entries(regionBadgePoints).map(([slug, point]) => ({
+    slug,
+    name: regions[slug]?.name ?? slug,
+    x: point.x,
+    y: point.y
+  }))
+)
 
 function layerClass(slug: string) {
   return [
@@ -45,24 +67,12 @@ function onEnter(slug: string) {
 function onLeave() {
   hovered.value = null
 }
-
-function onMove(event: MouseEvent) {
-  const el = wrapper.value
-  if (!el) return
-  const rect = el.getBoundingClientRect()
-  pointer.value = { x: event.clientX - rect.left, y: event.clientY - rect.top }
-}
-
-function onSelect(slug: string) {
-  emit('select', slug)
-}
 </script>
 
 <template>
   <div
     ref="wrapper"
     class="map-wrapper"
-    @mousemove="onMove"
   >
     <svg
       id="svg180"
@@ -112,7 +122,6 @@ function onSelect(slug: string) {
         style="display:inline;stroke:url(#linearGradient181);stroke-width:2.0;stroke-dasharray:none;stroke-opacity:0.6"
         @mouseenter="onEnter('centro-norte')"
         @mouseleave="onLeave"
-        @click="onSelect('centro-norte')"
       >
         <path
           id="path151"
@@ -291,7 +300,6 @@ function onSelect(slug: string) {
         style="display:inline;stroke:#000000;stroke-width:2.0;stroke-dasharray:none;stroke-opacity:0.6"
         @mouseenter="onEnter('region-metropolitana')"
         @mouseleave="onLeave"
-        @click="onSelect('region-metropolitana')"
       >
         <path
           id="path62"
@@ -596,7 +604,6 @@ function onSelect(slug: string) {
         style="display:inline;stroke-width:2.0;stroke-dasharray:none"
         @mouseenter="onEnter('norte')"
         @mouseleave="onLeave"
-        @click="onSelect('norte')"
       >
         <path
           id="path131"
@@ -715,7 +722,6 @@ function onSelect(slug: string) {
         style="display:inline;stroke:#000000;stroke-width:2.0;stroke-dasharray:none;stroke-opacity:0.6"
         @mouseenter="onEnter('costa-maritima')"
         @mouseleave="onLeave"
-        @click="onSelect('costa-maritima')"
       >
         <path
           id="path171"
@@ -780,7 +786,6 @@ function onSelect(slug: string) {
         style="display:inline;stroke:#000000;stroke-width:2.0;stroke-dasharray:none;stroke-opacity:0.6"
         @mouseenter="onEnter('sudoeste')"
         @mouseleave="onLeave"
-        @click="onSelect('sudoeste')"
       >
         <path
           id="path30"
@@ -866,7 +871,6 @@ function onSelect(slug: string) {
         style="display:inline;stroke:#000000;stroke-opacity:0.6;stroke-width:2.0;stroke-dasharray:none"
         @mouseenter="onEnter('centro-sur')"
         @mouseleave="onLeave"
-        @click="onSelect('centro-sur')"
       >
         <path
           id="path1"
@@ -958,7 +962,6 @@ function onSelect(slug: string) {
         style="display:inline;stroke:#000000;stroke-width:2.0;stroke-dasharray:none;stroke-opacity:0.6"
         @mouseenter="onEnter('este')"
         @mouseleave="onLeave"
-        @click="onSelect('este')"
       >
         <path
           id="path10"
@@ -1053,7 +1056,6 @@ function onSelect(slug: string) {
         style="display:inline;stroke:#000000;stroke-opacity:0.6;stroke-width:2.0;stroke-dasharray:none"
         @mouseenter="onEnter('noroeste')"
         @mouseleave="onLeave"
-        @click="onSelect('noroeste')"
       >
         <path
           id="path116"
@@ -1199,7 +1201,6 @@ function onSelect(slug: string) {
         style="display:inline;stroke:#000000;stroke-width:2.0;stroke-dasharray:none;stroke-opacity:0.6"
         @mouseenter="onEnter('fluvial')"
         @mouseleave="onLeave"
-        @click="onSelect('fluvial')"
       >
         <path
           id="path49"
@@ -1249,17 +1250,23 @@ function onSelect(slug: string) {
       </g>
     </svg>
 
-    <Transition name="map-tooltip">
-      <div
-        v-if="currentRegion"
-        class="map-tooltip"
-        :style="{ left: `${pointer.x}px`, top: `${pointer.y}px` }"
+    <div
+      v-for="badge in regionBadges"
+      :key="badge.slug"
+      class="map-badge"
+      :style="{
+        left: `${(badge.x / mapWidth) * 100}%`,
+        top: `${(badge.y / mapHeight) * 100}%`
+      }"
+    >
+      <UBadge
+        :color="hovered === badge.slug ? 'primary' : 'secondary'"
+        variant="solid"
+        class="map-badge__content rounded-full"
       >
-        <p class="map-tooltip__title">
-          {{ currentRegion.name }}
-        </p>
-      </div>
-    </Transition>
+        {{ badge.name }}
+      </UBadge>
+    </div>
   </div>
 </template>
 
@@ -1288,32 +1295,15 @@ function onSelect(slug: string) {
   opacity: 0.4;
 }
 
-.map-tooltip {
+.map-badge {
   position: absolute;
-  z-index: 10;
-  transform: translate(-50%, calc(-100% - 12px));
+  z-index: 3;
+  transform: translate(-50%, -50%);
   pointer-events: none;
+}
+
+.map-badge__content {
   white-space: nowrap;
-  border-radius: 0.5rem;
-  padding: 0.5rem 0.75rem;
-  background: var(--ui-bg-inverted, #111);
-  color: var(--ui-text-inverted, #fff);
-  box-shadow: 0 4px 12px rgb(0 0 0 / 0.25);
-}
-
-.map-tooltip__title {
-  font-size: 0.875rem;
-  font-weight: 700;
-  line-height: 1.2;
-}
-
-.map-tooltip-enter-active,
-.map-tooltip-leave-active {
-  transition: opacity 0.15s ease;
-}
-
-.map-tooltip-enter-from,
-.map-tooltip-leave-to {
-  opacity: 0;
+  box-shadow: 0 2px 8px rgb(0 0 0 / 0.18);
 }
 </style>

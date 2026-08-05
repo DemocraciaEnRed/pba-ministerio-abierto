@@ -139,6 +139,8 @@ const metadata = computed<ConsultaHeroMetadata[]>(() => {
   return items
 })
 
+const commentsVisible = computed(() => tema.value?.commentsEnabled !== false)
+
 // Navegación entre secciones del tema (scrolls dentro de la misma página).
 const topicSections = computed<NavigationMenuItem[]>(() => {
   const sections: NavigationMenuItem[] = [
@@ -149,7 +151,9 @@ const topicSections = computed<NavigationMenuItem[]>(() => {
     sections.push({ label: 'Otros temas', icon: 'i-lucide-list', to: '#temas' })
   }
 
-  sections.push({ label: 'Comentarios', icon: 'i-lucide-message-square', to: '#comentarios' })
+  if (commentsVisible.value) {
+    sections.push({ label: 'Comentarios', icon: 'i-lucide-message-square', to: '#comentarios' })
+  }
 
   return sections
 })
@@ -253,7 +257,10 @@ const topicSections = computed<NavigationMenuItem[]>(() => {
         No hay otros temas de participación en esta consulta.
       </p>
     </template>
-    <template #tema-comentarios>
+    <template
+      v-if="commentsVisible"
+      #tema-comentarios
+    >
       <MarkdownProse
         v-if="tema?.commentsGuidance"
         :content="tema.commentsGuidance"

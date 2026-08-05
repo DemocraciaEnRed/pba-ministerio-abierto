@@ -1,6 +1,10 @@
 import { ConsultationsQuerySchema } from '#shared/schemas/consultation'
 import { serializeConsultation } from '~~/server/utils/serializers/consultation'
-import { buildConsultationFilters } from '~~/server/utils/consultation-query'
+import {
+  buildConsultationFilters,
+  buildConsultationOrderBuckets,
+  getConsultationPageSegments
+} from '~~/server/utils/consultation-query'
 import { getCoverImagesByOwner } from '~~/server/utils/assets/cover'
 
 function isPubliclyVisibleConsultation(consultation: { visibility: string }): boolean {
@@ -14,6 +18,7 @@ export default defineEventHandler(async (event) => {
   const now = new Date()
   const skip = (query.page - 1) * query.perPage
   const whereByFilters = buildConsultationFilters(query, now)
+  const orderBuckets = buildConsultationOrderBuckets(query, now)
 
   const userId = ctx.user?.id ?? null
 
@@ -40,39 +45,46 @@ export default defineEventHandler(async (event) => {
           visibility: { not: 'hidden' as const }
         }
 
-  const consultations = await prisma.consultation.findMany({
-    where,
-    include: {
-      section: true,
-      region: true,
-      categoryAssignments: {
-        include: { category: true },
-        orderBy: [{ isPrimary: 'desc' }, { displayOrder: 'asc' }]
-      },
-      consultationTags: {
-        include: { tag: true }
-      },
-      // Cantidad de temas visibles (no ocultos) para la métrica "N temas" de la card.
-      _count: {
-        select: {
-          topics: { where: { visibility: { not: 'hidden' as const } } }
-        }
-      },
-      ...(userId
-        ? {
-            memberships: {
-              where: { userId },
-              select: { id: true }
-            }
-          }
-        : {})
-    },
-    orderBy: [{ startsAt: 'desc' }, { id: 'desc' }],
-    skip,
-    take: query.perPage
-  })
+  const bucketCounts = await Promise.all(orderBuckets.map(bucket =>
+    prisma.consultation.count({ where: { AND: [where, bucket.where] } })
+  ))
+  const total = bucketCounts.reduce((sum, count) => sum + count, 0)
+  const pageSegments = getConsultationPageSegments(bucketCounts, skip, query.perPage)
 
-  const total = await prisma.consultation.count({ where })
+  const consultations = (await Promise.all(pageSegments.map((segment) => {
+    const bucket = orderBuckets[segment.bucketIndex]!
+    return prisma.consultation.findMany({
+      where: { AND: [where, bucket.where] },
+      include: {
+        section: true,
+        region: true,
+        categoryAssignments: {
+          include: { category: true },
+          orderBy: [{ isPrimary: 'desc' }, { displayOrder: 'asc' }]
+        },
+        consultationTags: {
+          include: { tag: true }
+        },
+        // Cantidad de temas visibles (no ocultos) para la métrica "N temas" de la card.
+        _count: {
+          select: {
+            topics: { where: { visibility: { not: 'hidden' as const } } }
+          }
+        },
+        ...(userId
+          ? {
+              memberships: {
+                where: { userId },
+                select: { id: true }
+              }
+            }
+          : {})
+      },
+      orderBy: bucket.orderBy,
+      skip: segment.skip,
+      take: segment.take
+    })
+  }))).flat()
 
   // Decide la vista por consulta y agrupa los ids para resolver las portadas por
   // lote (una consulta por vista), evitando el N+1 por card.

@@ -1,5 +1,6 @@
 import { RepliesQuerySchema } from '#shared/schemas/comment'
 import {
+  assertCommentsVisible,
   commentWithRelationsInclude,
   getInstitutionName,
   resolveCommentAvatarUrls
@@ -23,10 +24,11 @@ export default defineEventHandler(async (event) => {
       moderationStatus: true,
       consultationId: true,
       topicId: true,
-      consultation: { select: { visibility: true } },
+      consultation: { select: { visibility: true, commentsEnabled: true } },
       topic: {
         select: {
           visibility: true,
+          commentsEnabled: true,
           consultationId: true,
           consultation: { select: { visibility: true } }
         }
@@ -55,6 +57,12 @@ export default defineEventHandler(async (event) => {
   // Para el ciudadano, un comentario oculto o de un contenedor no visible no existe.
   if (!isAdmin && (!isPubliclyVisible || parent.moderationStatus !== 'visible')) {
     throw createError({ statusCode: 404, message: 'Comentario no encontrado' })
+  }
+
+  if (parent.topic) {
+    assertCommentsVisible(parent.topic, 'topic')
+  } else {
+    assertCommentsVisible(parent.consultation!, 'consultation')
   }
 
   const query = await parseQuery(event, RepliesQuerySchema)

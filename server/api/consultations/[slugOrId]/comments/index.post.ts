@@ -21,7 +21,7 @@ export default defineEventHandler(async (event) => {
 
   const consultation = await prisma.consultation.findUnique({
     where: { id: consultationId },
-    select: { id: true, visibility: true, startsAt: true, endsAt: true }
+    select: { id: true, visibility: true, commentsEnabled: true, startsAt: true, endsAt: true }
   })
 
   if (!consultation) {

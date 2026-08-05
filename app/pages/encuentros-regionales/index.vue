@@ -5,22 +5,22 @@ const ejesTematicosDescripciones = ref([
   {
     title: 'Conectividad y logística',
     description: 'Corredores viales para el desarrollo, seguridad vial, rehabilitación y mantenimiento, apoyo logístico a la producción local y caminos rurales',
-    icon: 'lucide:route'
+    icon: 'lucide:road'
 
   },
   {
-    title: 'Infraestructura para los sistemas de ciudades',
+    title: 'Infraestructura para los Sistemas de Ciudades',
     description: 'Infraestructura urbana, productiva, para el transporte, ambiental, institucional, comunitaria y cultural.',
     icon: 'lucide:building-2'
   },
   {
-    title: 'Gestión integrada de los recursos hídricos',
-    description: 'Gestión de cuencas, adaptación productiva a extremos climáticos, riesgo hídrico en ciudades, agua y saneamiento',
+    title: 'Gestión Integrada del Recurso Hídrico',
+    description: 'Gestión de cuencas, adaptación productiva a extremos climáticos, riesgo hídrico en ciudades, agua y saneamiento.',
     icon: 'lucide:droplets'
   },
   {
-    title: 'Infraestructura del cuidado',
-    description: 'Red del Cuidado para infancias, personas con discapacidad, personas mayores, mujeres y diversidades, juventudes',
+    title: 'Infraestructura del Cuidado',
+    description: 'Red del Cuidado para infancias, personas con discapacidad, personas mayores, mujeres y diversidades, juventudes.',
     icon: 'lucide:heart-handshake'
   },
   {
@@ -30,7 +30,7 @@ const ejesTematicosDescripciones = ref([
   },
   {
     title: 'Juventudes',
-    description: 'Futuro del trabajo, oferta educativa, condiciones necesarias para el arraigo, infraestructuras para su desarrollo integral',
+    description: 'Futuro del trabajo, oferta educativa, condiciones necesarias para el arraigo, infraestructuras para su desarrollo integral.',
     icon: 'lucide:users'
   }
 ])
@@ -58,15 +58,6 @@ const comoHacemosPageSectionUi: ThemeUI['pageSection'] = {
   container: 'flex flex-col sm:flex-col md:flex-row-reverse lg:flex lg:flex-row-reverse items-center md:items-start lg:items-start py-0 sm:py-0 md:py-0 lg:py-0 sm:gap-7',
   body: ' space-y-6 mx-auto lg:mt-0',
   wrapper: 'w-full xl:w-9/12'
-}
-
-// Al hacer clic en una región del mapa, navega a la última consulta creada asignada a
-// esa región. Si la región no tiene ninguna consulta, el clic no tiene efecto.
-async function onRegionSelect(regionSlug: string) {
-  const { slug } = await $fetch(`/api/regions/${regionSlug}/latest-consultation`)
-  if (slug) {
-    await navigateTo(`/consultas/${slug}`)
-  }
 }
 </script>
 
@@ -101,7 +92,7 @@ async function onRegionSelect(regionSlug: string) {
     <UContainer>
       <UPage>
         <UPageBody>
-          <div class="max-w-3xl space-y-6 mx-auto">
+          <div class="space-y-6 mx-auto text-left md:text-justify">
             <p class="leading-7 text-neutral-700 dark:text-neutral-300">
               El Ministerio de Infraestructura y Servicios Públicos de la Provincia de Buenos Aires puso en marcha estos
               encuentros -destinados a las ocho regiones del interior bonaerense- para sumar aportes al <span class="font-bold text-highlighted">
@@ -161,7 +152,7 @@ async function onRegionSelect(regionSlug: string) {
         <h1 class="text-2xl sm:text-3xl lg:text-4xl text-pretty tracking-tight font-extrabold text-primary uppercase">
           ¿CÓMO LO HACEMOS?
         </h1>
-        <div class="space-y-6">
+        <div class="space-y-6 text-left md:text-justify">
           <p class="leading-7 text-neutral-700 dark:text-neutral-300">
             Poniendo en común el <span class="font-bold text-highlighted">Plan Estratégico de Infraestructura</span>, que se organiza en cinco ejes de gestión, con los que
             abordan las necesidades y los desafíos territoriales en cuanto al desarrollo de la infraestructura y el acceso a
@@ -173,7 +164,7 @@ async function onRegionSelect(regionSlug: string) {
             sumar aportes al PEI. A su vez, hay un espacio destinado específicamente a las <span class="font-bold text-highlighted">juventudes</span>.
           </p>
           <h3 class="text-xl sm:text-2xl lg:text-3xl font-bold text-primary">
-            Ejes Temáticos
+            Ejes temáticos de las mesas participativas
           </h3>
           <div class="grid grid-cols-1 sm:grid-cols-2 w-full gap-2">
             <UAlert
@@ -201,24 +192,24 @@ async function onRegionSelect(regionSlug: string) {
       <UPage>
         <UPageBody>
           <div class="flex flex-col-reverse md:flex-row justify-center gap-6">
-            <div class="w-9/12 sm:w-6/12 mx-auto md:w-8/12 lg:w-6/12">
-              <EncuentrosRegionalesMapSelector @select="onRegionSelect" />
+            <div class="w-9/12 sm:w-6/12 mx-auto md:w-8/12 lg:w-5/12">
+              <EncuentrosRegionalesMapSelector />
             </div>
             <div class="w-full space-y-6">
               <div class="space-y-2">
                 <h1 class="text-2xl sm:text-3xl lg:text-4xl text-pretty tracking-tight font-extrabold text-primary uppercase text-left">
                   Participá de los encuentros regionales
                 </h1>
-                <h1 class="text-xl sm:text-2xl lg:text-3xl text-pretty tracking-tight font-light text-highlighted uppercase text-left">
-                  Agenda
-                </h1>
               </div>
               <div class="px-4 lg:px-6 bg-elevated/35 border border-default rounded-lg shadow-lg">
                 <EncuentrosRegionalesAgendaTimeline />
               </div>
+              <p class="text-secondary text-lg md:text-2xl font-semibold mt-10">
+                Tu voz cuenta. El desarrollo de la Provincia se logra entre todos y todas.
+              </p>
             </div>
           </div>
-          <div class="max-w-5xl space-y-6 mx-auto">
+          <div class="space-y-6 mx-auto text-left md:text-justify">
             <h1 class="text-2xl sm:text-3xl lg:text-4xl text-pretty tracking-tight font-extrabold text-primary">
               Regionalización de la PBA en el marco del PEI
             </h1>
@@ -240,12 +231,12 @@ async function onRegionSelect(regionSlug: string) {
       :ui="{ icon: 'size-18 text-primary' }"
     />
     <div class="py-12 sm:py-16 md:py-16 lg:py-16">
-      <UContainer class="w-full lg:max-w-5xl 2xl:max-w-6xl">
+      <UContainer class="w-full">
         <h1 class="text-center sm:text-left text-2xl sm:text-3xl lg:text-4xl text-pretty tracking-tight font-extrabold text-primary uppercase mb-4">
           ACCEDÉ A LA INFORMACIÓN DE CADA JORNADA
         </h1>
         <p class="text-center sm:text-left leading-7 text-neutral-700 dark:text-neutral-300 mb-6">
-          Al clickear en cada región, encontrarás los documentos de cada encuentro y los espacios de participación para que te inscribas, dejes tus aportes y proyectos, y hagas comentarios.
+          Explorá cada región para ver la información y los materiales disponibles de cada encuentro, junto con los espacios de participación para que te inscribas, dejes tus aportes y proyectos, y hagas comentarios.
         </p>
         <EncuentrosRegionalesConsultasCardLists />
       </UContainer>

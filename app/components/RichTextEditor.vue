@@ -73,12 +73,12 @@ const toolbarItems: EditorToolbarItem<typeof customHandlers>[][] = [
     :handlers="customHandlers"
     :placeholder="props.placeholder"
     class="w-full rounded-md ring ring-default divide-y divide-default"
-    :ui="{ base: 'p-3 min-h-40 prose prose-sm dark:prose-invert max-w-none focus:outline-none' }"
+    :ui="{ base: 'p-3 min-h-40 prose dark:prose-invert max-w-none focus:outline-none' }"
   >
     <UEditorToolbar
       :editor="editor"
       :items="toolbarItems"
-      class="p-1 flex flex-wrap gap-1"
+      class="p-2 flex flex-wrap gap-1 bg-accented/15"
     />
 
     <UEditorDragHandle :editor="editor" />

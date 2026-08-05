@@ -1,5 +1,6 @@
 import { CommentsModerationQuerySchema, CommentsThreadQuerySchema } from '#shared/schemas/comment'
 import {
+  assertCommentsVisible,
   commentWithRelationsInclude,
   countVisibleReplies,
   getInstitutionName,
@@ -18,7 +19,7 @@ export default defineEventHandler(async (event) => {
 
   const consultation = await prisma.consultation.findUnique({
     where: { id: consultationId },
-    select: { id: true, visibility: true }
+    select: { id: true, visibility: true, commentsEnabled: true }
   })
 
   if (!consultation) {
@@ -110,6 +111,8 @@ export default defineEventHandler(async (event) => {
   if (!isAdmin && !isPubliclyVisibleConsultation(consultation)) {
     throw createError({ statusCode: 404, message: 'Consulta no encontrada' })
   }
+
+  assertCommentsVisible(consultation, 'consultation')
 
   // Solo comentarios de primer nivel: las respuestas se cargan bajo demanda y
   // paginadas desde `GET /api/comments/:id/replies`.

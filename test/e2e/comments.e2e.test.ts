@@ -44,6 +44,10 @@ describe('Server e2e: routing anidado + comentarios (fase 6)', async () => {
   let topicId: number
   let reactionCommentId: number
   let moderationCommentId: number
+  let hiddenCommentsConsultationId: number
+  let hiddenCommentsCommentId: number
+  let hiddenCommentsTopicId: number
+  let inheritedTopicId: number
 
   const createdConsultationIds: number[] = []
 
@@ -127,6 +131,61 @@ describe('Server e2e: routing anidado + comentarios (fase 6)', async () => {
       }
     })
     moderationCommentId = moderationComment.id
+
+    // Consulta abierta pero con la sección de comentarios oculta.
+    const hiddenCommentsConsultation = await prisma.consultation.create({
+      data: {
+        slug: `e2e-sin-comentarios-${now}`,
+        title: 'Consulta sin comentarios e2e',
+        visibility: 'visible',
+        publishedAt: new Date(),
+        startsAt: past,
+        endsAt: future,
+        commentsEnabled: false,
+        resultsVisibility: 'public',
+        createdByUserId: admin.id
+      }
+    })
+    hiddenCommentsConsultationId = hiddenCommentsConsultation.id
+    createdConsultationIds.push(hiddenCommentsConsultation.id)
+
+    const hiddenCommentsComment = await prisma.comment.create({
+      data: {
+        consultationId: hiddenCommentsConsultation.id,
+        authorUserId: citizen.id,
+        body: 'Comentario previo al ocultamiento',
+        authorMode: 'citizen'
+      }
+    })
+    hiddenCommentsCommentId = hiddenCommentsComment.id
+
+    // Tema con comentarios ocultos dentro de una consulta que sí los muestra.
+    const hiddenCommentsTopic = await prisma.topic.create({
+      data: {
+        consultationId: openConsultation.id,
+        slug: 'tema-sin-comentarios-e2e',
+        title: 'Tema sin comentarios e2e',
+        visibility: 'visible',
+        mechanismType: 'support',
+        commentsEnabled: false,
+        participationStartsAt: past
+      }
+    })
+    hiddenCommentsTopicId = hiddenCommentsTopic.id
+
+    // Tema con comentarios visibles dentro de la consulta que los oculta:
+    // el interruptor no se hereda.
+    const inheritedTopic = await prisma.topic.create({
+      data: {
+        consultationId: hiddenCommentsConsultation.id,
+        slug: 'tema-con-comentarios-e2e',
+        title: 'Tema con comentarios e2e',
+        visibility: 'visible',
+        mechanismType: 'support',
+        participationStartsAt: past
+      }
+    })
+    inheritedTopicId = inheritedTopic.id
   })
 
   afterAll(async () => {
@@ -455,6 +514,81 @@ describe('Server e2e: routing anidado + comentarios (fase 6)', async () => {
       )
       expect(res.status).toBe(200)
       expect(Array.isArray(res.data)).toBe(true)
+    })
+  })
+
+  describe('Sección de comentarios oculta', () => {
+    it('no lista el hilo público de la consulta (403)', async () => {
+      const res = await api(`/api/consultations/${hiddenCommentsConsultationId}/comments?view=thread`)
+      expect(res.status).toBe(403)
+    })
+
+    it('no permite comentar en la consulta (403)', async () => {
+      const res = await api(`/api/consultations/${hiddenCommentsConsultationId}/comments`, {
+        method: 'POST',
+        cookie: citizenCookie,
+        body: { body: 'No debería entrar' }
+      })
+      expect(res.status).toBe(403)
+    })
+
+    it('no permite reaccionar ni quitar la reacción (403)', async () => {
+      const add = await api(`/api/comments/${hiddenCommentsCommentId}/reactions`, {
+        method: 'POST',
+        cookie: citizenCookie,
+        body: { reactionType: 'heart' }
+      })
+      expect(add.status).toBe(403)
+
+      const remove = await api(`/api/comments/${hiddenCommentsCommentId}/reactions`, {
+        method: 'DELETE',
+        cookie: citizenCookie,
+        body: { reactionType: 'heart' }
+      })
+      expect(remove.status).toBe(403)
+    })
+
+    it('no lista las respuestas de un comentario (403)', async () => {
+      const res = await api(`/api/comments/${hiddenCommentsCommentId}/replies`)
+      expect(res.status).toBe(403)
+    })
+
+    it('no lista ni permite comentar en un tema con la sección oculta (403)', async () => {
+      const list = await api(
+        `/api/consultations/${openConsultationId}/topics/${hiddenCommentsTopicId}/comments?view=thread`
+      )
+      expect(list.status).toBe(403)
+
+      const create = await api(
+        `/api/consultations/${openConsultationId}/topics/${hiddenCommentsTopicId}/comments`,
+        {
+          method: 'POST',
+          cookie: citizenCookie,
+          body: { body: 'No debería entrar' }
+        }
+      )
+      expect(create.status).toBe(403)
+    })
+
+    it('no se hereda: un tema con comentarios visibles sigue aceptando comentarios (201)', async () => {
+      const res = await api(
+        `/api/consultations/${hiddenCommentsConsultationId}/topics/${inheritedTopicId}/comments`,
+        {
+          method: 'POST',
+          cookie: citizenCookie,
+          body: { body: 'El tema decide por su cuenta' }
+        }
+      )
+      expect(res.status).toBe(201)
+    })
+
+    it('la bandeja de moderación del admin sigue disponible (200)', async () => {
+      const res = await api<{ items: AdminComment[] }>(
+        `/api/consultations/${hiddenCommentsConsultationId}/comments?scope=all`,
+        { cookie: adminCookie }
+      )
+      expect(res.status).toBe(200)
+      expect(res.data.items.some(c => c.id === hiddenCommentsCommentId)).toBe(true)
     })
   })
 })

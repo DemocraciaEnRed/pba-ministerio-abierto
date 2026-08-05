@@ -1,6 +1,7 @@
 import { parseTopicSlugOrId, resolveTopicBySlugOrId } from '~~/server/utils/topics/slug'
 import { CommentsThreadQuerySchema, TopicCommentsModerationQuerySchema } from '#shared/schemas/comment'
 import {
+  assertCommentsVisible,
   commentWithRelationsInclude,
   countVisibleReplies,
   getInstitutionName,
@@ -87,6 +88,8 @@ export default defineEventHandler(async (event) => {
   if (!isAdmin && (!isPubliclyVisibleConsultation(consultation) || topic.visibility === 'hidden')) {
     throw createError({ statusCode: 404, message: 'Tema no encontrado' })
   }
+
+  assertCommentsVisible(topic, 'topic')
 
   // Solo comentarios de primer nivel: las respuestas se cargan bajo demanda y
   // paginadas desde `GET /api/comments/:id/replies`.

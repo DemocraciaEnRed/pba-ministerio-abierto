@@ -69,6 +69,7 @@ export default defineEventHandler(async (event) => {
       title: body.title,
       summary: body.summary,
       body: body.body,
+      commentsEnabled: body.commentsEnabled,
       commentsGuidance: body.commentsGuidance,
       displayOrder: body.displayOrder,
       participationStartsAt: body.participationStartsAt,

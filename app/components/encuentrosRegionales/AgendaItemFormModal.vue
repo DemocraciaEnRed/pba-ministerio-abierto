@@ -1,13 +1,14 @@
 <script setup lang="ts">
 import type { Form } from '@nuxt/ui'
 import type { UpdateAgendaItemInput } from '#shared/schemas/regional-meetings'
+import type { AgendaItemState } from '~/utils/estados'
 
 export interface AdminAgendaItem {
   id: number
   location: string
   heldAt: string
   year: number | null
-  held: boolean
+  state: AgendaItemState
   highlighted: boolean
   registrationUrl: string | null
   region: {
@@ -39,7 +40,7 @@ interface AgendaFormState {
   location: string
   heldAt: string | null
   year: number | null
-  held: boolean
+  state: AgendaItemState
   highlighted: boolean
   registrationUrl: string
 }
@@ -48,7 +49,7 @@ const state = reactive<AgendaFormState>({
   location: '',
   heldAt: null,
   year: null,
-  held: false,
+  state: 'scheduled',
   highlighted: false,
   registrationUrl: ''
 })
@@ -70,7 +71,7 @@ function hydrate() {
   state.location = values?.location ?? ''
   state.heldAt = values?.heldAt ?? null
   state.year = values?.year ?? null
-  state.held = values?.held ?? false
+  state.state = values?.state ?? 'scheduled'
   state.highlighted = values?.highlighted ?? false
   state.registrationUrl = values?.registrationUrl ?? ''
   formRef.value?.clear()
@@ -92,7 +93,7 @@ async function onSubmit() {
         location: state.location,
         heldAt: state.heldAt,
         year: state.year,
-        held: state.held,
+        state: state.state,
         highlighted: state.highlighted,
         registrationUrl: state.registrationUrl.trim() || null
       }
@@ -123,7 +124,7 @@ async function onSubmit() {
   <USlideover
     v-model:open="isOpen"
     title="Editar ítem de agenda"
-    description="La región es fija. Podés editar el lugar, la fecha, el año, si ya se celebró y cómo se destaca en la timeline."
+    description="La región es fija. Podés editar el lugar, la fecha, el año, el estado y cómo se destaca en la timeline."
     :dismissible="!saving"
     :ui="{ content: 'max-w-xl' }"
   >
@@ -179,10 +180,16 @@ async function onSubmit() {
         </UFormField>
 
         <UFormField
-          label="¿Ya se celebró?"
-          name="held"
+          label="Estado"
+          name="state"
+          help="Programado: aún no comenzó. Abierto: en curso o con inscripción abierta. Realizado: ya se celebró."
         >
-          <USwitch v-model="state.held" />
+          <USelect
+            v-model="state.state"
+            :items="agendaItemStateOptions"
+            :icon="agendaItemStateBadge(state.state).icon"
+            class="w-full"
+          />
         </UFormField>
 
         <UFormField

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { PageHeroProps, NavigationMenuItem, ThemeUI, DropdownMenuItem } from '@nuxt/ui'
+import type { PageHeroProps, NavigationMenuItem, ThemeUI } from '@nuxt/ui'
 import type { ConsultaHeroMetadata } from '~/types/consulta'
 
 const props = withDefaults(
@@ -66,28 +66,25 @@ const stickyTop = computed(() =>
     : 'var(--ui-header-height)'
 )
 
-// Aplana los grupos del menú de navegación (izquierda/derecha) en grupos del
-// dropdown para móvil, preservando la separación visual entre cada grupo.
-const consultationSectionsMobile = computed<DropdownMenuItem[][]>(() =>
-  props.consultationSections
-    .filter(group => group.length)
-    .map(group =>
-      group.map(section => ({
-        label: section.label,
-        icon: section.icon,
-        to: section.to
-      }))
-    )
-)
 const drawerOpen = ref(false)
 const openDrawer = () => {
   drawerOpen.value = true
+}
+
+function closeSlideoverOnNavigation(event: MouseEvent, close: () => void) {
+  if (event.target instanceof Element && event.target.closest('a')) {
+    close()
+  }
 }
 </script>
 
 <template>
   <UTheme :ui="uiTheme">
-    <UMain :style="{ '--consultas-sticky-top': stickyTop }">
+    <UMain
+      id="page-hero"
+      class="consultas-layout"
+      :style="{ '--consultas-sticky-top': stickyTop }"
+    >
       <Header />
       <div class="relative">
         <div
@@ -110,15 +107,10 @@ const openDrawer = () => {
       </div>
       <USeparator />
       <div
-        v-if="consultationSections.length"
         ref="navRef"
-        class="sticky top-(--ui-header-height) z-10 border-b border-default bg-default/75 backdrop-blur"
+        class="lg:hidden sticky top-(--ui-header-height) z-10 border-b border-default bg-default/75 backdrop-blur"
       >
         <UContainer class="">
-          <UNavigationMenu
-            :items="consultationSections"
-            class="hidden lg:flex"
-          />
           <div class="lg:hidden py-1 flex justify-between items-center gap-2">
             <UButton
               label="Metadatos"
@@ -127,20 +119,24 @@ const openDrawer = () => {
               color="neutral"
               @click="openDrawer"
             />
-            <UDropdownMenu
-              :items="consultationSectionsMobile"
-              :content="{ align: 'center' }"
-              arrow
-              :ui="{ content: 'w-56' }"
+            <USlideover
+              v-if="$slots['mobile-navigation']"
+              title="Secciones"
+              description="Navegá por el contenido de esta consulta"
+              side="right"
             >
               <UButton
                 label="Secciones"
                 icon="i-lucide-list"
-                trailing-icon="i-lucide-chevron-down"
                 variant="ghost"
                 color="neutral"
               />
-            </UDropdownMenu>
+              <template #body="{ close }">
+                <div @click="closeSlideoverOnNavigation($event, close)">
+                  <slot name="mobile-navigation" />
+                </div>
+              </template>
+            </USlideover>
           </div>
         </UContainer>
       </div>
@@ -210,3 +206,9 @@ const openDrawer = () => {
     <Footer />
   </UTheme>
 </template>
+
+<style scoped>
+.consultas-layout :deep([id]) {
+  scroll-margin-top: calc(var(--consultas-sticky-top) + 0.75rem);
+}
+</style>

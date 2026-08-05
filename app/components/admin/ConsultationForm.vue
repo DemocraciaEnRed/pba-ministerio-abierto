@@ -13,6 +13,7 @@ export interface ConsultationFormInitialValues {
   startsAt: string | null
   endsAt: string | null
   closedMessage: string | null
+  commentsEnabled: boolean
   commentsGuidance: string | null
   resultsVisibility: ResultsVisibility
 }
@@ -26,6 +27,7 @@ export interface ConsultationFormPayload {
   startsAt: string | null
   endsAt: string | null
   closedMessage: string | null
+  commentsEnabled: boolean
   commentsGuidance: string | null
   resultsVisibility: ResultsVisibility
   adjustTopics: boolean
@@ -64,6 +66,7 @@ const form = reactive({
   startsAt: null as string | null,
   endsAt: null as string | null,
   closedMessage: '' as string | null,
+  commentsEnabled: true,
   commentsGuidance: '' as string | null,
   resultsVisibility: 'public' as ResultsVisibility
 })
@@ -105,12 +108,21 @@ function hydrate(values: ConsultationFormInitialValues | null) {
   form.startsAt = values?.startsAt ?? null
   form.endsAt = values?.endsAt ?? null
   form.closedMessage = values?.closedMessage ?? ''
+  form.commentsEnabled = values?.commentsEnabled ?? true
   form.commentsGuidance = values?.commentsGuidance ?? ''
   form.resultsVisibility = 'public'
   slugTouched.value = Boolean(values?.slug)
 }
 
 watch(() => props.initialValues, hydrate, { immediate: true })
+
+// El campo se guarda como "comentarios habilitados"; la UI lo expresa al revés.
+const commentsHidden = computed({
+  get: () => !form.commentsEnabled,
+  set: (value: boolean) => {
+    form.commentsEnabled = !value
+  }
+})
 
 watch(() => form.title, (title) => {
   if (props.mode === 'create' && !slugTouched.value) {
@@ -132,6 +144,7 @@ function buildPayload(): ConsultationFormPayload {
     startsAt: form.startsAt,
     endsAt: form.endsAt,
     closedMessage: (form.closedMessage ?? '').trim() || null,
+    commentsEnabled: form.commentsEnabled,
     commentsGuidance: (form.commentsGuidance ?? '').trim() || null,
     resultsVisibility: form.resultsVisibility,
     // El ajuste no es opcional: si hay temas fuera de la ventana, se recortan al guardar.
@@ -390,6 +403,19 @@ const titleMax = 180
       </UFormField>
 
       <UFormField
+        label="Sección de comentarios"
+        description="Al ocultarla, la sección deja de mostrarse en la página pública y se deshabilita comentar, responder y reaccionar. Los comentarios ya publicados se conservan y se siguen viendo en el panel de moderación."
+        :error="errors.commentsEnabled"
+        class="md:col-span-2"
+      >
+        <USwitch
+          v-model="commentsHidden"
+          label="Ocultar la sección de comentarios"
+        />
+      </UFormField>
+
+      <UFormField
+        v-if="form.commentsEnabled"
         label="Guía para los comentarios"
         description="Texto opcional que se muestra debajo del título «Comentarios» para orientar la conversación (por ejemplo, preguntas disparadoras). Admite formato enriquecido (Markdown)."
         :error="errors.commentsGuidance"

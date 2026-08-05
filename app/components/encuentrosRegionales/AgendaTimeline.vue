@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import type { AgendaItemState } from '~/utils/estados'
+
 type AgendaRegionSlug
   = | 'metropolitana'
     | 'fluvial'
@@ -21,7 +23,7 @@ interface AgendaItem {
   location: string
   heldAt: string
   year: number | null
-  held: boolean
+  state: AgendaItemState
   highlighted: boolean
   registrationUrl: string | null
   region: AgendaRegion
@@ -44,7 +46,7 @@ const items = computed(() => data.value ?? [])
     </div>
 
     <template v-else>
-      <div class="grid lg:grid-cols-2 gap-2">
+      <div class="grid lg:grid-cols-2 lg:grid-flow-col lg:grid-rows-4 gap-2  items-center">
         <div
           v-for="item in items"
           :key="`agenda-item-${item.id}`"
@@ -67,10 +69,9 @@ const items = computed(() => data.value ?? [])
               </div>
               <div class="flex gap-2">
                 <UBadge
-                  v-if="item.held"
-                  icon="lucide:circle-check"
-                  label="Realizado"
-                  color="success"
+                  :icon="agendaItemStateBadge(item.state).icon"
+                  :label="agendaItemStateBadge(item.state).label"
+                  :color="agendaItemStateBadge(item.state).color"
                   variant="subtle"
                   class="rounded-full"
                 />

@@ -25,18 +25,18 @@ const themeUi: ThemeUI = {
       reverse
     >
       <template #header>
-        <h1 class="text-xl font-medium text-white text-shadow-lg uppercase mb-2">
+        <h1 class="text-md sm:text-lg font-medium text-white text-shadow-lg uppercase mb-3 text-center sm:text-left">
           Encuentros Regionales
         </h1>
         <div class="flex items-stretch gap-1">
-          <p class="font-extrabold text-4xl text-white text-shadow-lg uppercase">
+          <p class="font-bold sm:font-extrabold text-xl sm:text-4xl text-white text-shadow-lg uppercase max-sm:leading-tight">
             ¿
           </p>
-          <p class="font-extrabold text-4xl text-white text-shadow-lg uppercase">
+          <p class="font-bold sm:font-extrabold text-xl sm:text-4xl text-white text-shadow-lg uppercase max-sm:leading-tight">
             Cuánto<br>futuro<br>cabe en la<br>provincia?
           </p>
-          <div class="self-stretch border-l-white border-l-4 mx-5" />
-          <p class="font-extralight text-2xl text-white text-shadow-lg uppercase">
+          <div class="self-stretch border-l-white border-l-3 mx-3 sm:mx-5" />
+          <p class="font-light sm:font-extralight text-lg sm:text-2xl text-white text-shadow-lg uppercase max-sm:leading-tight">
             DIÁLOGO<br>Y PARTICIPACIÓN<br>PARA DISEÑAR<br>UNA AGENDA<br>DE DESARROLLO
           </p>
         </div>
@@ -49,7 +49,7 @@ const themeUi: ThemeUI = {
     <UContainer class="max-w-5xl">
       <UPage>
         <UPageBody>
-          <div class=" space-y-6 mx-auto">
+          <div class="space-y-6 mx-auto">
             <p class="leading-7 text-neutral-700 dark:text-neutral-300">
               Te invitamos a participar de la construcción de una <span class="font-bold text-highlighted">agenda de infraestructura</span> para el desarrollo que refleje las necesidades y oportunidades de cada región de la Provincia, con el objetivo de avanzar en la priorización de inversiones y obras estratégicas.
             </p>
