@@ -4,7 +4,7 @@ import type { ThemeUI } from '@nuxt/ui/runtime/types/theme.js'
 
 usePageSeo({
   title: 'Consultas públicas',
-  description: 'Encuentros participativos del Ministerio de Infraestructura y Servicios Públicos: presentación de obras y proyectos en el territorio y espacios para recibir aportes de la ciudadanía.',
+  description: 'Conocé los proyectos del Ministerio de Infraestructura y Servicios Públicos y acercá tus opiniones, consultas y aportes para mejorar su diseño e implementación.',
   url: '/consultas-publicas'
 })
 

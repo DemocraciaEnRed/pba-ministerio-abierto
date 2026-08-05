@@ -4,7 +4,7 @@ import type { ThemeUI } from '@nuxt/ui/runtime/types/theme.js'
 
 usePageSeo({
   title: 'Audiencias públicas',
-  description: 'Encuentros participativos del Ministerio de Infraestructura y Servicios Públicos: presentación de obras y proyectos en el territorio y espacios para recibir aportes de la ciudadanía.',
+  description: 'Informate y participá en las audiencias públicas sobre obras y servicios con impacto en la Provincia de Buenos Aires.',
   url: '/audiencias-publicas'
 })
 

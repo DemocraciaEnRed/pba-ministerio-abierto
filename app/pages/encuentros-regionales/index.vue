@@ -1,6 +1,12 @@
 <script lang="ts" setup>
 import type { ThemeUI } from '@nuxt/ui/runtime/types/theme.js'
 
+usePageSeo({
+  title: 'Encuentros Regionales',
+  description: 'Participá de los Encuentros Regionales y sumá aportes al Plan Estratégico de Infraestructura de la Provincia de Buenos Aires.',
+  url: '/encuentros-regionales'
+})
+
 const ejesTematicosDescripciones = ref([
   {
     title: 'Conectividad y logística',
