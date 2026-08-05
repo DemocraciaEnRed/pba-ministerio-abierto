@@ -112,6 +112,30 @@ type ConsultationWindow = {
   endsAt: Date | null
 }
 
+/** Contenedor (consulta o tema) con el interruptor de la sección de comentarios. */
+type CommentsToggle = { commentsEnabled: boolean }
+
+/**
+ * Lanza 403 si la sección de comentarios del contenedor está oculta. Ocultarla
+ * también deshabilita leer el hilo, comentar, responder y reaccionar; el panel
+ * de moderación es el único que sigue accediendo.
+ */
+export function assertCommentsVisible(
+  container: CommentsToggle,
+  containerType: 'consultation' | 'topic'
+): void {
+  if (container.commentsEnabled) {
+    return
+  }
+
+  throw createError({
+    statusCode: 403,
+    message: containerType === 'consultation'
+      ? 'Los comentarios de esta consulta están ocultos'
+      : 'Los comentarios de este tema están ocultos'
+  })
+}
+
 /**
  * ¿Está abierta la ventana efectiva para comentar a nivel consulta?
  * La consulta debe estar visible y su estado temporal derivado debe ser `open`
@@ -128,9 +152,12 @@ export function isConsultationCommentingOpen(
 }
 
 /**
- * Lanza 403 si no se puede comentar en la consulta (ventana efectiva cerrada).
+ * Lanza 403 si no se puede comentar en la consulta (sección oculta o ventana
+ * efectiva cerrada).
  */
-export function assertConsultationCommentingOpen(consultation: ConsultationWindow): void {
+export function assertConsultationCommentingOpen(consultation: ConsultationWindow & CommentsToggle): void {
+  assertCommentsVisible(consultation, 'consultation')
+
   if (!isConsultationCommentingOpen(consultation)) {
     throw createError({
       statusCode: 403,
@@ -142,12 +169,15 @@ export function assertConsultationCommentingOpen(consultation: ConsultationWindo
 /**
  * Lanza 403 si no se puede comentar en el tema. Reutiliza la ventana efectiva
  * de participación: la consulta debe estar abierta y el tema publicado y dentro
- * de su ventana efectiva.
+ * de su ventana efectiva. El interruptor de comentarios del tema es propio: no
+ * se hereda el de la consulta.
  */
 export function assertTopicCommentingOpen(
-  topic: { visibility: string, participationStartsAt: Date | null, participationEndsAt: Date | null },
+  topic: CommentsToggle & { visibility: string, participationStartsAt: Date | null, participationEndsAt: Date | null },
   consultation: ConsultationWindow
 ): void {
+  assertCommentsVisible(topic, 'topic')
+
   if (!isConsultationCommentingOpen(consultation)) {
     throw createError({
       statusCode: 403,
@@ -232,6 +262,10 @@ type LoadedComment = {
   consultationId: number | null
   topicId: number | null
   moderationStatus: string
+  /** Tipo de contenedor del comentario, para mensajes y guards. */
+  containerType: 'consultation' | 'topic'
+  /** Interruptor de la sección de comentarios del contenedor. */
+  commentsEnabled: boolean
 }
 
 /**
@@ -251,7 +285,8 @@ export async function loadCommentWithConsultation(
       consultationId: true,
       topicId: true,
       moderationStatus: true,
-      topic: { select: { consultationId: true } }
+      consultation: { select: { commentsEnabled: true } },
+      topic: { select: { consultationId: true, commentsEnabled: true } }
     }
   })
 
@@ -265,12 +300,18 @@ export async function loadCommentWithConsultation(
     throw createError({ statusCode: 404, message: 'Comentario no encontrado' })
   }
 
+  const containerType = comment.topicId !== null ? 'topic' : 'consultation'
+
   return {
     comment: {
       id: comment.id,
       consultationId: comment.consultationId,
       topicId: comment.topicId,
-      moderationStatus: comment.moderationStatus
+      moderationStatus: comment.moderationStatus,
+      containerType,
+      commentsEnabled: containerType === 'topic'
+        ? comment.topic!.commentsEnabled
+        : comment.consultation!.commentsEnabled
     },
     consultationId
   }

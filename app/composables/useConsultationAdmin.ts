@@ -12,6 +12,7 @@ export interface AdminConsultationSummary {
   endsAt: string | null
   publishedAt: string | null
   closedMessage: string | null
+  commentsEnabled: boolean
   commentsGuidance: string | null
   resultsVisibility: 'hidden' | 'participants_only' | 'public'
   section: { id: number, slug: string, name: string } | null

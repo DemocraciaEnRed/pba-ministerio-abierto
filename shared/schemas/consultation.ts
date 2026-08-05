@@ -77,6 +77,7 @@ export const CreateConsultationSchema = z.object({
   startsAt: requiredStartDateField,
   endsAt: dateField.default(null),
   closedMessage: textAreaField,
+  commentsEnabled: z.boolean().default(true),
   commentsGuidance: textAreaField.default(null),
   resultsVisibility: z.enum(['hidden', 'participants_only', 'public']).default('public')
 })
@@ -90,6 +91,7 @@ export const UpdateConsultationSchema = z.object({
   startsAt: requiredStartDateField,
   endsAt: dateField,
   closedMessage: textAreaField,
+  commentsEnabled: z.boolean().default(true),
   commentsGuidance: textAreaField.default(null),
   resultsVisibility: z.enum(['hidden', 'participants_only', 'public']),
   // Si es true, al guardar se recortan las fechas de los temas que quedan fuera

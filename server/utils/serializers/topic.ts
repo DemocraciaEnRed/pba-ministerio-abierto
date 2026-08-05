@@ -15,6 +15,7 @@ type TopicEntity = {
   summary: string | null
   body: string | null
   questionText: string | null
+  commentsEnabled: boolean
   commentsGuidance: string | null
   displayOrder: number
   participationStartsAt: Date | null
@@ -42,6 +43,7 @@ export interface PublicTopicDTO {
   summary: string | null
   body: string | null
   questionText: string | null
+  commentsEnabled: boolean
   commentsGuidance: string | null
   displayOrder: number
   participationStartsAt: string | null
@@ -107,6 +109,7 @@ export function serializeTopic(
     summary: topic.summary,
     body: topic.body,
     questionText: topic.questionText,
+    commentsEnabled: topic.commentsEnabled,
     commentsGuidance: topic.commentsGuidance,
     displayOrder: topic.displayOrder,
     participationStartsAt: topic.participationStartsAt?.toISOString() ?? null,

@@ -67,11 +67,13 @@ const registrationUrlField = z
 
 // --- Agenda ---
 
+export const AGENDA_ITEM_STATES = ['scheduled', 'open', 'closed'] as const
+
 export const UpdateAgendaItemSchema = z.object({
   location: locationField,
   heldAt: heldAtField,
   year: yearField.default(null),
-  held: z.boolean().default(false),
+  state: z.enum(AGENDA_ITEM_STATES, { error: 'Elegí un estado válido' }).default('scheduled'),
   highlighted: z.boolean().default(false),
   registrationUrl: registrationUrlField.default(null)
 })

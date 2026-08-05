@@ -14,8 +14,8 @@ const html = computed(() => props.parsed?.html ?? parseMarkdown(props.content).h
   <!-- eslint-disable vue/no-v-html -->
   <div
     v-if="html"
-    class="prose prose-sm dark:prose-invert max-w-none"
+    class="prose dark:prose-invert max-w-none"
     v-html="html"
   />
-  <!-- eslint-enable vue/no-v-html -->
+<!-- eslint-enable vue/no-v-html -->
 </template>

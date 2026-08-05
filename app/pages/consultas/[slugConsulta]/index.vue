@@ -143,6 +143,8 @@ const consultationMetadata = computed<ConsultaHeroMetadata[]>(() => {
   return items
 })
 
+const commentsVisible = computed(() => consultation.value?.commentsEnabled !== false)
+
 const consultationSections = computed<NavigationMenuItem[][]>(() => {
   const leftMenu: NavigationMenuItem[] = [
     {
@@ -157,11 +159,13 @@ const consultationSections = computed<NavigationMenuItem[][]>(() => {
           to: '#temas'
         }]
       : []),
-    {
-      label: 'Comentarios',
-      icon: 'i-lucide-message-square',
-      to: '#comentarios'
-    }
+    ...(commentsVisible.value
+      ? [{
+          label: 'Comentarios',
+          icon: 'i-lucide-message-square',
+          to: '#comentarios'
+        }]
+      : [])
   ]
   const rightMenu: NavigationMenuItem[] = []
   if (consultation.value?.canManage) {
@@ -176,7 +180,8 @@ const consultationSections = computed<NavigationMenuItem[][]>(() => {
 
 // Los comentarios pueden crearse solo con la consulta visible y su participación abierta.
 const commentingOpen = computed(() =>
-  consultation.value?.visibility === 'visible'
+  commentsVisible.value
+  && consultation.value?.visibility === 'visible'
   && consultation.value?.participationState === 'open'
 )
 
@@ -212,7 +217,9 @@ const consultationPageAnchors: ComputedRef<InteractivePageAnchor[]> = computed((
   if (temas.value.length) {
     anchors.push(createScrollAnchor('Temas de participación', 'lucide:list', 'temas'))
   }
-  anchors.push(createScrollAnchor('Comentarios', 'lucide:message-square', 'comentarios'))
+  if (commentsVisible.value) {
+    anchors.push(createScrollAnchor('Comentarios', 'lucide:message-square', 'comentarios'))
+  }
 
   if (consultation.value?.canManage) {
     anchors.push({
@@ -367,7 +374,10 @@ const consultationPageAnchors: ComputedRef<InteractivePageAnchor[]> = computed((
         </div>
       </div>
     </template>
-    <template #consultas-comentarios>
+    <template
+      v-if="commentsVisible"
+      #consultas-comentarios
+    >
       <MarkdownProse
         v-if="consultation?.commentsGuidance"
         :content="consultation.commentsGuidance"

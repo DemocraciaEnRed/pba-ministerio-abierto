@@ -1,5 +1,6 @@
 import { CommentReactionSchema } from '#shared/schemas/comment'
 import {
+  assertCommentsVisible,
   commentWithRelationsInclude,
   getInstitutionName,
   loadCommentWithConsultation,
@@ -14,6 +15,8 @@ export default defineEventHandler(async (event) => {
 
   await assertCan(ctx, 'participate', { type: 'consultation', id: consultationId })
   const userId = ctx.user!.id
+
+  assertCommentsVisible(comment, comment.containerType)
 
   // Solo se reacciona sobre comentarios visibles.
   if (comment.moderationStatus !== 'visible') {

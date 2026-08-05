@@ -30,6 +30,8 @@ model Consultation {
   endsAt              DateTime?
   publishedAt         DateTime?
   closedMessage       String?   @db.Text
+  /// Cuando es `false` la sección de comentarios se oculta y se deshabilita comentar y reaccionar.
+  commentsEnabled     Boolean   @default(true)
   /// Texto opcional (Markdown) que orienta la conversación debajo del título "Comentarios".
   commentsGuidance    String?   @db.Text
   resultsVisibility   ResultsVisibility @default(hidden)

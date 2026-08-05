@@ -1,3 +1,11 @@
+/// Estado explícito de un ítem de agenda. No se deriva de la fecha: lo define
+/// quien administra, igual que el resto de la agenda.
+enum AgendaItemState {
+  scheduled
+  open
+  closed
+}
+
 /// Ítem de agenda de los Encuentros Regionales. Hay exactamente uno por región
 /// (catálogo fijo de 8): se siembra y se edita (lugar/fecha/año/estado), pero no
 /// se crea ni elimina desde la app, y la región no cambia. La timeline pública se
@@ -10,8 +18,8 @@ model RegionalMeetingAgendaItem {
   heldAt    DateTime
   /// Marca de año al inicio del segmento en la timeline (opcional).
   year      Int?
-  /// Si el encuentro ya se celebró (equivale a `done` en la timeline).
-  held      Boolean  @default(false)
+  /// Estado del encuentro: programado, abierto o realizado.
+  state     AgendaItemState @default(scheduled)
   /// Resalta el ítem en la timeline pública.
   highlighted Boolean @default(false)
   /// Destino del botón "Inscribite"; si es null el botón no se muestra.

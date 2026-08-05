@@ -28,7 +28,7 @@ export default defineEventHandler(async (event) => {
       location: body.location,
       heldAt: body.heldAt,
       year: body.year,
-      held: body.held,
+      state: body.state,
       highlighted: body.highlighted,
       registrationUrl: body.registrationUrl
     },

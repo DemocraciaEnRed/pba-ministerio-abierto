@@ -2,7 +2,7 @@
 import type { TabsItem } from '@nuxt/ui'
 import type { PublicConsultationListItem } from '~/types/consulta'
 
-type StatusFilter = 'scheduled' | 'open' | 'closed'
+type StatusFilter = 'all' | 'scheduled' | 'open' | 'closed'
 
 interface ConsultationsResponse {
   items: PublicConsultationListItem[]
@@ -12,8 +12,13 @@ interface ConsultationsResponse {
 // (nunca hay más consultas que regiones), pero paginamos en cliente de a 4.
 const PER_PAGE = 4
 
-const selectedStatusFilter = ref<StatusFilter>('open')
+const selectedStatusFilter = ref<StatusFilter>('all')
 const consultasStatuses = ref<TabsItem[]>([
+  {
+    label: 'Todos',
+    value: 'all',
+    icon: 'lucide:list'
+  },
   {
     label: 'Abiertos',
     value: 'open',
@@ -43,7 +48,7 @@ const { data, status } = await useAsyncData(
       page: 1,
       perPage: 50,
       sectionSlug: 'encuentros-regionales',
-      state: selectedStatusFilter.value
+      ...(selectedStatusFilter.value !== 'all' && { state: selectedStatusFilter.value })
     }
   }),
   {
@@ -94,13 +99,13 @@ watch(selectedStatusFilter, () => {
       <template v-else-if="consultations.length > 0">
         <UBlogPosts
           orientation="vertical"
-          :ui="{ base: 'sm:grid sm:grid-cols-2 lg:flex lg:flex-col gap-4 lg:gap-y-4' }"
+          :ui="{ base: 'sm:grid sm:grid-cols-2 lg:grid-cols-4 lg:flex-col gap-4 lg:gap-y-4' }"
         >
           <ConsultasConsultaCard
             v-for="consultation in paginatedConsultations"
             :key="consultation.id"
             :consultation="consultation"
-            orientation="horizontal"
+            orientation="vertical"
           />
         </UBlogPosts>
 

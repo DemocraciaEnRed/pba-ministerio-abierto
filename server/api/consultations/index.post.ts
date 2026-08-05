@@ -25,6 +25,7 @@ export default defineEventHandler(async (event) => {
         startsAt: body.startsAt,
         endsAt: body.endsAt,
         closedMessage: body.closedMessage,
+        commentsEnabled: body.commentsEnabled,
         commentsGuidance: body.commentsGuidance,
         resultsVisibility: body.resultsVisibility,
         createdByUserId: ctx.user!.id,

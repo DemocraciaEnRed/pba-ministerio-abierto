@@ -1,80 +1,4 @@
-<script setup lang="ts">
-defineOptions({ name: 'EncuentrosRegionalesMapSelector' })
-
-interface RegionInfo {
-  name: string
-}
-
-interface RegionBadgePoint {
-  x: number
-  y: number
-}
-
-const mapWidth = 515
-const mapHeight = 737
-
-// Metadatos de cada región, indexados por el slug que coincide con el id/inkscape:label de cada <g> del mapa.
-const regions: Record<string, RegionInfo> = {
-  'centro-sur': { name: 'Centro Sur' },
-  'fluvial': { name: 'Fluvial' },
-  'este': { name: 'Este' },
-  'noroeste': { name: 'Noroeste' },
-  'norte': { name: 'Norte' },
-  'costa-maritima': { name: 'Costa Marítima' },
-  'centro-norte': { name: 'Centro Norte' },
-  'sudoeste': { name: 'Sudoeste' },
-  'region-metropolitana': { name: 'Región Metropolitana' }
-}
-
-const wrapper = ref<HTMLElement | null>(null)
-const hovered = ref<string | null>(null)
-
-const regionBadgePoints: Record<string, RegionBadgePoint> = {
-  'centro-sur': { x: 276.819, y: 378.605 },
-  'fluvial': { x: 317.951, y: 55.481 },
-  'este': { x: 432.12363, y: 294.74377 },
-  'noroeste': { x: 89.649, y: 265.916 },
-  'norte': { x: 221.791, y: 107.03 },
-  'costa-maritima': { x: 346.12973, y: 469.22537 },
-  'centro-norte': { x: 268.924, y: 225.853 },
-  'sudoeste': { x: 81.822533, y: 472.95688 },
-  'region-metropolitana': { x: 382.137, y: 150.751 }
-}
-
-const regionBadges = computed(() =>
-  Object.entries(regionBadgePoints).map(([slug, point]) => ({
-    slug,
-    name: regions[slug]?.name ?? slug,
-    x: point.x,
-    y: point.y
-  }))
-)
-
-function layerClass(slug: string) {
-  return [
-    'region-layer',
-    {
-      'is-active': hovered.value === slug,
-      'is-dimmed': hovered.value !== null && hovered.value !== slug
-    }
-  ]
-}
-
-function onEnter(slug: string) {
-  hovered.value = slug
-}
-
-function onLeave() {
-  hovered.value = null
-}
-</script>
-
-<template>
-  <div
-    ref="wrapper"
-    class="map-wrapper"
-  >
-    <svg
+<svg
       id="svg180"
       class="map-svg"
       width="515"
@@ -118,10 +42,7 @@ function onLeave() {
         id="centro-norte"
         inkscape:groupmode="layer"
         inkscape:label="centro-norte"
-        :class="layerClass('centro-norte')"
         style="display:inline;stroke:url(#linearGradient181);stroke-width:2.0;stroke-dasharray:none;stroke-opacity:0.6"
-        @mouseenter="onEnter('centro-norte')"
-        @mouseleave="onLeave"
       >
         <path
           id="path151"
@@ -291,15 +212,24 @@ function onLeave() {
           stroke-miterlimit="10"
           style="stroke:url(#linearGradient181);stroke-width:2.0;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.6"
         />
+        <circle
+          id="punto-centro-centro-norte"
+          inkscape:label="punto-centro-centro-norte"
+          cx="268.924"
+          cy="225.853"
+          r="4"
+          fill="#ff1f1f"
+          stroke="#ffffff"
+          stroke-width="1.5"
+          vector-effect="non-scaling-stroke"
+        />
+
       </g>
       <g
         id="region-metropolitana"
         inkscape:groupmode="layer"
         inkscape:label="region-metropolitana"
-        :class="layerClass('region-metropolitana')"
         style="display:inline;stroke:#000000;stroke-width:2.0;stroke-dasharray:none;stroke-opacity:0.6"
-        @mouseenter="onEnter('region-metropolitana')"
-        @mouseleave="onLeave"
       >
         <path
           id="path62"
@@ -595,15 +525,24 @@ function onLeave() {
           fill="#e7a6b0"
           style="stroke:#000000;stroke-width:2.0;stroke-dasharray:none;stroke-opacity:0.6"
         />
+        <circle
+          id="punto-centro-region-metropolitana"
+          inkscape:label="punto-centro-region-metropolitana"
+          cx="382.137"
+          cy="150.751"
+          r="4"
+          fill="#ff1f1f"
+          stroke="#ffffff"
+          stroke-width="1.5"
+          vector-effect="non-scaling-stroke"
+        />
+
       </g>
       <g
         id="norte"
         inkscape:groupmode="layer"
         inkscape:label="norte"
-        :class="layerClass('norte')"
         style="display:inline;stroke-width:2.0;stroke-dasharray:none"
-        @mouseenter="onEnter('norte')"
-        @mouseleave="onLeave"
       >
         <path
           id="path131"
@@ -713,15 +652,24 @@ function onLeave() {
           fill="#8ec7dd"
           style="stroke:#000000;stroke-width:2.0;stroke-dasharray:none;stroke-opacity:0.6"
         />
+        <circle
+          id="punto-centro-norte"
+          inkscape:label="punto-centro-norte"
+          cx="221.791"
+          cy="107.030"
+          r="4"
+          fill="#ff1f1f"
+          stroke="#ffffff"
+          stroke-width="1.5"
+          vector-effect="non-scaling-stroke"
+        />
+
       </g>
       <g
         id="costa-maritima"
         inkscape:groupmode="layer"
         inkscape:label="costa-maritima"
-        :class="layerClass('costa-maritima')"
         style="display:inline;stroke:#000000;stroke-width:2.0;stroke-dasharray:none;stroke-opacity:0.6"
-        @mouseenter="onEnter('costa-maritima')"
-        @mouseleave="onLeave"
       >
         <path
           id="path171"
@@ -777,15 +725,24 @@ function onLeave() {
           fill="#75b95e"
           style="stroke:#000000;stroke-width:2.0;stroke-dasharray:none;stroke-opacity:0.6"
         />
+        <circle
+          id="punto-centro-costa-maritima"
+          inkscape:label="punto-centro-costa-maritima"
+          cx="356.672"
+          cy="421.306"
+          r="4"
+          fill="#ff1f1f"
+          stroke="#ffffff"
+          stroke-width="1.5"
+          vector-effect="non-scaling-stroke"
+        />
+
       </g>
       <g
         id="sudoeste"
         inkscape:groupmode="layer"
         inkscape:label="sudoeste"
-        :class="layerClass('sudoeste')"
         style="display:inline;stroke:#000000;stroke-width:2.0;stroke-dasharray:none;stroke-opacity:0.6"
-        @mouseenter="onEnter('sudoeste')"
-        @mouseleave="onLeave"
       >
         <path
           id="path30"
@@ -862,15 +819,24 @@ function onLeave() {
           fill="#fff2ba"
           style="stroke:#000000;stroke-width:2.0;stroke-dasharray:none;stroke-opacity:0.6"
         />
+        <circle
+          id="punto-centro-sudoeste"
+          inkscape:label="punto-centro-sudoeste"
+          cx="107.699"
+          cy="540.044"
+          r="4"
+          fill="#ff1f1f"
+          stroke="#ffffff"
+          stroke-width="1.5"
+          vector-effect="non-scaling-stroke"
+        />
+
       </g>
       <g
         id="centro-sur"
         inkscape:groupmode="layer"
         inkscape:label="centro-sur"
-        :class="layerClass('centro-sur')"
         style="display:inline;stroke:#000000;stroke-opacity:0.6;stroke-width:2.0;stroke-dasharray:none"
-        @mouseenter="onEnter('centro-sur')"
-        @mouseleave="onLeave"
       >
         <path
           id="path1"
@@ -953,15 +919,24 @@ function onLeave() {
           stroke-miterlimit="10"
           style="stroke-width:2.0;stroke-dasharray:none;stroke:#000000;stroke-opacity:0.6"
         />
+        <circle
+          id="punto-centro-centro-sur"
+          inkscape:label="punto-centro-centro-sur"
+          cx="276.819"
+          cy="378.605"
+          r="4"
+          fill="#ff1f1f"
+          stroke="#ffffff"
+          stroke-width="1.5"
+          vector-effect="non-scaling-stroke"
+        />
+
       </g>
       <g
         id="este"
         inkscape:groupmode="layer"
         inkscape:label="este"
-        :class="layerClass('este')"
         style="display:inline;stroke:#000000;stroke-width:2.0;stroke-dasharray:none;stroke-opacity:0.6"
-        @mouseenter="onEnter('este')"
-        @mouseleave="onLeave"
       >
         <path
           id="path10"
@@ -1047,15 +1022,24 @@ function onLeave() {
           fill="#ffe1a4"
           style="stroke:#000000;stroke-width:2.0;stroke-dasharray:none;stroke-opacity:0.6"
         />
+        <circle
+          id="punto-centro-este"
+          inkscape:label="punto-centro-este"
+          cx="433.082"
+          cy="292.827"
+          r="4"
+          fill="#ff1f1f"
+          stroke="#ffffff"
+          stroke-width="1.5"
+          vector-effect="non-scaling-stroke"
+        />
+
       </g>
       <g
         id="noroeste"
         inkscape:groupmode="layer"
         inkscape:label="noroeste"
-        :class="layerClass('noroeste')"
         style="display:inline;stroke:#000000;stroke-opacity:0.6;stroke-width:2.0;stroke-dasharray:none"
-        @mouseenter="onEnter('noroeste')"
-        @mouseleave="onLeave"
       >
         <path
           id="path116"
@@ -1192,15 +1176,24 @@ function onLeave() {
           stroke-miterlimit="10"
           style="stroke-width:2.0;stroke-dasharray:none;stroke:#000000;stroke-opacity:0.6"
         />
+        <circle
+          id="punto-centro-noroeste"
+          inkscape:label="punto-centro-noroeste"
+          cx="89.649"
+          cy="265.916"
+          r="4"
+          fill="#ff1f1f"
+          stroke="#ffffff"
+          stroke-width="1.5"
+          vector-effect="non-scaling-stroke"
+        />
+
       </g>
       <g
         id="fluvial"
         inkscape:groupmode="layer"
         inkscape:label="fluvial"
-        :class="layerClass('fluvial')"
         style="display:inline;stroke:#000000;stroke-width:2.0;stroke-dasharray:none;stroke-opacity:0.6"
-        @mouseenter="onEnter('fluvial')"
-        @mouseleave="onLeave"
       >
         <path
           id="path49"
@@ -1247,63 +1240,29 @@ function onLeave() {
           fill="#f6baa2"
           style="stroke:#000000;stroke-width:2.0;stroke-dasharray:none;stroke-opacity:0.6"
         />
+        <circle
+          id="punto-centro-fluvial"
+          inkscape:label="punto-centro-fluvial"
+          cx="317.951"
+          cy="55.481"
+          r="4"
+          fill="#ff1f1f"
+          stroke="#ffffff"
+          stroke-width="1.5"
+          vector-effect="non-scaling-stroke"
+        />
+
       </g>
+      <g id="debug-centros-regiones" inkscape:label="debug-centros-regiones">
+        <text x="14" y="24" font-size="12" fill="#333">centro-sur: (276.819, 378.605)</text>
+        <text x="14" y="40" font-size="12" fill="#333">fluvial: (317.951, 55.481)</text>
+        <text x="14" y="56" font-size="12" fill="#333">este: (433.082, 292.827)</text>
+        <text x="14" y="72" font-size="12" fill="#333">noroeste: (89.649, 265.916)</text>
+        <text x="14" y="88" font-size="12" fill="#333">norte: (221.791, 107.03)</text>
+        <text x="14" y="104" font-size="12" fill="#333">costa-maritima: (356.672, 421.306)</text>
+        <text x="14" y="120" font-size="12" fill="#333">centro-norte: (268.924, 225.853)</text>
+        <text x="14" y="136" font-size="12" fill="#333">sudoeste: (107.699, 540.044)</text>
+        <text x="14" y="152" font-size="12" fill="#333">region-metropolitana: (382.137, 150.751)</text>
+      </g>
+
     </svg>
-
-    <div
-      v-for="badge in regionBadges"
-      :key="badge.slug"
-      class="map-badge"
-      :style="{
-        left: `${(badge.x / mapWidth) * 100}%`,
-        top: `${(badge.y / mapHeight) * 100}%`
-      }"
-    >
-      <UBadge
-        :color="hovered === badge.slug ? 'primary' : 'secondary'"
-        variant="solid"
-        class="map-badge__content rounded-full"
-      >
-        {{ badge.name }}
-      </UBadge>
-    </div>
-  </div>
-</template>
-
-<style scoped>
-.map-wrapper {
-  position: relative;
-  width: 100%;
-}
-
-.map-svg {
-  display: block;
-  width: 100%;
-  height: auto;
-}
-
-.region-layer {
-  cursor: pointer;
-  transition: opacity 0.2s ease, filter 0.2s ease;
-}
-
-.region-layer.is-active {
-  filter: brightness(1.08) drop-shadow(0 2px 4px rgb(0 0 0 / 0.35));
-}
-
-.region-layer.is-dimmed {
-  opacity: 0.4;
-}
-
-.map-badge {
-  position: absolute;
-  z-index: 3;
-  transform: translate(-50%, -50%);
-  pointer-events: none;
-}
-
-.map-badge__content {
-  white-space: nowrap;
-  box-shadow: 0 2px 8px rgb(0 0 0 / 0.18);
-}
-</style>

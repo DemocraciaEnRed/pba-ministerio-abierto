@@ -1,3 +1,5 @@
+import type { AgendaItemState } from '../../../prisma/generated/enums'
+
 export type RegionalMeetingAgendaItemView = 'public' | 'admin'
 
 type AgendaItemRegion = {
@@ -11,7 +13,7 @@ type AgendaItemEntity = {
   location: string
   heldAt: Date
   year: number | null
-  held: boolean
+  state: AgendaItemState
   highlighted: boolean
   registrationUrl: string | null
   createdAt: Date
@@ -30,7 +32,7 @@ export interface PublicRegionalMeetingAgendaItemDTO {
   location: string
   heldAt: string
   year: number | null
-  held: boolean
+  state: AgendaItemState
   highlighted: boolean
   registrationUrl: string | null
   region: AgendaItemRegionDTO
@@ -52,7 +54,7 @@ export function serializeRegionalMeetingAgendaItem(
     location: item.location,
     heldAt: item.heldAt.toISOString(),
     year: item.year,
-    held: item.held,
+    state: item.state,
     highlighted: item.highlighted,
     registrationUrl: item.registrationUrl,
     region: {

@@ -29,6 +29,7 @@ const initialValues = computed<TopicFormInitialValues | null>(() => {
     title: topic.value.title,
     summary: topic.value.summary,
     body: topic.value.body,
+    commentsEnabled: topic.value.commentsEnabled,
     commentsGuidance: topic.value.commentsGuidance,
     mechanismType: topic.value.mechanismType,
     participationStartsAt: topic.value.participationStartsAt,

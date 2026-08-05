@@ -187,3 +187,12 @@
   background-size: cover;
   background-position: center;
 }
+
+/* Prose overrides */
+.prose p img {
+  @apply rounded-md max-h-100 mr-auto ;
+}
+/* Apply style in the p that wraps img  
+.prose p:has(img) {
+  @apply flex justify-center items-center border border-neutral-200 dark:border-neutral-700 rounded-lg p-4 bg-accented/25;
+} */
