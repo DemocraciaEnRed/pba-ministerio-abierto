@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { consultationTypeAllowsRegion } from '#shared/data/consultation-types'
+
 definePageMeta({
   layout: 'consultas-control-panel',
   middleware: 'consultation-manager'
@@ -61,14 +63,16 @@ function formatDate(value: string | null | undefined): string {
 
 const formatLabel = computed(() => consultation.value?.consultationFormat === 'single' ? 'Única' : 'Múltiple')
 
-// Recordatorio no bloqueante: falta clasificar la consulta (sección/ejes de gestión/etiquetas).
+const requiresRegionByType = computed(() => consultationTypeAllowsRegion(consultation.value?.section?.slug))
+const needsRegionClassification = computed(() => requiresRegionByType.value && !consultation.value?.region)
+
+// Recordatorio no bloqueante: falta definir tipo de consulta y/o región cuando corresponde.
 const missingClassification = computed(() => {
   const c = consultation.value
   if (!c) return [] as string[]
   const missing: string[] = []
-  if (!c.section) missing.push('sección')
-  if (!c.categories?.length) missing.push('ejes de gestión')
-  if (!c.tags?.length) missing.push('etiquetas')
+  if (!c.section) missing.push('el tipo de consulta')
+  if (needsRegionClassification.value) missing.push('la región')
   return missing
 })
 
@@ -77,6 +81,16 @@ const classificationHint = computed(() => {
   if (items.length === 0) return ''
   if (items.length === 1) return items[0]
   return `${items.slice(0, -1).join(', ')} ni ${items[items.length - 1]}`
+})
+
+const classificationDescription = computed(() => {
+  const base = `Todavía no definiste ${classificationHint.value}. No es obligatorio, pero ayuda a que la consulta aparezca mejor en el listado público y los filtros.`
+
+  if (needsRegionClassification.value) {
+    return `${base} En Encuentros Regionales es importante asignar la región desde Clasificación.`
+  }
+
+  return base
 })
 </script>
 
@@ -105,8 +119,18 @@ const classificationHint = computed(() => {
         variant="subtle"
         class="mb-6"
         title="Completá la clasificación de la consulta"
-        :description="`Todavía no definiste ${classificationHint}. No es obligatorio, pero ayuda a que la consulta aparezca mejor en el listado público y los filtros.`"
+        :description="classificationDescription"
         :actions="[{ label: 'Completar clasificación', icon: 'i-lucide-shapes', color: 'warning', variant: 'soft', to: `/consultas/${slug}/panel/clasificacion` }]"
+      />
+      <UAlert
+        v-if="consultation?.visibility === 'hidden'"
+        icon="i-lucide-eye-off"
+        color="neutral"
+        variant="subtle"
+        class="mb-6"
+        title="La consulta está oculta"
+        description="Mientras esté en estado Oculta, la ciudadanía no la va a ver en el sitio público."
+        :actions="[{ label: 'Ir a configuración', icon: 'i-lucide-settings-2', color: 'neutral', variant: 'soft', to: `/consultas/${slug}/panel/configuracion` }]"
       />
       <div class="space-y-8">
         <section class="space-y-3">
