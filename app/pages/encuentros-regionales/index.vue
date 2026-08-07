@@ -198,36 +198,22 @@ const comoHacemosPageSectionUi: ThemeUI['pageSection'] = {
       <UPage>
         <UPageBody>
           <div class="flex flex-col-reverse md:flex-row justify-center gap-6">
-            <div class="w-9/12 sm:w-6/12 mx-auto md:w-8/12 lg:w-5/12">
+            <div class="w-9/12 sm:w-6/12 mx-auto md:w-8/12 lg:w-5/12 relative">
               <EncuentrosRegionalesMapSelector />
             </div>
             <div class="w-full space-y-6">
               <div class="space-y-2">
-                <h1 class="text-2xl sm:text-3xl lg:text-4xl text-pretty tracking-tight font-extrabold text-primary uppercase text-left">
+                <h1 class="text-2xl sm:text-3xl lg:text-4xl text-pretty tracking-tight font-extrabold text-primary uppercase text-left lg:text-center">
                   Participá de los encuentros regionales
                 </h1>
               </div>
               <div class="px-4 lg:px-6 bg-elevated/35 border border-default rounded-lg shadow-lg">
                 <EncuentrosRegionalesAgendaTimeline />
               </div>
-              <p class="text-secondary text-lg md:text-2xl font-semibold mt-10">
-                Tu voz cuenta. El desarrollo de la Provincia se logra entre todos y todas.
+              <p class="text-secondary text-lg md:text-2xl font-semibold mt-10 lg:text-center">
+                ¡Sumate para que podamos construir colectivamente la agenda de desarrollo para la región!
               </p>
             </div>
-          </div>
-          <div class="space-y-6 mx-auto text-left md:text-justify">
-            <h1 class="text-2xl sm:text-3xl lg:text-4xl text-pretty tracking-tight font-extrabold text-primary">
-              Regionalización de la PBA en el marco del PEI
-            </h1>
-            <p class="leading-7 text-neutral-700 dark:text-neutral-300">
-              En la Provincia, los criterios de regionalización son múltiples y suelen ser utilizados por distintos organismos para <span class="font-bold text-highlighted">planificar políticas públicas</span>. En este caso, se toma como base la propuesta publicada por el Ministerio de Economía bonaerense en el estudio "Programación del Desarrollo Territorial. Diagnóstico preliminar y líneas de acción (2011-2012)", que delimitó regiones económico-productivas desde una perspectiva político-administrativa.
-            </p>
-            <p class="leading-7 text-neutral-700 dark:text-neutral-300">
-              A partir de este esquema, se introdujeron ajustes orientados a favorecer la complementariedad productiva y social, con el objetivo de que sirvan como <span class="font-bold text-highlighted">insumo para la construcción de iniciativas de infraestructura integrales</span> que superen la capacidad de acción aislada de cada gobierno local. Esta organización territorial no restringe la realización de intervenciones fuera de sus límites; por el contrario, pretende articular esfuerzos para potenciar el desarrollo territorial y la eficacia de las políticas públicas, respetando las especificidades locales.
-            </p>
-            <p class="leading-7 text-neutral-700 dark:text-neutral-300">
-              El criterio adoptado agrupó municipios en regiones homogéneas y compactas desde el punto de vista socioeconómico, dando como resultado una división del territorio en las <span class="font-bold text-highlighted">9 regiones</span> indicadas en el mapa disponible en este sitio.
-            </p>
           </div>
         </UPageBody>
       </UPage>

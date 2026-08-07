@@ -69,13 +69,11 @@ const themeUi: ThemeUI = {
       orientation="horizontal"
       reverse
     >
-      <!-- <template #description>
+      <template #description>
         <p class="">
-          Espacios participativos para conocer las intervenciones del<br>
-          <span class="block font-semibold md:inline">Ministerio de Infraestructura y Servicios Públicos</span>
-          en tu región
+          Instancias participativas para difundir los proyectos de obras en el territorio y generar retroalimentación con la población.
         </p>
-      </template> -->
+      </template>
       <UIcon
         name="pba:consultas-publicas"
         class="size-40 shrink-0 text-white sm:size-40 md:size-52 lg:size-60"
@@ -86,10 +84,13 @@ const themeUi: ThemeUI = {
         <UPageBody>
           <div class="max-w-3xl mx-auto py-12 space-y-6">
             <p class="leading-7 text-neutral-700 dark:text-neutral-300">
-              Una consulta pública es un proceso de diálogo continuo donde se proporciona información relevante sobre un proyecto y se recogen opiniones, preocupaciones y aportes de las partes interesadas, con el objetivo de incidir en su diseño e implementación. No es un requisito formal, sino una herramienta clave para lograr proyectos sostenibles, legítimos y socialmente aceptados.
+              Una consulta pública es un proceso participativo no vinculante, en el que se proporciona información relevante sobre un proyecto, sus características e impactos y se recogen opiniones, preocupaciones y aportes de las partes interesadas.
             </p>
             <p class="leading-7 text-neutral-700 dark:text-neutral-300">
-              Estas instancias permiten identificar impactos sociales y ambientales de los proyectos, mejorar la calidad del diseño y la implementación, y contribuir a la generación de confianza y legitimidad en la comunidad.
+              Tiene como objetivo brindar información clara, transparente y oportuna durante la fase de diseño del Proyecto, y promover la retroalimentación con la población . Es un requisito en el marco de las obras financiadas por organismos internacionales de crédito, y constituye una herramienta clave para lograr proyectos sostenibles, legítimos y socialmente adecuados.
+            </p>
+            <p class="leading-7 text-neutral-700 dark:text-neutral-300">
+              Estas instancias permiten identificar impactos sociales y ambientales de los proyectos no detectados originalmente, mejorar la calidad del diseño y la implementación, y contribuir a la generación de confianza y legitimidad en la comunidad.
             </p>
             <UAccordion
               v-model="openFaq"
@@ -101,6 +102,8 @@ const themeUi: ThemeUI = {
         </UPageBody>
       </UPage>
     </UContainer>
+    <USeparator />
+    <ConsultasSeccionListado section-slug="consultas-publicas" />
   </UTheme>
 </template>
 
