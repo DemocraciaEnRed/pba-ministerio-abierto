@@ -55,6 +55,11 @@ export const CommentsThreadQuerySchema = z.object({
   view: z.enum(['thread']).optional()
 })
 
+// Rango temporal del panel de actividad de comentarios.
+export const CommentMetricsQuerySchema = z.object({
+  range: z.enum(['7d', '14d', 'month', 'all'], { message: 'Rango inválido' }).default('14d')
+})
+
 // Paginado del hilo de respuestas de un comentario (carga bajo demanda, 5 por página).
 export const RepliesQuerySchema = z.object({
   page: z.coerce.number().int('La página debe ser un entero').min(1, 'La página mínima es 1').default(1),
@@ -68,4 +73,5 @@ export type CommentReactionInput = z.output<typeof CommentReactionSchema>
 export type CommentsModerationQueryInput = z.output<typeof CommentsModerationQuerySchema>
 export type TopicCommentsModerationQueryInput = z.output<typeof TopicCommentsModerationQuerySchema>
 export type CommentsThreadQueryInput = z.output<typeof CommentsThreadQuerySchema>
+export type CommentMetricsQueryInput = z.output<typeof CommentMetricsQuerySchema>
 export type RepliesQueryInput = z.output<typeof RepliesQuerySchema>

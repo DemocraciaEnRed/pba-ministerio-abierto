@@ -16,7 +16,8 @@ interface InitialCategory {
 
 const props = defineProps<{
   consultationId: number
-  initialSectionId: number | null
+  sectionId: number | null
+  sectionName: string | null
   initialCategories: InitialCategory[]
   initialTags: TaxonomyOption[]
 }>()
@@ -28,11 +29,6 @@ const emit = defineEmits<{
 const toast = useToast()
 const saving = ref(false)
 
-const { data: sections, status: sectionsStatus } = await useAsyncData(
-  'admin-sections',
-  () => $fetch<TaxonomyOption[]>('/api/sections')
-)
-
 const { data: categories, status: categoriesStatus } = await useAsyncData(
   'admin-categories',
   () => $fetch<CategoryOption[]>('/api/categories')
@@ -43,45 +39,24 @@ const { data: tags, status: tagsStatus } = await useAsyncData(
   () => $fetch<TaxonomyOption[]>('/api/tags')
 )
 
-const selectedSectionId = ref<number>(0)
 const selectedCategoryIds = ref<number[]>([])
 const primaryCategoryId = ref<number>(0)
 const selectedTagIds = ref<number[]>([])
 
 function hydrate() {
-  selectedSectionId.value = props.initialSectionId ?? 0
   selectedCategoryIds.value = props.initialCategories.map(category => category.id)
   primaryCategoryId.value = props.initialCategories.find(category => category.isPrimary)?.id ?? 0
   selectedTagIds.value = props.initialTags.map(tag => tag.id)
 }
 
-watch(() => [props.initialSectionId, props.initialCategories, props.initialTags], hydrate, { immediate: true, deep: true })
+watch(() => [props.initialCategories, props.initialTags], hydrate, { immediate: true, deep: true })
 
-const sectionItems = computed(() => [
-  { label: 'Sin sección', value: 0 },
-  ...(sections.value ?? []).map(section => ({ label: section.name, value: section.id }))
-])
-
-// Las categorías dependen de la sección: solo se listan las de la sección elegida.
+// Las categorías dependen del tipo de consulta: solo se listan las de su sección.
 const categoryItems = computed(() => {
-  if (selectedSectionId.value === 0) return []
+  if (props.sectionId === null) return []
   return (categories.value ?? [])
-    .filter(category => category.sectionId === selectedSectionId.value)
+    .filter(category => category.sectionId === props.sectionId)
     .map(category => ({ label: category.name, value: category.id }))
-})
-
-// Al cambiar la sección, se quitan las categorías que no pertenecen a ella.
-watch(selectedSectionId, (sectionId) => {
-  if (sectionId === 0) {
-    selectedCategoryIds.value = []
-    return
-  }
-  const validIds = new Set(
-    (categories.value ?? [])
-      .filter(category => category.sectionId === sectionId)
-      .map(category => category.id)
-  )
-  selectedCategoryIds.value = selectedCategoryIds.value.filter(id => validIds.has(id))
 })
 
 const tagItems = computed(() =>
@@ -107,11 +82,6 @@ watch(selectedCategoryIds, (ids) => {
 async function save() {
   saving.value = true
   try {
-    await $fetch(`/api/consultations/${props.consultationId}/section`, {
-      method: 'PUT',
-      body: { sectionId: selectedSectionId.value === 0 ? null : selectedSectionId.value }
-    })
-
     const categoriesPayload = selectedCategoryIds.value.map((id, index) => ({
       categoryId: id,
       isPrimary: id === primaryCategoryId.value,
@@ -129,7 +99,7 @@ async function save() {
     })
 
     toast.add({
-      title: 'Sección, ejes de gestión y etiquetas actualizados',
+      title: 'Ejes de gestión y etiquetas actualizados',
       color: 'success'
     })
     emit('saved')
@@ -148,20 +118,18 @@ async function save() {
 
 <template>
   <UCard
-    title="Sección, ejes de gestión y etiquetas"
-    description="Seguí el orden: elegí la sección, luego sus ejes de gestión, el eje de gestión principal y las etiquetas."
+    title="Ejes de gestión y etiquetas"
+    description="Clasificá la consulta dentro de su tipo: elegí los ejes de gestión, el principal y las etiquetas."
   >
     <div class="space-y-6">
       <UFormField
         orientation="vertical"
-        label="Sección"
-        description="Contenedor de nivel superior al que pertenece la consulta (opcional)."
+        label="Tipo de consulta"
+        description="Se fija al crear la consulta y no se puede modificar."
       >
-        <USelect
-          v-model="selectedSectionId"
-          :items="sectionItems"
-          value-key="value"
-          :loading="sectionsStatus === 'pending'"
+        <UInput
+          :model-value="sectionName ?? 'Sin tipo asignado'"
+          disabled
           class="w-full"
         />
       </UFormField>
@@ -169,16 +137,16 @@ async function save() {
       <UFormField
         orientation="vertical"
         label="Ejes de gestión"
-        :description="selectedSectionId === 0 ? 'Elegí primero una sección para ver sus ejes de gestión.' : 'Clasificá la consulta con uno o varios ejes de gestión de la sección.'"
+        :description="sectionId === null ? 'La consulta no tiene un tipo asignado, así que no hay ejes de gestión disponibles.' : 'Clasificá la consulta con uno o varios ejes de gestión de su tipo.'"
       >
         <USelectMenu
           v-model="selectedCategoryIds"
           :items="categoryItems"
           value-key="value"
           multiple
-          :disabled="selectedSectionId === 0"
+          :disabled="sectionId === null"
           :loading="categoriesStatus === 'pending'"
-          :placeholder="selectedSectionId === 0 ? 'Seleccioná una sección primero' : 'Elegí ejes de gestión'"
+          :placeholder="sectionId === null ? 'Sin tipo asignado' : 'Elegí ejes de gestión'"
           class="w-full"
         />
       </UFormField>
@@ -217,7 +185,7 @@ async function save() {
     <template #footer>
       <div class="flex justify-end">
         <UButton
-          label="Guardar sección, ejes de gestión y etiquetas"
+          label="Guardar ejes de gestión y etiquetas"
           icon="i-lucide-save"
           :loading="saving"
           @click="save"

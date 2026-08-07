@@ -1,3 +1,4 @@
+import { consultationTypeAllowsRegion } from '#shared/data/consultation-types'
 import { SetConsultationRegionSchema } from '#shared/schemas/consultation'
 import { resolveConsultationIdFromParam } from '~~/server/utils/consultations/slug'
 import { serializeRegion } from '~~/server/utils/serializers/region'
@@ -10,7 +11,7 @@ export default defineEventHandler(async (event) => {
 
   const consultation = await prisma.consultation.findUnique({
     where: { id: consultationId },
-    select: { id: true }
+    select: { id: true, section: { select: { slug: true } } }
   })
 
   if (!consultation) {
@@ -20,7 +21,15 @@ export default defineEventHandler(async (event) => {
     })
   }
 
+  // Limpiar la región siempre se permite (hay consultas legacy con región incompatible).
   if (body.regionId !== null) {
+    if (!consultationTypeAllowsRegion(consultation.section?.slug)) {
+      throw createError({
+        statusCode: 422,
+        message: 'Este tipo de consulta no admite región'
+      })
+    }
+
     const region = await prisma.region.findUnique({
       where: { id: body.regionId },
       select: { id: true }

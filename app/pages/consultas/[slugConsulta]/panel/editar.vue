@@ -44,6 +44,8 @@ const initialValues = computed<ConsultationFormInitialValues | null>(() => {
   return {
     slug: consultation.value.slug,
     title: consultation.value.title,
+    sectionId: consultation.value.section?.id ?? null,
+    sectionName: consultation.value.section?.name ?? null,
     summary: consultation.value.summary,
     body: consultation.value.body,
     consultationFormat: consultation.value.consultationFormat,

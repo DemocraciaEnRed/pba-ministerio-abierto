@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { isKnownConsultationTypeSlug } from '#shared/data/consultation-types'
 import { CreateConsultationSchema, UpdateConsultationSchema } from '#shared/schemas/consultation'
 
 type ConsultationFormat = 'single' | 'multiple'
@@ -7,6 +8,8 @@ type ResultsVisibility = 'hidden' | 'participants_only' | 'public'
 export interface ConsultationFormInitialValues {
   slug: string
   title: string
+  sectionId?: number | null
+  sectionName?: string | null
   summary: string | null
   body: string | null
   consultationFormat: ConsultationFormat
@@ -21,6 +24,7 @@ export interface ConsultationFormInitialValues {
 export interface ConsultationFormPayload {
   slug: string
   title: string
+  sectionId: number | null
   summary: string | null
   body: string | null
   consultationFormat: ConsultationFormat
@@ -60,6 +64,7 @@ const emit = defineEmits<{
 const form = reactive({
   slug: '',
   title: '',
+  sectionId: undefined as number | undefined,
   summary: '',
   body: '' as string | null,
   consultationFormat: 'multiple' as ConsultationFormat,
@@ -88,6 +93,19 @@ const visibilityOptions = [
   { label: 'Públicos', value: 'public' }
 ] satisfies { label: string, value: ResultsVisibility }[]
 
+// El tipo se elige una sola vez, en el alta: define qué estructura habilita la consulta.
+const { data: sections } = useAsyncData(
+  'consultation-form-sections',
+  () => $fetch<Array<{ id: number, slug: string, name: string }>>('/api/sections'),
+  { default: () => [], immediate: props.mode === 'create' }
+)
+
+const sectionOptions = computed(() =>
+  (sections.value ?? [])
+    .filter(section => isKnownConsultationTypeSlug(section.slug))
+    .map(section => ({ label: section.name, value: section.id }))
+)
+
 function slugify(value: string): string {
   return value
     .toLowerCase()
@@ -101,6 +119,7 @@ function slugify(value: string): string {
 function hydrate(values: ConsultationFormInitialValues | null) {
   form.slug = values?.slug ?? ''
   form.title = values?.title ?? ''
+  form.sectionId = values?.sectionId ?? undefined
   form.summary = values?.summary ?? ''
   form.body = values?.body ?? ''
   // Formato y visibilidad quedan fijos temporalmente (solo 'multiple'/'public' soportados).
@@ -138,6 +157,7 @@ function buildPayload(): ConsultationFormPayload {
   return {
     slug: form.slug.trim(),
     title: form.title.trim(),
+    sectionId: form.sectionId ?? null,
     summary: form.summary.trim() || null,
     body: (form.body ?? '').trim() || null,
     consultationFormat: form.consultationFormat,
@@ -318,6 +338,30 @@ const titleMax = 180
           v-model="form.consultationFormat"
           :items="formatOptions"
           value-key="value"
+          disabled
+          class="w-full"
+        />
+      </UFormField>
+
+      <UFormField
+        label="Tipo de consulta"
+        :description="mode === 'create'
+          ? 'Define la estructura de la consulta y sus ejes de gestión. No se puede cambiar después.'
+          : 'El tipo se fija al crear la consulta y no se puede modificar.'"
+        :required="mode === 'create'"
+        :error="errors.sectionId"
+      >
+        <USelect
+          v-if="mode === 'create'"
+          v-model="form.sectionId"
+          :items="sectionOptions"
+          value-key="value"
+          placeholder="Elegí un tipo de consulta"
+          class="w-full"
+        />
+        <UInput
+          v-else
+          :model-value="initialValues?.sectionName ?? 'Sin tipo asignado'"
           disabled
           class="w-full"
         />

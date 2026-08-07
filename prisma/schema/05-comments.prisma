@@ -33,6 +33,8 @@ model Comment {
 
   @@index([consultationId, moderationStatus])
   @@index([topicId, moderationStatus])
+  @@index([consultationId, createdAt])
+  @@index([topicId, createdAt])
   @@index([authorUserId])
   @@index([parentCommentId])
 }

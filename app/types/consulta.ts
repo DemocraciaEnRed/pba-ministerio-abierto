@@ -132,6 +132,7 @@ export interface TopicParentConsultation {
   slug: string
   title: string
   visibility: Visibility
+  startsAt: string | null
   participationState: ParticipationState
 }
 
@@ -276,4 +277,27 @@ export interface PaginationMeta {
 export interface CommentRepliesResponse {
   items: PublicComment[]
   pagination: PaginationMeta
+}
+
+/** Ventana temporal del panel de actividad de comentarios. */
+export type CommentMetricsRange = '7d' | '14d' | 'month' | 'all'
+
+/**
+ * Métricas agregadas de comentarios de un alcance (una consulta o un tipo de
+ * consulta), tal como las devuelven los endpoints de panel.
+ */
+export interface CommentMetrics {
+  range: CommentMetricsRange
+  from: string | null
+  to: string
+  total: number
+  topLevel: number
+  replies: number
+  hidden: number
+  deleted: number
+  previousTotal: number | null
+  deltaAbs: number | null
+  deltaPct: number | null
+  allTimeTotal: number
+  lastCommentAt: string | null
 }

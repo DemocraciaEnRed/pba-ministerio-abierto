@@ -121,6 +121,7 @@ export default defineEventHandler(async (event) => {
     slug: consultation.slug,
     title: consultation.title,
     visibility: consultation.visibility,
+    startsAt: consultation.startsAt?.toISOString() ?? null,
     participationState: deriveParticipationState({
       startsAt: consultation.startsAt,
       endsAt: consultation.endsAt

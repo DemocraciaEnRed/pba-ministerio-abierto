@@ -48,18 +48,25 @@ const accessCards: (PageCardProps & { to: string })[] = [
       title="Administración de Encuentros Regionales"
       description="Gestione todo lo referido a los Encuentros Regionales desde este panel de administración."
     />
-    <UPageBody>
-      <UPageGrid>
-        <UPageCard
-          v-for="card in accessCards"
-          :key="card.to"
-          :title="card.title"
-          :description="card.description"
-          :icon="card.icon"
-          :to="card.to"
-          spotlight
-        />
-      </UPageGrid>
+    <UPageBody class="space-y-8">
+      <EncuentrosRegionalesPanelOverviewStats />
+
+      <section class="space-y-3">
+        <h2 class="text-sm font-medium text-muted">
+          Accesos rápidos
+        </h2>
+        <UPageGrid>
+          <UPageCard
+            v-for="card in accessCards"
+            :key="card.to"
+            :title="card.title"
+            :description="card.description"
+            :icon="card.icon"
+            :to="card.to"
+            spotlight
+          />
+        </UPageGrid>
+      </section>
     </UPageBody>
   </div>
 </template>

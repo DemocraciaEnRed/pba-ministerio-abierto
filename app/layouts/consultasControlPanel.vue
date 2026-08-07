@@ -130,24 +130,26 @@ const itemsNavigationMenu = computed<NavigationMenuItem[][]>(() => [
           <template #left>
             <UPageAside>
               <div class="space-y-2 pb-2">
-                <div class="flex justify-between items-start">
-                  <p class="text-xs font-medium uppercase text-muted">
-                    Consulta
-                  </p>
+                <div class="flex justify-between items-start gap-2">
+                  <div class="flex flex-col text-xs text-muted">
+                    <p class="">
+                      {{ consultation?.section?.name || 'Consulta' }}
+                    </p>
+                    <p class="font-medium uppercase">
+                      Instancia de participación
+                    </p>
+                  </div>
                   <UBadge
                     v-if="consultation && estadoBadge"
                     :label="estadoBadge.label"
                     :color="estadoBadge.color"
                     variant="soft"
+                    size="sm"
                   />
                 </div>
-                <ULink
-                  :to="publicView"
-                  target="_blank"
-                  class="font-semibold leading-tight text-sm"
-                >
+                <p class="font-semibold leading-tight text-sm">
                   {{ consultation?.title || slug }}
-                </ULink>
+                </p>
               </div>
               <USeparator class="my-2" />
               <UNavigationMenu

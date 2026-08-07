@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { consultationTypeAllowsRegion } from '#shared/data/consultation-types'
+
 definePageMeta({
   layout: 'consultas-control-panel',
   middleware: 'consultation-manager'
@@ -7,6 +9,8 @@ definePageMeta({
 usePrivatePageSeo('Clasificación')
 
 const { data: consultation, refresh } = useConsultationAdmin()
+
+const allowsRegion = computed(() => consultationTypeAllowsRegion(consultation.value?.section?.slug))
 </script>
 
 <template>
@@ -21,13 +25,14 @@ const { data: consultation, refresh } = useConsultationAdmin()
         <AdminConsultationTaxonomyForm
           v-if="consultation"
           :consultation-id="consultation.id"
-          :initial-section-id="consultation.section?.id ?? null"
+          :section-id="consultation.section?.id ?? null"
+          :section-name="consultation.section?.name ?? null"
           :initial-categories="consultation.categories"
           :initial-tags="consultation.tags"
           @saved="refresh"
         />
         <AdminConsultationRegionForm
-          v-if="consultation"
+          v-if="consultation && allowsRegion"
           :consultation-id="consultation.id"
           :initial-region-id="consultation.region?.id ?? null"
           @saved="refresh"

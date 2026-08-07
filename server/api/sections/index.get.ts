@@ -1,3 +1,4 @@
+import { CONSULTATION_TYPE_SLUGS } from '#shared/data/consultation-types'
 import { serializeSection } from '~~/server/utils/serializers/section'
 
 export default defineEventHandler(async (event) => {
@@ -9,7 +10,11 @@ export default defineEventHandler(async (event) => {
   }
 
   const sections = await prisma.section.findMany({
-    where: isAdmin ? undefined : { isActive: true },
+    where: {
+      // El catálogo lo define el registro tipado: filas legacy fuera de él se ignoran.
+      slug: { in: [...CONSULTATION_TYPE_SLUGS] },
+      ...(isAdmin ? {} : { isActive: true })
+    },
     orderBy: [{ displayOrder: 'asc' }, { id: 'asc' }]
   })
 

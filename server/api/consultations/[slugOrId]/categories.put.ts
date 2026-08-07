@@ -9,7 +9,7 @@ export default defineEventHandler(async (event) => {
 
   const consultation = await prisma.consultation.findUnique({
     where: { id: consultationId },
-    select: { id: true }
+    select: { id: true, sectionId: true }
   })
 
   if (!consultation) {
@@ -33,13 +33,20 @@ export default defineEventHandler(async (event) => {
         id: { in: uniqueCategoryIds },
         isActive: true
       },
-      select: { id: true }
+      select: { id: true, sectionId: true }
     })
 
     if (existingCategories.length !== uniqueCategoryIds.length) {
       throw createError({
         statusCode: 422,
         message: 'Algún eje de gestión no existe o está inactivo'
+      })
+    }
+
+    if (existingCategories.some(category => category.sectionId !== consultation.sectionId)) {
+      throw createError({
+        statusCode: 422,
+        message: 'Algún eje de gestión no pertenece al tipo de esta consulta'
       })
     }
   }
