@@ -1,4 +1,5 @@
 import type { CommentMetricsQueryInput } from '#shared/schemas/comment'
+import type { CommentWhereInput } from '~~/prisma/generated/models'
 
 export type CommentMetricsRange = CommentMetricsQueryInput['range']
 
@@ -8,7 +9,7 @@ const ARGENTINA_UTC_OFFSET_MS = 3 * 60 * 60 * 1000
 const RANGE_DAYS: Record<'7d' | '14d', number> = { '7d': 7, '14d': 14 }
 const DAY_MS = 24 * 60 * 60 * 1000
 
-export interface ConsultationCommentMetricsDTO {
+export interface CommentMetricsDTO {
   range: CommentMetricsRange
   /** Inicio de la ventana; `null` cuando el rango es histórico (`all`). */
   from: string | null
@@ -51,8 +52,18 @@ export function resolveMetricsWindow(range: CommentMetricsRange, now: Date): Met
 }
 
 /** Comentarios de la consulta y de sus temas. */
-function consultationCommentsWhere(consultationId: number) {
+export function consultationCommentsWhere(consultationId: number): CommentWhereInput {
   return { OR: [{ consultationId }, { topic: { consultationId } }] }
+}
+
+/** Comentarios de todas las consultas de un tipo de consulta (sección) y de sus temas. */
+export function sectionCommentsWhere(sectionSlug: string): CommentWhereInput {
+  return {
+    OR: [
+      { consultation: { section: { slug: sectionSlug } } },
+      { topic: { consultation: { section: { slug: sectionSlug } } } }
+    ]
+  }
 }
 
 function createdBetween(from: Date | null, to: Date) {
@@ -60,18 +71,18 @@ function createdBetween(from: Date | null, to: Date) {
 }
 
 /**
- * Métricas agregadas de comentarios de una consulta para el panel de gestión.
+ * Métricas agregadas de comentarios sobre un alcance arbitrario (una consulta,
+ * un tipo de consulta, etc.) para los paneles de gestión.
  *
  * `hidden` y `deleted` cuentan comentarios **creados** en la ventana cuyo estado
  * de moderación actual es ese: no existe una fecha de moderación para `hidden`.
  */
-export async function getConsultationCommentMetrics(
-  consultationId: number,
+export async function getCommentMetrics(
+  containerWhere: CommentWhereInput,
   range: CommentMetricsRange,
   now: Date = new Date()
-): Promise<ConsultationCommentMetricsDTO> {
+): Promise<CommentMetricsDTO> {
   const window = resolveMetricsWindow(range, now)
-  const containerWhere = consultationCommentsWhere(consultationId)
   const inWindow = { AND: [containerWhere, createdBetween(window.from, window.to)] }
 
   const [total, replies, hidden, deleted, allTimeTotal, previousTotal, lastComment] = await Promise.all([
@@ -114,4 +125,12 @@ export async function getConsultationCommentMetrics(
     allTimeTotal,
     lastCommentAt: lastComment?.createdAt.toISOString() ?? null
   }
+}
+
+export function getConsultationCommentMetrics(
+  consultationId: number,
+  range: CommentMetricsRange,
+  now: Date = new Date()
+): Promise<CommentMetricsDTO> {
+  return getCommentMetrics(consultationCommentsWhere(consultationId), range, now)
 }

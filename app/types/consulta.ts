@@ -283,10 +283,10 @@ export interface CommentRepliesResponse {
 export type CommentMetricsRange = '7d' | '14d' | 'month' | 'all'
 
 /**
- * Métricas agregadas de comentarios de una consulta, tal como las devuelve
- * `GET /api/consultations/:slug/comment-metrics` (solo gestores).
+ * Métricas agregadas de comentarios de un alcance (una consulta o un tipo de
+ * consulta), tal como las devuelven los endpoints de panel.
  */
-export interface ConsultationCommentMetrics {
+export interface CommentMetrics {
   range: CommentMetricsRange
   from: string | null
   to: string

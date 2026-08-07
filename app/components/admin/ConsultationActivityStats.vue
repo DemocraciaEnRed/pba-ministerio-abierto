@@ -1,22 +1,16 @@
 <script setup lang="ts">
-import type { CommentMetricsRange, ConsultationCommentMetrics } from '~/types/consulta'
+import type { CommentMetrics, CommentMetricsRange } from '~/types/consulta'
 
 const props = defineProps<{ slug: string }>()
 
 const range = ref<CommentMetricsRange>('14d')
-const rangeOptions: { label: string, value: CommentMetricsRange }[] = [
-  { label: 'Últimos 7 días', value: '7d' },
-  { label: 'Últimos 14 días', value: '14d' },
-  { label: 'Este mes', value: 'month' },
-  { label: 'Siempre', value: 'all' }
-]
 
 // `useRequestFetch` reenvía la cookie de sesión durante el SSR: el endpoint es
 // solo para gestores de la consulta.
 const requestFetch = useRequestFetch()
 const { data: metrics, status } = await useAsyncData(
   () => `admin-consultation-comment-metrics-${props.slug}-${range.value}`,
-  () => requestFetch<ConsultationCommentMetrics>(
+  () => requestFetch<CommentMetrics>(
     `/api/consultations/${props.slug}/comment-metrics`,
     { query: { range: range.value } }
   ),
@@ -36,9 +30,7 @@ const repliesHint = computed(() => {
   return `${Math.round((data.replies / data.total) * 100)}% del total del período`
 })
 
-const periodLabel = computed(() =>
-  range.value === 'all' ? 'histórico' : rangeOptions.find(option => option.value === range.value)?.label.toLowerCase() ?? ''
-)
+const periodLabel = computed(() => commentMetricsPeriodLabel(range.value))
 </script>
 
 <template>
@@ -57,7 +49,7 @@ const periodLabel = computed(() =>
       </div>
       <USelect
         v-model="range"
-        :items="rangeOptions"
+        :items="COMMENT_METRICS_RANGE_OPTIONS"
         size="sm"
         icon="i-lucide-calendar-range"
         class="w-44"

@@ -8,12 +8,13 @@ definePageMeta({
 
 usePrivatePageSeo('Administración')
 
-const headerButtons = ref<ButtonProps[]>([
+const headerButtons: ButtonProps[] = [
   {
     label: 'Actualizar',
-    icon: 'lucide:refresh-cw'
+    icon: 'lucide:refresh-cw',
+    onClick: () => refreshNuxtData()
   }
-])
+]
 </script>
 
 <template>
@@ -24,7 +25,7 @@ const headerButtons = ref<ButtonProps[]>([
       :links="headerButtons"
     />
     <UPageBody>
-      Contenido del panel de administración
+      <AdminPlatformOverviewStats />
     </UPageBody>
   </div>
 </template>

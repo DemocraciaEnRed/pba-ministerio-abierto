@@ -1,8 +1,23 @@
+import type { CommentMetricsRange } from '~/types/consulta'
+
 export interface DeltaIndicator {
   label: string
   /** Clase de color para el texto del indicador. */
   class: string
   icon: string
+}
+
+export const COMMENT_METRICS_RANGE_OPTIONS: { label: string, value: CommentMetricsRange }[] = [
+  { label: 'Últimos 7 días', value: '7d' },
+  { label: 'Últimos 14 días', value: '14d' },
+  { label: 'Este mes', value: 'month' },
+  { label: 'Siempre', value: 'all' }
+]
+
+/** Etiqueta en minúscula del rango, para usar dentro de una frase. */
+export function commentMetricsPeriodLabel(range: CommentMetricsRange): string {
+  if (range === 'all') return 'histórico'
+  return COMMENT_METRICS_RANGE_OPTIONS.find(option => option.value === range)?.label.toLowerCase() ?? ''
 }
 
 /**
