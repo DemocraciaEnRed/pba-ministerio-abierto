@@ -65,8 +65,8 @@ const footerColumns: FooterColumn[] = [
       },
       {
         label: 'Observatorio de Obras y Servicios Públicos',
-        disabled: true,
-        class: 'opacity-60 cursor-not-allowed pointer-events-none'
+        to: 'https://observatorio.minfra.gba.gob.ar/home',
+        target: '_blank'
       }
     ]
   },

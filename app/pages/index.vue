@@ -46,12 +46,26 @@ onMounted(() => {
 })
 
 const sectionsAsPageCards: Array<PageCardProps> = CONSULTATION_TYPES.map(type => ({
+  slug: type.slug,
   to: type.enabled && type.landingRoute ? type.landingRoute : undefined,
   icon: type.icon,
   title: type.label,
   description: type.tagline,
   class: type.enabled && type.landingRoute ? undefined : 'opacity-60 cursor-not-allowed pointer-events-none'
 }))
+
+/**
+ * 2026-08-07: Temporarely change in sectionsAsPageCards that the 'observatorio-obras-servicios' sections will
+ * take you to https://observatorio.minfra.gba.gob.ar/home so its not a dead link.
+ */
+
+const observatorioCard = sectionsAsPageCards.find(card => card.icon === 'pba:observatorio')
+
+if (observatorioCard) {
+  observatorioCard.to = 'https://observatorio.minfra.gba.gob.ar/home'
+  observatorioCard.target = '_blank'
+  observatorioCard.class = undefined
+}
 
 const themeUi: ThemeUI = {
   pageSection: {
