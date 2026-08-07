@@ -63,6 +63,23 @@ function formatDate(value: string | null | undefined): string {
 
 const formatLabel = computed(() => consultation.value?.consultationFormat === 'single' ? 'Única' : 'Múltiple')
 
+const visibilityColors: Record<Visibility, 'success' | 'warning' | 'neutral'> = {
+  visible: 'success',
+  hidden: 'warning',
+  archived: 'neutral'
+}
+
+const publicationState = computed(() => {
+  const c = consultation.value
+  if (!c) return null
+  return {
+    label: visibilityLabelsConsulta[c.visibility],
+    icon: visibilityIcons[c.visibility],
+    color: visibilityColors[c.visibility],
+    participation: participationStateBadgeConsulta(c.participationState).label
+  }
+})
+
 const requiresRegionByType = computed(() => consultationTypeAllowsRegion(consultation.value?.section?.slug))
 const needsRegionClassification = computed(() => requiresRegionByType.value && !consultation.value?.region)
 
@@ -135,9 +152,18 @@ const classificationDescription = computed(() => {
       <div class="space-y-8">
         <section class="space-y-3">
           <h2 class="text-sm font-medium text-muted">
-            Estadísticas rápidas
+            Estado de la consulta
           </h2>
           <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <AdminPanelStat
+              :icon="publicationState?.icon ?? 'lucide:eye'"
+              label="Publicación"
+              :value="publicationState?.label ?? 'Sin definir'"
+              :color="publicationState?.color ?? 'neutral'"
+              :hint="publicationState ? `Participación: ${publicationState.participation}` : undefined"
+              :to="`/consultas/${slug}/panel/configuracion`"
+            />
+
             <AdminPanelStat
               icon="i-lucide-list-tree"
               label="Temas"
@@ -150,15 +176,7 @@ const classificationDescription = computed(() => {
               icon="i-lucide-git-branch"
               label="Formato"
               :value="formatLabel"
-              :hint="consultation?.consultationFormat === 'single' ? 'Un solo espacio de participación' : 'Varios temas'"
-            />
-
-            <AdminPanelStat
-              icon="i-lucide-star"
-              label="Destacada"
-              :value="consultation?.featured ? 'Sí' : 'No'"
-              :color="consultation?.featured ? 'warning' : 'neutral'"
-              :hint="consultation?.featured ? 'Aparece resaltada' : 'No destacada'"
+              :hint="consultation?.featured ? 'Destacada en el listado' : 'Sin destacar'"
             />
 
             <AdminPanelStat
@@ -186,6 +204,8 @@ const classificationDescription = computed(() => {
             </AdminPanelStat>
           </div>
         </section>
+
+        <AdminConsultationActivityStats :slug="slug" />
 
         <section class="space-y-3">
           <div class="flex items-center justify-between">

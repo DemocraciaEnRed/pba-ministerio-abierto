@@ -278,3 +278,26 @@ export interface CommentRepliesResponse {
   items: PublicComment[]
   pagination: PaginationMeta
 }
+
+/** Ventana temporal del panel de actividad de comentarios. */
+export type CommentMetricsRange = '7d' | '14d' | 'month' | 'all'
+
+/**
+ * Métricas agregadas de comentarios de una consulta, tal como las devuelve
+ * `GET /api/consultations/:slug/comment-metrics` (solo gestores).
+ */
+export interface ConsultationCommentMetrics {
+  range: CommentMetricsRange
+  from: string | null
+  to: string
+  total: number
+  topLevel: number
+  replies: number
+  hidden: number
+  deleted: number
+  previousTotal: number | null
+  deltaAbs: number | null
+  deltaPct: number | null
+  allTimeTotal: number
+  lastCommentAt: string | null
+}
