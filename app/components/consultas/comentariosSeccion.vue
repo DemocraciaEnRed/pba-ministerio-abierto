@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { CommentOrder, PublicComment } from '~/types/consulta'
+import type { CommentOrder, ParticipationState, PublicComment } from '~/types/consulta'
 
 const props = withDefaults(
   defineProps<{
@@ -11,13 +11,33 @@ const props = withDefaults(
     commentingOpen?: boolean
     /** El usuario puede gestionar la consulta/tema (habilita autoría institucional). */
     canManage?: boolean
+    /** Estado temporal efectivo de la instancia (consulta o tema). */
+    participationState?: ParticipationState
+    /** Fecha de apertura efectiva, para anunciar cuándo se podrá comentar. */
+    opensAt?: string | null
   }>(),
   {
     topicSlug: undefined,
     commentingOpen: false,
-    canManage: false
+    canManage: false,
+    participationState: undefined,
+    opensAt: null
   }
 )
+
+const scheduled = computed(() => props.participationState === 'scheduled')
+
+const closedAlert = computed(() => scheduled.value
+  ? {
+      icon: 'i-lucide-calendar-clock',
+      title: props.opensAt
+        ? `Vas a poder comenzar a participar con comentarios el ${formatDate(props.opensAt)}`
+        : 'La instancia participativa todavía no está abierta'
+    }
+  : {
+      icon: 'i-lucide-lock',
+      title: 'Instancia participativa finalizada'
+    })
 
 const basePath = computed(() =>
   props.topicSlug
@@ -82,10 +102,10 @@ const totalSorted = computed(() => sortedItems.value.length)
     />
     <UAlert
       v-else
-      icon="i-lucide-lock"
+      :icon="closedAlert.icon"
       color="neutral"
       variant="subtle"
-      title="Instancia participativa finalizada"
+      :title="closedAlert.title"
     />
 
     <UAlert

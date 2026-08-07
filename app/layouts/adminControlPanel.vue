@@ -37,7 +37,7 @@ const itemsNavigationMenu = computed<NavigationMenuItem[][]>(() => [
       type: 'label'
     },
     {
-      label: 'Secciones',
+      label: 'Tipos de consulta',
       to: '/admin/secciones',
       icon: 'i-lucide-layout-grid',
       active: route.path.startsWith('/admin/secciones')

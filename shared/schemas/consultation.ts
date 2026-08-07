@@ -71,6 +71,8 @@ export const ConsultationsQuerySchema = z.object({
 export const CreateConsultationSchema = z.object({
   slug: slugField,
   title: titleField,
+  // El tipo de consulta se fija en el alta y después no se puede cambiar.
+  sectionId: z.int({ error: 'Elegí un tipo de consulta' }).positive('Elegí un tipo de consulta'),
   summary: textAreaField,
   body: textAreaField,
   consultationFormat: z.enum(['single', 'multiple']).default('multiple'),
@@ -132,10 +134,6 @@ export const SetConsultationTagsSchema = z.object({
   tagIds: z.array(z.int().positive('La etiqueta debe ser un ID válido')).max(50, 'No podés asignar más de 50 etiquetas')
 })
 
-export const SetConsultationSectionSchema = z.object({
-  sectionId: z.int().positive('La sección debe ser un ID válido').nullable()
-})
-
 export const SetConsultationRegionSchema = z.object({
   regionId: z.int().positive('La región debe ser un ID válido').nullable()
 })
@@ -160,6 +158,5 @@ export type UpdateConsultationFormatInput = z.output<typeof UpdateConsultationFo
 export type UpdateConsultationFeaturedInput = z.output<typeof UpdateConsultationFeaturedSchema>
 export type SetConsultationCategoriesInput = z.output<typeof SetConsultationCategoriesSchema>
 export type SetConsultationTagsInput = z.output<typeof SetConsultationTagsSchema>
-export type SetConsultationSectionInput = z.output<typeof SetConsultationSectionSchema>
 export type SetConsultationRegionInput = z.output<typeof SetConsultationRegionSchema>
 export type AssignConsultationMemberInput = z.output<typeof AssignConsultationMemberSchema>

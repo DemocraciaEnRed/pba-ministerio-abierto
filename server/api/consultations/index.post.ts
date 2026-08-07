@@ -1,3 +1,4 @@
+import { isKnownConsultationTypeSlug } from '#shared/data/consultation-types'
 import { CreateConsultationSchema } from '#shared/schemas/consultation'
 import { serializeConsultation } from '~~/server/utils/serializers/consultation'
 
@@ -14,11 +15,24 @@ export default defineEventHandler(async (event) => {
   const ctx = await getAuthContext(event)
   await assertCan(ctx, 'manage', { type: 'platform' })
 
+  const section = await prisma.section.findFirst({
+    where: { id: body.sectionId, isActive: true },
+    select: { id: true, slug: true }
+  })
+
+  if (!section || !isKnownConsultationTypeSlug(section.slug)) {
+    throw createError({
+      statusCode: 422,
+      message: 'El tipo de consulta no existe o está inactivo'
+    })
+  }
+
   try {
     const created = await prisma.consultation.create({
       data: {
         slug: body.slug,
         title: body.title,
+        sectionId: section.id,
         summary: body.summary,
         body: body.body,
         consultationFormat: body.consultationFormat,
@@ -30,7 +44,8 @@ export default defineEventHandler(async (event) => {
         resultsVisibility: body.resultsVisibility,
         createdByUserId: ctx.user!.id,
         updatedByUserId: ctx.user!.id
-      }
+      },
+      include: { section: true }
     })
 
     setResponseStatus(event, 201)

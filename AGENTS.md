@@ -17,7 +17,7 @@ Package manager is **pnpm** (`packageManager: pnpm@11.5.0`). Run `nvm use` befor
 - `pnpm db:generate` — regenerate Prisma client after schema edits
 - `pnpm db:migrate --name <nombre>` — create a local migration (uses `DATABASE_MIGRATION_URL` for the shadow DB)
 - `pnpm db:deploy` — apply pending migrations (staging/prod: never create migrations there)
-- `pnpm db:seed` — seed base users + institution (`pnpm db:seed:base` / `:institution` for subsets)
+- `pnpm db:seed` — seed base (users + consultation types + regions) + institution (`pnpm db:seed:base` / `:institution` for subsets)
 - `pnpm db:test` — test DB connectivity; `pnpm db:studio` — Prisma Studio
 - `pnpm test` — e2e backend tests (Vitest + `@nuxt/test-utils`) against the **test DB** `consultas_ciudadanas_test`. Prepare it once with `pnpm test:db:setup` (creates DB, grants, migrations, seed from `.env.test`). Tests live in `test/e2e/`.
 

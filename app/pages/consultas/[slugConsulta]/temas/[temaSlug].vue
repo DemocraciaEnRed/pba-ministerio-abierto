@@ -5,6 +5,7 @@ import type {
   ConsultationTopic,
   GalleryImage,
   MechanismType,
+  ParticipationState,
   TopicAttachment,
   TopicDetailResponse,
   TopicLink
@@ -58,6 +59,22 @@ const estadoBadge = computed(() =>
     ? topicStateBadge(tema.value.visibility, tema.value.participationState)
     : null
 )
+
+// La ventana efectiva del tema está anidada en la de su consulta: si alguna de
+// las dos todavía no arrancó, la instancia está programada y abre con la más tardía.
+const comentariosParticipationState = computed<ParticipationState | undefined>(() => {
+  if (!tema.value) return undefined
+  if (consultation.value?.participationState === 'scheduled') return 'scheduled'
+  return tema.value.participationState
+})
+
+const comentariosOpensAt = computed<string | null>(() => {
+  const inicioTema = tema.value?.participationStartsAt ?? null
+  const inicioConsulta = consultation.value?.startsAt ?? null
+  if (!inicioTema) return inicioConsulta
+  if (!inicioConsulta) return inicioTema
+  return inicioTema > inicioConsulta ? inicioTema : inicioConsulta
+})
 
 const mechanismLabels: Record<MechanismType, string> = {
   support: 'Apoyo',
@@ -272,6 +289,8 @@ const topicSections = computed<NavigationMenuItem[]>(() => {
         :topic-slug="topicSlug"
         :commenting-open="tema.participationOpen"
         :can-manage="tema.canManage"
+        :participation-state="comentariosParticipationState"
+        :opens-at="comentariosOpensAt"
       />
     </template>
   </NuxtLayout>

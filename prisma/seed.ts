@@ -10,6 +10,7 @@ import { seedRegions } from './seeds/regions'
 import { seedRegionalMeetingsAgenda } from './seeds/regional-meetings-agenda'
 import { seedRegionalMeetingsMetrics } from './seeds/regional-meetings-metrics'
 import { seedRegionalMeetingsTestimonials } from './seeds/regional-meetings-testimonials'
+import { seedSections } from './seeds/sections'
 
 type SeedProfile = 'base' | 'institution' | 'regions' | 'regional-meetings' | 'regional-meetings-metrics' | 'regional-meetings-testimonials' | 'demo'
 
@@ -21,7 +22,12 @@ const seedProfiles: Record<
   SeedProfile,
   (prisma: PrismaClient, options: SeedRunOptions) => Promise<void>
 > = {
-  'base': prisma => seedBaseUsers(prisma),
+  // Catálogo base del sistema: usuarios, tipos de consulta y regiones.
+  'base': async (prisma) => {
+    await seedBaseUsers(prisma)
+    await seedSections(prisma)
+    await seedRegions(prisma)
+  },
   'institution': prisma => seedInstitution(prisma),
   'regions': prisma => seedRegions(prisma),
   'regional-meetings': prisma => seedRegionalMeetingsAgenda(prisma),
@@ -83,7 +89,7 @@ function parseSeedArgs(): ParsedSeedArgs {
   const rawProfile = values.profile?.trim()
 
   if (!rawProfile) {
-    return { profiles: ['base', 'institution', 'regions', 'regional-meetings', 'regional-meetings-metrics'], options }
+    return { profiles: ['base', 'institution', 'regional-meetings', 'regional-meetings-metrics'], options }
   }
 
   const requested = rawProfile

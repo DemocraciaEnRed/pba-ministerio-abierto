@@ -28,6 +28,10 @@ const regions: Record<string, RegionInfo> = {
 
 const wrapper = ref<HTMLElement | null>(null)
 const hovered = ref<string | null>(null)
+const openRegionalizacion = ref(false)
+const regionalizacionTitle = 'Regionalización de la PBA en el marco del PEI'
+const regionalizacionContent
+  = 'En la Provincia, los criterios de regionalización son múltiples y suelen ser utilizados por distintos organismos para planificar políticas públicas. En este caso, se toma como base la propuesta publicada por el Ministerio de Economía bonaerense en el estudio "Programación del Desarrollo Territorial. Diagnóstico preliminar y líneas de acción (2011-2012)", que delimitó regiones económico-productivas desde una perspectiva político-administrativa.\n\nA partir de este esquema, se introdujeron ajustes orientados a favorecer la complementariedad productiva y social, con el objetivo de que sirvan como insumo para la construcción de iniciativas de infraestructura integrales que superen la capacidad de acción aislada de cada gobierno local. Esta organización territorial no restringe la realización de intervenciones fuera de sus límites; por el contrario, pretende articular esfuerzos para potenciar el desarrollo territorial y la eficacia de las políticas públicas, respetando las especificidades locales.\n\nEl criterio adoptado agrupó municipios en regiones homogéneas y compactas desde el punto de vista socioeconómico, dando como resultado una división del territorio en las 9 regiones indicadas en el mapa disponible en este sitio.'
 
 const regionBadgePoints: Record<string, RegionBadgePoint> = {
   'centro-sur': { x: 276.819, y: 378.605 },
@@ -72,7 +76,7 @@ function onLeave() {
 <template>
   <div
     ref="wrapper"
-    class="map-wrapper"
+    class="map-wrapper relative"
   >
     <svg
       id="svg180"
@@ -1249,7 +1253,15 @@ function onLeave() {
         />
       </g>
     </svg>
-
+    <div class="max-w-30 sm:max-w-50 absolute bottom-0 right-0 text-xs sm:text-sm text-neutral-700 dark:text-neutral-300">
+      <ULink
+        variant="link"
+        class="text-right hover:text-primary-600 dark:hover:text-primary-400 cursor-pointer"
+        @click="openRegionalizacion = true"
+      >
+        <UIcon name="lucide:circle-question-mark" /> Acerca de la regionalización de la Provincia
+      </ULink>
+    </div>
     <div
       v-for="badge in regionBadges"
       :key="badge.slug"
@@ -1267,6 +1279,20 @@ function onLeave() {
         {{ badge.name }}
       </UBadge>
     </div>
+    <UModal
+      v-model:open="openRegionalizacion"
+      :title="regionalizacionTitle"
+      :ui="{
+        content: 'max-w-3xl',
+        title: 'text-xl sm:text-2xl text-pretty tracking-tight font-extrabold text-primary'
+      }"
+    >
+      <template #body>
+        <p class="whitespace-pre-line text-left md:text-justify text-base leading-7 text-neutral-700 dark:text-neutral-300">
+          {{ regionalizacionContent }}
+        </p>
+      </template>
+    </UModal>
   </div>
 </template>
 

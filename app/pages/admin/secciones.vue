@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import type { ButtonProps, DropdownMenuItem } from '@nuxt/ui'
 import type { AdminSection } from '~/components/admin/SectionFormModal.vue'
 
 definePageMeta({
@@ -7,9 +6,7 @@ definePageMeta({
   middleware: 'platform-admin'
 })
 
-usePrivatePageSeo('Secciones')
-
-const toast = useToast()
+usePrivatePageSeo('Tipos de consulta')
 
 // `useRequestFetch` reenvía la cookie de sesión durante el SSR para que el
 // backend resuelva la vista admin del usuario logueado.
@@ -21,82 +18,22 @@ const { data: sections, status, refresh } = await useAsyncData('admin-sections',
 const formOpen = ref(false)
 const editingSection = ref<AdminSection | null>(null)
 
-const confirmOpen = ref(false)
-const deleteTarget = ref<AdminSection | null>(null)
-const deleting = ref(false)
-
-function openCreate() {
-  editingSection.value = null
-  formOpen.value = true
-}
-
 function openEdit(section: AdminSection) {
   editingSection.value = section
   formOpen.value = true
 }
-
-function askRemove(section: AdminSection) {
-  deleteTarget.value = section
-  confirmOpen.value = true
-}
-
-async function confirmRemove() {
-  if (!deleteTarget.value) return
-  deleting.value = true
-
-  try {
-    await $fetch(`/api/sections/${deleteTarget.value.id}`, { method: 'DELETE' })
-    toast.add({
-      title: 'Sección eliminada',
-      color: 'success'
-    })
-    confirmOpen.value = false
-    deleteTarget.value = null
-    await refresh()
-  } catch (error) {
-    toast.add({
-      title: 'No se pudo eliminar',
-      description: getErrorMessage(error),
-      color: 'error'
-    })
-  } finally {
-    deleting.value = false
-  }
-}
-
-function moreActions(section: AdminSection): DropdownMenuItem[] {
-  return [
-    {
-      label: 'Eliminar',
-      icon: 'lucide:trash-2',
-      color: 'error',
-      onClick: () => askRemove(section)
-    }
-  ]
-}
-
-const pageActions = computed<ButtonProps[]>(() => [
-  {
-    label: 'Crear',
-    icon: 'lucide:plus',
-    color: 'primary',
-    variant: 'solid',
-    onClick: () => openCreate()
-  }
-])
 </script>
 
 <template>
   <UPage>
     <UPageHeader
-      title="Secciones"
-      description="Contenedores de nivel superior que agrupan consultas y sus ejes de gestión."
-      :links="pageActions"
+      title="Tipos de consulta"
+      description="Catálogo base del sistema: define la estructura de cada consulta y agrupa sus ejes de gestión. No se crean ni se eliminan; sí podés ajustar cómo se presentan."
     />
 
     <UPageBody>
       <UPageCard v-if="status === 'pending'">
-        Cargando secciones...
+        Cargando tipos de consulta...
       </UPageCard>
 
       <AppTable
@@ -141,30 +78,14 @@ const pageActions = computed<ButtonProps[]>(() => [
               />
             </td>
             <td>
-              <UFieldGroup size="xs">
-                <UButton
-                  label="Editar"
-                  icon="lucide:pencil"
-                  color="neutral"
-                  variant="subtle"
-                  @click="openEdit(section)"
-                />
-                <UDropdownMenu
-                  :items="moreActions(section)"
-                  :content="{
-                    align: 'end',
-                    side: 'bottom',
-                    sideOffset: 8
-                  }"
-                  size="sm"
-                >
-                  <UButton
-                    color="neutral"
-                    variant="outline"
-                    icon="lucide:chevron-down"
-                  />
-                </UDropdownMenu>
-              </UFieldGroup>
+              <UButton
+                size="xs"
+                label="Editar"
+                icon="lucide:pencil"
+                color="neutral"
+                variant="subtle"
+                @click="openEdit(section)"
+              />
             </td>
           </tr>
         </template>
@@ -172,8 +93,8 @@ const pageActions = computed<ButtonProps[]>(() => [
         <template #empty>
           <UEmpty
             icon="lucide:layout-grid"
-            title="No hay secciones"
-            description="Creá la primera sección con el botón de arriba."
+            title="No hay tipos de consulta"
+            description="Corré el seed base para cargar el catálogo del sistema."
           />
         </template>
       </AppTable>
@@ -183,16 +104,6 @@ const pageActions = computed<ButtonProps[]>(() => [
       v-model:open="formOpen"
       :initial-values="editingSection"
       @saved="refresh"
-    />
-
-    <ConfirmModal
-      v-model:open="confirmOpen"
-      title="Eliminar sección"
-      :description="deleteTarget ? `¿Seguro que querés eliminar «${deleteTarget.name}»? Esta acción no se puede deshacer.` : ''"
-      confirm-label="Eliminar"
-      confirm-color="error"
-      :loading="deleting"
-      @confirm="confirmRemove"
     />
   </UPage>
 </template>

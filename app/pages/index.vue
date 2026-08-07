@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { PageCardProps, ThemeUI } from '@nuxt/ui'
+import { CONSULTATION_TYPES } from '#shared/data/consultation-types'
 
 usePageSeo({
   description: 'Ministerio Abierto reúne las instancias participativas del Ministerio de Infraestructura y Servicios Públicos de la provincia de Buenos Aires: audiencias, consultas, diálogos y el observatorio de obras y servicios públicos.',
@@ -44,39 +45,13 @@ onMounted(() => {
   })
 })
 
-const sectionsAsPageCards: Array<PageCardProps> = [
-  {
-    to: '/audiencias-publicas',
-    icon: 'pba:audiencias-publicas',
-    title: 'Audiencias públicas',
-    description: 'Conocé y seguí las audiencias públicas abiertas a la comunidad.'
-  },
-  {
-    to: '/consultas-publicas',
-    icon: 'pba:consultas-publicas',
-    title: 'Consultas públicas',
-    description: 'Sumate a las consultas ciudadanas sobre proyectos de impacto.'
-  },
-  {
-    to: '/dialogos',
-    icon: 'pba:dialogos',
-    title: 'Obras y proyectos en diálogo',
-    description: 'Formá parte para conocer el avance de obras estratégicas.'
-  },
-  {
-    icon: 'pba:encuentros-regionales',
-    title: 'Encuentros Regionales',
-    to: '/encuentros-regionales',
-    description: 'Participá para construir la agenda de desarrollo de tu región.'
-  },
-  {
-    class: 'opacity-60 cursor-not-allowed pointer-events-none',
-    to: undefined,
-    icon: 'pba:observatorio',
-    title: 'Observatorio de Obras y Servicios Públicos',
-    description: 'Espacio institucional de participación y control ciudadano.'
-  }
-]
+const sectionsAsPageCards: Array<PageCardProps> = CONSULTATION_TYPES.map(type => ({
+  to: type.enabled && type.landingRoute ? type.landingRoute : undefined,
+  icon: type.icon,
+  title: type.label,
+  description: type.tagline,
+  class: type.enabled && type.landingRoute ? undefined : 'opacity-60 cursor-not-allowed pointer-events-none'
+}))
 
 const themeUi: ThemeUI = {
   pageSection: {

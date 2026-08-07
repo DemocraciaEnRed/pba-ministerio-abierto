@@ -23,7 +23,7 @@ const items = computed<NavigationMenuItem[]>(() => [
     active: route.path.startsWith('/admin/paginas')
   },
   {
-    label: 'Secciones',
+    label: 'Tipos de consulta',
     to: '/admin/secciones',
     icon: 'i-lucide-layout-grid',
     active: route.path.startsWith('/admin/secciones')

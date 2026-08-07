@@ -388,6 +388,8 @@ const consultationPageAnchors: ComputedRef<InteractivePageAnchor[]> = computed((
         :consultation-slug="String(route.params.slugConsulta)"
         :commenting-open="commentingOpen"
         :can-manage="consultation.canManage"
+        :participation-state="consultation.participationState"
+        :opens-at="consultation.startsAt"
       />
     </template>
   </NuxtLayout>

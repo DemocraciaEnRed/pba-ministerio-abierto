@@ -180,11 +180,12 @@ Seed de datos base (Prisma 7, ejecucion explicita):
 pnpm run db:seed
 ```
 
-Por defecto corre los perfiles `base` (usuarios) e `institution` (institucion
-demo, paginas, categorias y etiquetas). Tambien se pueden correr por separado:
+Por defecto corre los perfiles `base` (usuarios, tipos de consulta y regiones) e
+`institution` (institucion demo, paginas, categorias y etiquetas). Tambien se
+pueden correr por separado:
 
 ```bash
-pnpm run db:seed:base          # solo usuarios base
+pnpm run db:seed:base          # usuarios + catalogo del sistema
 pnpm run db:seed:institution   # solo institucion y taxonomias
 ```
 

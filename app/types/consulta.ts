@@ -132,6 +132,7 @@ export interface TopicParentConsultation {
   slug: string
   title: string
   visibility: Visibility
+  startsAt: string | null
   participationState: ParticipationState
 }
 
