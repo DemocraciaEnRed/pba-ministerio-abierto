@@ -1,4 +1,13 @@
 import { sendMail } from './send'
+import type {
+  RegistrationParticipantCharacter,
+  RegistrationParticipationMode
+} from '../../../prisma/generated/enums'
+import {
+  REGISTRATION_CHARACTER_LABELS,
+  REGISTRATION_PARTICIPATION_MODE_LABELS,
+  REGISTRATION_PRIVACY_NOTICE
+} from '#shared/data/consultation-registrations'
 
 /** Construye la URL pública de verificación de email a partir del token crudo. */
 function buildVerificationUrl(token: string): string {
@@ -74,6 +83,54 @@ export async function sendEmailChangeVerification(to: string, token: string, dis
     data: {
       displayName: displayName || null,
       changeEmailUrl: buildEmailChangeUrl(token)
+    }
+  })
+}
+
+export interface RegistrationConfirmationData {
+  displayName: string
+  consultationTitle: string
+  /** Ruta relativa de la consulta; se completa con `appUrl`. */
+  consultationUrl: string
+  formTitle: string
+  eventAt: Date
+  venueName: string
+  venueAddress: string
+  venueCity: string
+  venueProvince: string
+  participationMode: RegistrationParticipationMode | null
+  isLegalEntity: boolean
+}
+
+/** Email de confirmación de inscripción a una audiencia o consulta pública. */
+export async function sendRegistrationConfirmationEmail(to: string, data: RegistrationConfirmationData) {
+  const config = useRuntimeConfig()
+  const base = config.public.appUrl.replace(/\/$/, '')
+
+  const eventAt = new Intl.DateTimeFormat('es-AR', {
+    dateStyle: 'full',
+    timeStyle: 'short',
+    timeZone: 'America/Argentina/Buenos_Aires'
+  }).format(data.eventAt)
+
+  const character: RegistrationParticipantCharacter = data.isLegalEntity ? 'legal_entity' : 'individual'
+
+  await sendMail({
+    to,
+    subject: `Confirmamos tu inscripción: ${data.formTitle}`,
+    template: 'registration-confirmation',
+    data: {
+      displayName: data.displayName,
+      consultationTitle: data.consultationTitle,
+      consultationUrl: `${base}${data.consultationUrl}`,
+      formTitle: data.formTitle,
+      eventAt,
+      venue: `${data.venueName} — ${data.venueAddress}, ${data.venueCity}, ${data.venueProvince}`,
+      characterLabel: REGISTRATION_CHARACTER_LABELS[character],
+      participationModeLabel: data.participationMode
+        ? REGISTRATION_PARTICIPATION_MODE_LABELS[data.participationMode]
+        : null,
+      privacyNotice: REGISTRATION_PRIVACY_NOTICE
     }
   })
 }

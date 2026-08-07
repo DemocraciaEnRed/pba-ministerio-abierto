@@ -103,7 +103,14 @@ function closeSlideoverOnNavigation(event: MouseEvent, close: () => void) {
           v-bind="hero"
           id="page-hero-top"
           class="relative"
-        />
+        >
+          <template
+            v-if="$slots['hero-actions']"
+            #links
+          >
+            <slot name="hero-actions" />
+          </template>
+        </UPageHero>
       </div>
       <USeparator />
       <div

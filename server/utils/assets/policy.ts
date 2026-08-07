@@ -39,6 +39,24 @@ export function isAllowedSubmissionAttachmentMime(mimeType: string): boolean {
   return (SUBMISSION_ATTACHMENT_ALLOWED_MIME_TYPES as readonly string[]).includes(mimeType)
 }
 
+/**
+ * Instrumento que acredita la personería jurídica en el formulario de
+ * inscripción: PDF, Word o imagen escaneada, hasta 8 MB. Se sirve solo a quien
+ * administra la consulta por un endpoint protegido.
+ */
+export const REGISTRATION_PROOF_MAX_SIZE_BYTES = 8 * MB
+export const REGISTRATION_PROOF_ALLOWED_MIME_TYPES = [
+  'application/pdf',
+  'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'image/jpeg',
+  'image/png'
+] as const
+
+export function isAllowedRegistrationProofMime(mimeType: string): boolean {
+  return (REGISTRATION_PROOF_ALLOWED_MIME_TYPES as readonly string[]).includes(mimeType)
+}
+
 const mimeByMediaType: Record<MediaType, readonly string[]> = {
   image: ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml'],
   document: [
