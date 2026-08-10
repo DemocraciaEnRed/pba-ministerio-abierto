@@ -107,14 +107,14 @@ const items = computed<NavigationMenuItem[]>(() => [
         label: 'Audiencias públicas',
         to: '/audiencias-publicas',
         icon: 'pba:audiencias-publicas',
-        description: 'Conocé y seguí las audiencias públicas abiertas a la comunidad.',
+        description: 'Informate y participá en la toma de decisiones.',
         active: route.path.startsWith('/audiencias-publicas')
       },
       {
         label: 'Consultas públicas',
         to: '/consultas-publicas',
         icon: 'pba:consultas-publicas',
-        description: 'Sumate a las consultas ciudadanas sobre proyectos de impacto.',
+        description: 'Conocé e informate sobre los proyectos que impactan en tu región.',
         active: route.path.startsWith('/consultas-publicas')
       },
       {
@@ -182,14 +182,14 @@ const itemsMobile = computed<NavigationMenuItem[][]>(() => [
       label: 'Audiencias públicas',
       to: '/audiencias-publicas',
       icon: 'pba:audiencias-publicas',
-      description: 'Conocé y seguí las audiencias públicas abiertas a la comunidad.',
+      description: 'Informate y participá en la toma de decisiones.',
       active: isPathExclusivelyActive('/audiencias-publicas')
     },
     {
       label: 'Consultas públicas',
       to: '/consultas-publicas',
       icon: 'pba:consultas-publicas',
-      description: 'Sumate a las consultas ciudadanas sobre proyectos de impacto.',
+      description: 'Conocé e informate sobre los proyectos que impactan en tu región.',
       active: isPathExclusivelyActive('/consultas-publicas')
     },
     {
