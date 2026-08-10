@@ -72,9 +72,9 @@ onBeforeUnmount(() => {
 
 const statusItems: ListboxItem[] = [
   { label: 'Todas', value: 'all', icon: statusFilterIcons.all },
-  { label: 'Programados', value: 'scheduled', icon: statusFilterIcons.scheduled },
-  { label: 'Abiertos', value: 'open', icon: statusFilterIcons.open },
-  { label: 'Realizados', value: 'closed', icon: statusFilterIcons.closed },
+  { label: 'Participación programada', value: 'scheduled', icon: statusFilterIcons.scheduled },
+  { label: 'Participación abierta', value: 'open', icon: statusFilterIcons.open },
+  { label: 'Instancia participativa finalizada', value: 'closed', icon: statusFilterIcons.closed },
   { label: 'Archivadas', value: 'archived', icon: statusFilterIcons.archived }
 ]
 
@@ -209,9 +209,9 @@ const consultations = computed(() => data.value?.items ?? [])
             multiple
             :loading="sectionsStatus === 'pending'"
           />
-          <!-- Ejes de gestión -->
+          <!-- Categories -->
           <USeparator
-            label="Ejes de gestión"
+            label="Categorias"
             position="start"
           />
           <UListbox

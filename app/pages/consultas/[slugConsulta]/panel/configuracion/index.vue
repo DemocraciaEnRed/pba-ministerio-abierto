@@ -21,7 +21,7 @@ const deleting = ref(false)
 
 const visibilityOptions = [
   { label: 'Oculta', value: 'hidden', description: 'Solo la ve el equipo administrador mientras preparás la consulta.' },
-  { label: 'Visible', value: 'visible', description: 'Publicada para la ciudadanía. Requiere fecha de inicio: el estado (programado/abierto/cerrado) se calcula según las fechas.' },
+  { label: 'Visible', value: 'visible', description: 'Publicada para la ciudadanía. Requiere fecha de inicio: el estado (programada, abierta o finalizada) se calcula según las fechas.' },
   { label: 'Archivada', value: 'archived', description: 'Finaliza y archiva la consulta. La participación queda cerrada.' }
 ] satisfies (RadioGroupItem & { value: Visibility })[]
 
@@ -45,9 +45,9 @@ const missingStartDate = computed(() =>
 
 const participationStateLabel = computed(() => {
   const state = consultation.value?.participationState
-  if (state === 'scheduled') return 'Programado'
-  if (state === 'open') return 'Abierto'
-  if (state === 'closed') return 'Realizado'
+  if (state === 'scheduled') return 'Participación programada'
+  if (state === 'open') return 'Participación abierta'
+  if (state === 'closed') return 'Instancia participativa finalizada'
   return null
 })
 
@@ -135,7 +135,7 @@ async function removeConsultation() {
       <UCard
         variant="outline"
         title="Visibilidad de la consulta"
-        description="Controla si la consulta es pública. El estado de participación (programado, abierto o cerrado) se calcula automáticamente según las fechas."
+        description="Controla si la consulta es pública. El estado de participación (programada, abierta o finalizada) se calcula automáticamente según las fechas."
       >
         <div class="space-y-6">
           <UFormField

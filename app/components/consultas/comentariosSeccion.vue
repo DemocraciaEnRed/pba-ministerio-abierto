@@ -31,7 +31,7 @@ const closedAlert = computed(() => scheduled.value
   ? {
       icon: 'i-lucide-calendar-clock',
       title: props.opensAt
-        ? `Vas a poder comenzar a participar con comentarios el ${formatDate(props.opensAt)}`
+        ? `Podrás participar con comentarios a partir del ${formatDate(props.opensAt)}`
         : 'La instancia participativa todavía no está abierta'
     }
   : {

@@ -51,21 +51,12 @@ export const visibilityLabelsTema: Record<Visibility, string> = {
 }
 
 /**
- * Badge del estado temporal derivado (programado/abierto/realizado) de una consulta.
+ * Badge del estado temporal derivado (programada/abierta/finalizada) de participación.
  */
-export function participationStateBadgeConsulta(state: ParticipationState): EstadoBadge {
-  if (state === 'open') return { label: 'Abierto', color: 'success', icon: participationStateIcons.open }
-  if (state === 'scheduled') return { label: 'Programado', color: 'primary', icon: participationStateIcons.scheduled }
-  return { label: 'Realizado', color: 'warning', icon: participationStateIcons.closed }
-}
-
-/**
- * Badge del estado temporal derivado de un tema (variante masculina).
- */
-export function participationStateBadgeTema(state: ParticipationState): EstadoBadge {
-  if (state === 'open') return { label: 'Abierto', color: 'success', icon: participationStateIcons.open }
-  if (state === 'scheduled') return { label: 'Programado', color: 'primary', icon: participationStateIcons.scheduled }
-  return { label: 'Realizado', color: 'warning', icon: participationStateIcons.closed }
+export function participationStateBadge(state: ParticipationState): EstadoBadge {
+  if (state === 'open') return { label: 'Participación abierta', color: 'success', icon: participationStateIcons.open }
+  if (state === 'scheduled') return { label: 'Participación programada', color: 'primary', icon: participationStateIcons.scheduled }
+  return { label: 'Instancia participativa finalizada', color: 'warning', icon: participationStateIcons.closed }
 }
 
 /**
@@ -79,7 +70,7 @@ export function consultationStateBadge(
 ): EstadoBadge {
   if (visibility === 'hidden') return { label: 'Oculta', color: 'neutral', icon: visibilityIcons.hidden }
   if (visibility === 'archived') return { label: 'Archivada', color: 'neutral', icon: visibilityIcons.archived }
-  return participationStateBadgeConsulta(participationState)
+  return participationStateBadge(participationState)
 }
 
 /**
@@ -91,7 +82,7 @@ export function topicStateBadge(
 ): EstadoBadge {
   if (visibility === 'hidden') return { label: 'Oculto', color: 'neutral', icon: visibilityIcons.hidden }
   if (visibility === 'archived') return { label: 'Archivado', color: 'neutral', icon: visibilityIcons.archived }
-  return participationStateBadgeTema(participationState)
+  return participationStateBadge(participationState)
 }
 
 /**
@@ -102,12 +93,12 @@ export function topicStateBadge(
 export type AgendaItemState = ParticipationState
 
 export function agendaItemStateBadge(state: AgendaItemState): EstadoBadge {
-  return participationStateBadgeTema(state)
+  return participationStateBadge(state)
 }
 
 /** Opciones para elegir el estado de un ítem de agenda en el panel. */
 export const agendaItemStateOptions = [
-  { label: 'Programado', value: 'scheduled', icon: participationStateIcons.scheduled },
-  { label: 'Abierto', value: 'open', icon: participationStateIcons.open },
-  { label: 'Realizado', value: 'closed', icon: participationStateIcons.closed }
+  { label: 'Participación programada', value: 'scheduled', icon: participationStateIcons.scheduled },
+  { label: 'Participación abierta', value: 'open', icon: participationStateIcons.open },
+  { label: 'Instancia participativa finalizada', value: 'closed', icon: participationStateIcons.closed }
 ] satisfies { label: string, value: AgendaItemState, icon: string }[]

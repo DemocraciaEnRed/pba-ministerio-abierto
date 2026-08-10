@@ -17,22 +17,24 @@ const consultasStatuses = ref<TabsItem[]>([
   {
     label: 'Todos',
     value: 'all',
-    icon: 'lucide:list'
+    icon: 'lucide:list',
+    badge: undefined
   },
   {
-    label: 'Abiertos',
+    label: 'Participación abierta',
     value: 'open',
     icon: 'lucide:circle-play',
     badge: undefined
   },
   {
-    label: 'Programados',
+
+    label: 'Participación programada',
     value: 'scheduled',
     icon: 'lucide:calendar-days',
     badge: undefined
   },
   {
-    label: 'Realizados',
+    label: 'Instancia participativa finalizada',
     value: 'closed',
     icon: 'lucide:lock',
     badge: undefined
