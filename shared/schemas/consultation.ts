@@ -50,6 +50,8 @@ const idListField = z
       .optional()
   )
 
+const commentsEnabledField = z.boolean().default(true)
+
 export const ConsultationsQuerySchema = z.object({
   q: z.string().trim().max(120, 'El texto de búsqueda no puede superar los 120 caracteres').optional(),
   visibility: z.enum(['hidden', 'visible', 'archived']).optional(),
@@ -71,15 +73,17 @@ export const ConsultationsQuerySchema = z.object({
 export const CreateConsultationSchema = z.object({
   slug: slugField,
   title: titleField,
-  // El tipo de consulta se fija en el alta y después no se puede cambiar.
-  sectionId: z.int({ error: 'Elegí un tipo de consulta' }).positive('Elegí un tipo de consulta'),
+  // El tipo de consulta se define solo en el alta: determina qué estructura habilita.
+  sectionId: z
+    .int('El tipo de consulta debe ser un ID válido')
+    .positive('Elegí un tipo de consulta'),
   summary: textAreaField,
   body: textAreaField,
   consultationFormat: z.enum(['single', 'multiple']).default('multiple'),
   startsAt: requiredStartDateField,
   endsAt: dateField.default(null),
   closedMessage: textAreaField,
-  commentsEnabled: z.boolean().default(true),
+  commentsEnabled: commentsEnabledField,
   commentsGuidance: textAreaField.default(null),
   resultsVisibility: z.enum(['hidden', 'participants_only', 'public']).default('public')
 })
@@ -93,7 +97,7 @@ export const UpdateConsultationSchema = z.object({
   startsAt: requiredStartDateField,
   endsAt: dateField,
   closedMessage: textAreaField,
-  commentsEnabled: z.boolean().default(true),
+  commentsEnabled: commentsEnabledField,
   commentsGuidance: textAreaField.default(null),
   resultsVisibility: z.enum(['hidden', 'participants_only', 'public']),
   // Si es true, al guardar se recortan las fechas de los temas que quedan fuera
@@ -115,16 +119,16 @@ export const UpdateConsultationFeaturedSchema = z.object({
 
 export const SetConsultationCategoriesSchema = z.object({
   categories: z.array(z.object({
-    categoryId: z.int().positive('El eje de gestión debe ser un ID válido'),
+    categoryId: z.int().positive('La categoría debe ser un ID válido'),
     isPrimary: z.boolean().default(false),
     displayOrder: z.int().min(0, 'El orden no puede ser negativo').default(0)
-  })).max(20, 'No podés asignar más de 20 ejes de gestión')
+  })).max(20, 'No podés asignar más de 20 categorías')
 }).superRefine((value, ctx) => {
   const primaryCount = value.categories.filter(category => category.isPrimary).length
   if (primaryCount > 1) {
     ctx.addIssue({
       code: 'custom',
-      message: 'Solo puede haber un eje de gestión principal',
+      message: 'Solo puede haber una categoría principal',
       path: ['categories']
     })
   }
@@ -132,6 +136,10 @@ export const SetConsultationCategoriesSchema = z.object({
 
 export const SetConsultationTagsSchema = z.object({
   tagIds: z.array(z.int().positive('La etiqueta debe ser un ID válido')).max(50, 'No podés asignar más de 50 etiquetas')
+})
+
+export const SetConsultationSectionSchema = z.object({
+  sectionId: z.int().positive('La sección debe ser un ID válido').nullable()
 })
 
 export const SetConsultationRegionSchema = z.object({
@@ -158,5 +166,6 @@ export type UpdateConsultationFormatInput = z.output<typeof UpdateConsultationFo
 export type UpdateConsultationFeaturedInput = z.output<typeof UpdateConsultationFeaturedSchema>
 export type SetConsultationCategoriesInput = z.output<typeof SetConsultationCategoriesSchema>
 export type SetConsultationTagsInput = z.output<typeof SetConsultationTagsSchema>
+export type SetConsultationSectionInput = z.output<typeof SetConsultationSectionSchema>
 export type SetConsultationRegionInput = z.output<typeof SetConsultationRegionSchema>
 export type AssignConsultationMemberInput = z.output<typeof AssignConsultationMemberSchema>

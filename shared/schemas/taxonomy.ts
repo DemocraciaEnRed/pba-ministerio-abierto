@@ -21,9 +21,16 @@ const descriptionField = z
 
 const sectionIdField = z.int().positive('La sección debe ser un ID válido')
 
-// Las secciones (tipos de consulta) son catálogo del sistema: no hay alta ni baja
-// y el slug es inmutable porque define las capacidades de la consulta.
+export const CreateSectionSchema = z.object({
+  slug: slugField,
+  name: nameField,
+  description: descriptionField,
+  isActive: z.boolean().default(true),
+  displayOrder: z.int().min(0, 'El orden no puede ser negativo').default(0)
+})
+
 export const UpdateSectionSchema = z.object({
+  slug: slugField,
   name: nameField,
   description: descriptionField
 })
@@ -78,6 +85,7 @@ export const UpdateTagSchema = z.object({
   isActive: z.boolean()
 })
 
+export type CreateSectionInput = z.output<typeof CreateSectionSchema>
 export type UpdateSectionInput = z.output<typeof UpdateSectionSchema>
 export type PatchSectionInput = z.output<typeof PatchSectionSchema>
 export type CreateCategoryInput = z.output<typeof CreateCategorySchema>
