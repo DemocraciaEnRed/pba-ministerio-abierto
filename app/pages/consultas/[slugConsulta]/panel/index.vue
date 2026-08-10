@@ -76,7 +76,7 @@ const publicationState = computed(() => {
     label: visibilityLabelsConsulta[c.visibility],
     icon: visibilityIcons[c.visibility],
     color: visibilityColors[c.visibility],
-    participation: participationStateBadgeConsulta(c.participationState).label
+    participation: participationStateBadge(c.participationState).label
   }
 })
 

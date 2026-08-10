@@ -59,6 +59,11 @@ const themeUi: ThemeUI = {
     // Default description: 'text-lg sm:text-xl/8 text-muted',
     description: 'text-white text-shadow-lg',
     wrapper: 'max-w-2xl text-center lg:text-left lg:ml-0 lg:mr-full'
+  },
+  accordion: {
+    label: 'text-2xl font-bold text-primary',
+    body: 'leading-7 text-neutral-700 dark:text-neutral-300',
+    trigger: 'hover:cursor-pointer'
   }
 }
 </script>
@@ -70,13 +75,11 @@ const themeUi: ThemeUI = {
       orientation="horizontal"
       reverse
     >
-      <!-- <template #description>
+      <template #description>
         <p class="">
-          Espacios participativos para conocer las intervenciones del<br>
-          <span class="block font-semibold md:inline">Ministerio de Infraestructura y Servicios Públicos</span>
-          en tu región
+          Espacios abiertos de información y participación ciudadana para la definición de obras y servicios públicos.
         </p>
-      </template> -->
+      </template>
       <UIcon
         name="pba:audiencias-publicas"
         class="size-40 shrink-0 text-white sm:size-40 md:size-52 lg:size-60"

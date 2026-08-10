@@ -42,9 +42,9 @@ const publishingWithoutMechanism = computed(() =>
 
 const participationStateLabel = computed(() => {
   const state = topic.value?.participationState
-  if (state === 'scheduled') return 'Programado'
-  if (state === 'open') return 'Abierto'
-  if (state === 'closed') return 'Realizado'
+  if (state === 'scheduled') return 'Participación programada'
+  if (state === 'open') return 'Participación abierta'
+  if (state === 'closed') return 'Instancia participativa finalizada'
   return null
 })
 
@@ -108,7 +108,7 @@ async function saveVisibility() {
         v-else
         variant="outline"
         title="Visibilidad del tema"
-        description="Controla si el tema es público. El estado de participación (programado, abierto o cerrado) se calcula automáticamente según las fechas."
+        description="Controla si el tema es público. El estado de participación (programada, abierta o finalizada) se calcula automáticamente según las fechas."
       >
         <div class="space-y-6">
           <UFormField

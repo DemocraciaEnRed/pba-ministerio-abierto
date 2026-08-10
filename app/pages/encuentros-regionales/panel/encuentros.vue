@@ -32,9 +32,9 @@ const filterOptions = [
   { label: 'Oculta', value: 'hidden' },
   { label: 'Visible', value: 'visible' },
   { label: 'Archivada', value: 'archived' },
-  { label: 'Programado', value: 'scheduled' },
-  { label: 'Abierto', value: 'open' },
-  { label: 'Realizado', value: 'closed' }
+  { label: 'Participación programada', value: 'scheduled' },
+  { label: 'Participación abierta', value: 'open' },
+  { label: 'Instancia participativa finalizada', value: 'closed' }
 ] satisfies { label: string, value: ConsultationFilter }[]
 
 const perPageOptions = [

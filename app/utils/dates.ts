@@ -13,7 +13,7 @@ dayjs.locale('es')
  */
 export function formatDate(value: string | null | undefined): string {
   if (!value) return 'Sin definir'
-  return dayjs(value).format('D [de] MMMM [de] YYYY HH:mm')
+  return dayjs(value).format('D [de] MMMM [de] YYYY, HH:mm')
 }
 
 /**

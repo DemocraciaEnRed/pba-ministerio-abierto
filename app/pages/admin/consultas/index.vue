@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { isKnownConsultationTypeSlug } from '#shared/data/consultation-types'
 import type { AdminConsultationListItem, ParticipationState, Visibility } from '~/types/consulta'
 
 definePageMeta({
@@ -20,9 +21,16 @@ interface ConsultationsResponse {
   }
 }
 
+interface SectionOption {
+  id: number
+  slug: string
+  name: string
+}
+
 const filters = reactive({
   q: '',
   filter: 'all' as ConsultationFilter,
+  sectionSlug: 'all',
   page: 1,
   perPage: 10
 })
@@ -32,9 +40,9 @@ const filterOptions = [
   { label: 'Oculta', value: 'hidden' },
   { label: 'Visible', value: 'visible' },
   { label: 'Archivada', value: 'archived' },
-  { label: 'Programado', value: 'scheduled' },
-  { label: 'Abierto', value: 'open' },
-  { label: 'Realizado', value: 'closed' }
+  { label: 'Participación programada', value: 'scheduled' },
+  { label: 'Participación abierta', value: 'open' },
+  { label: 'Instancia participativa finalizada', value: 'closed' }
 ] satisfies { label: string, value: ConsultationFilter }[]
 
 const perPageOptions = [
@@ -56,6 +64,20 @@ function filterQuery(filter: ConsultationFilter): { visibility?: Visibility, sta
 // `useRequestFetch` reenvía la cookie de sesión durante el SSR para que el
 // backend resuelva la vista admin del usuario logueado.
 const requestFetch = useRequestFetch()
+
+const { data: sections, status: sectionsStatus } = await useAsyncData(
+  'admin-consultas-sections',
+  () => requestFetch<SectionOption[]>('/api/sections'),
+  { default: () => [] }
+)
+
+const sectionOptions = computed(() => [
+  { label: 'Todas las secciones', value: 'all' },
+  ...sections.value
+    .filter(section => isKnownConsultationTypeSlug(section.slug))
+    .map(section => ({ label: section.name, value: section.slug }))
+])
+
 const { data, status, refresh } = await useAsyncData(
   'admin-consultations',
   () => requestFetch<ConsultationsResponse>('/api/admin/consultations', {
@@ -63,19 +85,26 @@ const { data, status, refresh } = await useAsyncData(
       page: filters.page,
       perPage: filters.perPage,
       q: filters.q || undefined,
+      sectionSlug: filters.sectionSlug === 'all' ? undefined : filters.sectionSlug,
       ...filterQuery(filters.filter)
     }
   }),
   {
-    watch: [() => filters.q, () => filters.filter, () => filters.page, () => filters.perPage]
+    watch: [
+      () => filters.q,
+      () => filters.filter,
+      () => filters.sectionSlug,
+      () => filters.page,
+      () => filters.perPage
+    ]
   }
 )
 
 const consultations = computed(() => data.value?.items ?? [])
 const pagination = computed(() => data.value?.pagination)
 
-// Al cambiar búsqueda, filtro o tamaño de página volvemos a la primera página.
-watch([() => filters.q, () => filters.filter, () => filters.perPage], () => {
+// Al cambiar búsqueda, filtros o tamaño de página volvemos a la primera página.
+watch([() => filters.q, () => filters.filter, () => filters.sectionSlug, () => filters.perPage], () => {
   filters.page = 1
 })
 </script>
@@ -105,12 +134,19 @@ watch([() => filters.q, () => filters.filter, () => filters.perPage], () => {
     </UPageHeader>
 
     <UPageBody>
-      <div class="grid gap-3 md:grid-cols-4">
+      <div class="grid gap-3 md:grid-cols-5">
         <UInput
           v-model="filters.q"
           placeholder="Buscar por título o contenido"
           icon="i-lucide-search"
           class="md:col-span-2"
+        />
+        <USelect
+          v-model="filters.sectionSlug"
+          :items="sectionOptions"
+          :loading="sectionsStatus === 'pending'"
+          value-key="value"
+          class="w-full"
         />
         <USelect
           v-model="filters.filter"
