@@ -146,6 +146,12 @@ function onReplyCreated(created: PublicComment): void {
               locale="es-AR"
             />
           </span>
+          <UIcon
+            v-if="comment.hasAttachment"
+            name="i-lucide-paperclip"
+            class="size-3.5 text-muted"
+            aria-label="Incluye un archivo adjunto"
+          />
         </div>
 
         <p class="text-sm text-default whitespace-pre-line">

@@ -1,9 +1,10 @@
-import { CreateCommentSchema } from '#shared/schemas/comment'
 import {
   assertConsultationCommentingOpen,
   assertValidParent,
   commentWithRelationsInclude,
   getInstitutionName,
+  parseCommentInput,
+  persistCommentAttachment,
   resolveAuthorMode,
   resolveCommentAvatarUrl
 } from '~~/server/utils/comments'
@@ -17,7 +18,7 @@ export default defineEventHandler(async (event) => {
   await assertCan(ctx, 'participate', { type: 'consultation', id: consultationId })
   const userId = ctx.user!.id
 
-  const body = await parseBody(event, CreateCommentSchema)
+  const { data: body, attachment } = await parseCommentInput(event)
 
   const consultation = await prisma.consultation.findUnique({
     where: { id: consultationId },
@@ -36,6 +37,8 @@ export default defineEventHandler(async (event) => {
     await assertValidParent(body.parentCommentId, { consultationId, topicId: null })
   }
 
+  const attachmentAssetId = attachment ? await persistCommentAttachment(attachment, userId) : null
+
   const comment = await prisma.comment.create({
     data: {
       consultationId,
@@ -43,7 +46,8 @@ export default defineEventHandler(async (event) => {
       authorUserId: userId,
       parentCommentId: body.parentCommentId,
       body: body.body,
-      authorMode
+      authorMode,
+      attachmentAssetId
     },
     include: commentWithRelationsInclude
   })

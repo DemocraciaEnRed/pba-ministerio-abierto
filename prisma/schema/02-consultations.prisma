@@ -53,6 +53,7 @@ model Consultation {
   closure ConsultationClosure?
   comments Comment[]
   relatedLinks ConsultationRelatedLink[]
+  registrationForm ConsultationRegistrationForm?
 
   @@index([visibility])
   @@index([featured])

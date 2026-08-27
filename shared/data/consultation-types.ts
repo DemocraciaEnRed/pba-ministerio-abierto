@@ -18,6 +18,12 @@ export const CONSULTATION_TYPE_SLUGS = [
 
 export type ConsultationTypeSlug = typeof CONSULTATION_TYPE_SLUGS[number]
 
+/**
+ * Variante del formulario de inscripción. `hearing` suma la forma de
+ * participación (asistente/expositor) y la sección de exposición.
+ */
+export type RegistrationFormKind = 'hearing' | 'consultation'
+
 export interface ConsultationTypeDefinition {
   slug: ConsultationTypeSlug
   /** Nombre por defecto; el admin puede sobrescribirlo en la base. */
@@ -31,6 +37,8 @@ export interface ConsultationTypeDefinition {
   landingRoute: string | null
   /** Habilita asignar una región a las consultas de este tipo. */
   allowsRegion: boolean
+  /** Habilita crear un formulario de inscripción presencial para la consulta. */
+  registrationFormKind: RegistrationFormKind | null
   defaultConsultationFormat: 'single' | 'multiple'
   /** `false` para tipos anunciados pero todavía no lanzados. */
   enabled: boolean
@@ -46,6 +54,7 @@ export const CONSULTATION_TYPES: readonly ConsultationTypeDefinition[] = [
     icon: 'pba:audiencias-publicas',
     landingRoute: '/audiencias-publicas',
     allowsRegion: false,
+    registrationFormKind: 'hearing',
     defaultConsultationFormat: 'multiple',
     enabled: true
   },
@@ -58,6 +67,7 @@ export const CONSULTATION_TYPES: readonly ConsultationTypeDefinition[] = [
     icon: 'pba:consultas-publicas',
     landingRoute: '/consultas-publicas',
     allowsRegion: false,
+    registrationFormKind: 'consultation',
     defaultConsultationFormat: 'multiple',
     enabled: true
   },
@@ -70,6 +80,7 @@ export const CONSULTATION_TYPES: readonly ConsultationTypeDefinition[] = [
     icon: 'pba:dialogos',
     landingRoute: '/dialogos',
     allowsRegion: false,
+    registrationFormKind: null,
     defaultConsultationFormat: 'multiple',
     enabled: true
   },
@@ -82,6 +93,7 @@ export const CONSULTATION_TYPES: readonly ConsultationTypeDefinition[] = [
     icon: 'pba:encuentros-regionales',
     landingRoute: '/encuentros-regionales',
     allowsRegion: true,
+    registrationFormKind: null,
     defaultConsultationFormat: 'multiple',
     enabled: true
   },
@@ -94,6 +106,7 @@ export const CONSULTATION_TYPES: readonly ConsultationTypeDefinition[] = [
     icon: 'pba:observatorio',
     landingRoute: null,
     allowsRegion: false,
+    registrationFormKind: null,
     defaultConsultationFormat: 'multiple',
     enabled: false
   }
@@ -114,4 +127,12 @@ export function isKnownConsultationTypeSlug(slug: string | null | undefined): sl
 
 export function consultationTypeAllowsRegion(slug: string | null | undefined): boolean {
   return getConsultationType(slug)?.allowsRegion ?? false
+}
+
+export function consultationTypeRegistrationKind(slug: string | null | undefined): RegistrationFormKind | null {
+  return getConsultationType(slug)?.registrationFormKind ?? null
+}
+
+export function consultationTypeAllowsRegistrationForm(slug: string | null | undefined): boolean {
+  return consultationTypeRegistrationKind(slug) !== null
 }

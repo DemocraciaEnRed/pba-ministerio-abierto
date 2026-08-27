@@ -1,0 +1,88 @@
+/// Carácter en que participa la persona inscripta.
+enum RegistrationParticipantCharacter {
+  individual
+  legal_entity
+}
+
+/// Forma de participación. Solo aplica a las audiencias públicas; en las
+/// consultas públicas queda en null.
+enum RegistrationParticipationMode {
+  attendee
+  speaker_request
+  speaker_report
+}
+
+/// Formulario de inscripción presencial de una audiencia o consulta pública.
+/// Hay a lo sumo uno por consulta y solo se puede crear en los tipos que lo
+/// habilitan (ver `registrationFormKind` en shared/data/consultation-types.ts).
+model ConsultationRegistrationForm {
+  id             Int      @id @default(autoincrement())
+  consultationId Int      @unique
+  title          String
+  /// Cuerpo con formato (markdown) que se muestra en la página de inscripción.
+  body           String?  @db.Text
+  /// Fecha y hora en que se realiza la audiencia/consulta.
+  eventAt        DateTime
+  /// Ventana de inscripción.
+  opensAt        DateTime
+  closesAt       DateTime
+  venueName      String
+  venueAddress   String
+  venueCity      String
+  venueProvince  String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  consultation  Consultation               @relation(fields: [consultationId], references: [id], onDelete: Cascade)
+  registrations ConsultationRegistration[]
+
+  @@index([opensAt, closesAt])
+}
+
+/// Inscripción de una persona a una audiencia/consulta pública. El formulario es
+/// público: `userId` solo se completa cuando hay sesión, y en ese caso el índice
+/// único impide inscribirse dos veces (MySQL admite múltiples NULL).
+model ConsultationRegistration {
+  id                  Int      @id @default(autoincrement())
+  formId              Int
+  userId              Int?
+  firstName           String
+  lastName            String
+  dni                 String
+  email               String
+  phone               String
+  character           RegistrationParticipantCharacter @default(individual)
+  /// Bloque de persona jurídica: solo se completa cuando `character` es `legal_entity`.
+  entityName          String?
+  entityAddress       String?
+  entityEmail         String?
+  entityPhone         String?
+  /// Instrumento que acredita la personería: archivo adjunto o enlace externo.
+  proofAssetId        Int?
+  proofUrl            String?  @db.VarChar(500)
+  participationMode   RegistrationParticipationMode?
+  presentationSummary String?  @db.Text
+  documentationDetail String?  @db.Text
+  createdAt           DateTime @default(now())
+
+  form      ConsultationRegistrationForm       @relation(fields: [formId], references: [id], onDelete: Cascade)
+  user      User?                              @relation("ConsultationRegistrationUser", fields: [userId], references: [id], onDelete: SetNull)
+  proofAsset Asset?                            @relation("ConsultationRegistrationProof", fields: [proofAssetId], references: [id], onDelete: SetNull)
+  questions ConsultationRegistrationQuestion[]
+
+  @@unique([formId, userId])
+  @@index([formId, createdAt])
+  @@index([email])
+}
+
+/// Preguntas que el/la expositor/a formula al inscribirse.
+model ConsultationRegistrationQuestion {
+  id             Int      @id @default(autoincrement())
+  registrationId Int
+  body           String   @db.Text
+  displayOrder   Int      @default(0)
+
+  registration ConsultationRegistration @relation(fields: [registrationId], references: [id], onDelete: Cascade)
+
+  @@index([registrationId, displayOrder])
+}

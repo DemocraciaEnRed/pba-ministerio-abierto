@@ -1,10 +1,18 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
-  modules: ['@nuxt/eslint', '@nuxt/ui', 'nuxt-auth-utils'],
+  modules: ['@nuxt/eslint', '@nuxt/ui', 'nuxt-auth-utils', '@nuxt/scripts'],
+  $production: {
+    scripts: {
+      registry: {
+        googleAnalytics: {
+          trigger: 'onNuxtReady'
+        }
+      }
+    }
+  },
   devtools: {
     enabled: true
   },
-
   css: ['~/assets/css/main.css'],
   ui: {
     prose: true,
@@ -144,5 +152,5 @@ export default defineNuxtConfig({
         dir: './app/assets/icons/pba'
       }
     ]
-  }
+  },
 })

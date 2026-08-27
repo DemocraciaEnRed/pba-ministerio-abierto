@@ -5,6 +5,8 @@ import { serializeConsultationLink } from '~~/server/utils/serializers/consultat
 import { listAttachments } from '~~/server/utils/assets/attachments'
 import { listGalleryImages } from '~~/server/utils/assets/gallery'
 import { getCoverImage, getCoverImagesByOwner } from '~~/server/utils/assets/cover'
+import { serializeConsultationRegistrationForm } from '~~/server/utils/serializers/consultationRegistrationForm'
+import { consultationTypeRegistrationKind } from '#shared/data/consultation-types'
 import type { ConsultationRelatedLinkModel, TopicModel } from '~~/prisma/generated/models'
 
 function isPubliclyVisible(entity: { visibility: string }): boolean {
@@ -111,13 +113,26 @@ export default defineEventHandler(async (event) => {
     }
   }
 
+  // Formulario de inscripción: solo existe en audiencias y consultas públicas.
+  // Se compone acá para que el banner no necesite un pedido extra.
+  const registrationKind = consultationTypeRegistrationKind(
+    (consultation as unknown as { section: { slug: string } | null }).section?.slug
+  )
+  const registrationFormRow = registrationKind
+    ? await prisma.consultationRegistrationForm.findUnique({ where: { consultationId: consultation.id } })
+    : null
+  const registrationForm = registrationFormRow && registrationKind
+    ? serializeConsultationRegistrationForm(registrationFormRow, 'public', { kind: registrationKind })
+    : null
+
   if (isAdminView) {
     return {
       consultation: { ...serializeConsultation(consultationWithCover, 'admin'), canManage: true },
       topics: visibleTopics.map(topic => serializeTopic(attachCover(topic), 'admin')),
       links: relatedLinks.map(link => serializeConsultationLink(link, 'admin')),
       attachments,
-      gallery
+      gallery,
+      registrationForm
     }
   }
 
@@ -126,6 +141,7 @@ export default defineEventHandler(async (event) => {
     topics: visibleTopics.map(topic => serializeTopic(attachCover(topic), 'public')),
     links: relatedLinks.map(link => serializeConsultationLink(link, 'public')),
     attachments,
-    gallery
+    gallery,
+    registrationForm
   }
 })

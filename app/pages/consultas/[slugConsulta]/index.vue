@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { PageHeroProps, NavigationMenuItem, PageAnchor } from '@nuxt/ui'
 import type { ConsultaHeroMetadata, ConsultationDetail, ConsultationTopic, GalleryImage } from '~/types/consulta'
+import type { PublicConsultationRegistrationFormDTO } from '~~/server/utils/serializers/consultationRegistrationForm'
 
 definePageMeta({
   layout: false
@@ -32,6 +33,7 @@ interface ConsultationDetailResponse {
   links: ConsultationRelatedLink[]
   attachments: ConsultationAttachment[]
   gallery: GalleryImage[]
+  registrationForm: PublicConsultationRegistrationFormDTO | null
 }
 
 type InteractivePageAnchor = Omit<PageAnchor, 'onClick'> & {
@@ -61,6 +63,7 @@ usePageSeo(() => ({
 const enlaces = computed<ConsultationRelatedLink[]>(() => detail.value?.links ?? [])
 const archivos = computed<ConsultationAttachment[]>(() => detail.value?.attachments ?? [])
 const galeria = computed<GalleryImage[]>(() => detail.value?.gallery ?? [])
+const registrationForm = computed(() => detail.value?.registrationForm ?? null)
 
 const estadoBadge = computed(() =>
   consultation.value
@@ -202,6 +205,9 @@ function createScrollAnchor(label: string, icon: PageAnchor['icon'], id: string)
 const consultationPageAnchors: ComputedRef<InteractivePageAnchor[]> = computed(() => {
   const anchors: InteractivePageAnchor[] = [createScrollAnchor('Volver arriba', 'lucide:arrow-up', 'page-hero')]
 
+  if (registrationForm.value) {
+    anchors.push(createScrollAnchor('Formulario de inscripción', 'lucide:clipboard-check', 'formulario-registro-cta'))
+  }
   if (consultation.value?.closedMessage) {
     anchors.push(createScrollAnchor('Mensaje de cierre', 'lucide:message-square', 'mensaje-cierre'))
   }
@@ -241,6 +247,16 @@ const consultationPageAnchors: ComputedRef<InteractivePageAnchor[]> = computed((
     :consultation-sections="consultationSections"
     :consultation-metadata="consultationMetadata"
   >
+    <template
+      v-if="registrationForm"
+      #hero-actions
+    >
+      <ConsultasInscripcionCta
+        :form="registrationForm"
+        :consultation-slug="String(route.params.slugConsulta)"
+      />
+    </template>
+
     <UPage>
       <template #left>
         <UPageAside>
@@ -314,6 +330,12 @@ const consultationPageAnchors: ComputedRef<InteractivePageAnchor[]> = computed((
             v-if="consultation.body"
             :content="consultation.body"
             :parsed="parsedBody"
+          />
+          <ConsultasInscripcionAlert
+            v-if="registrationForm"
+            :form="registrationForm"
+            :consultation-slug="String(route.params.slugConsulta)"
+            :participation-state="consultation.participationState"
           />
           <UCard
             v-if="consultation.closedMessage"

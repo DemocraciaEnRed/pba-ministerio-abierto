@@ -1,0 +1,48 @@
+{% extends "layout.njk" %}
+
+{% block title %}Confirmamos tu inscripción{% endblock %}
+
+{% block content %}
+  <h1 style="margin:0 0 16px; font-size:20px; color:#18181b;">
+    {% if displayName %}Hola {{ displayName }},{% else %}¡Hola!{% endif %}
+  </h1>
+  <p style="margin:0 0 16px;">
+    Registramos tu inscripción a <strong>{{ consultationTitle }}</strong>.
+  </p>
+
+  <table role="presentation" style="width:100%; margin:0 0 24px; border-collapse:collapse; font-size:14px;">
+    <tr>
+      <td style="padding:8px 0; color:#71717a; width:40%;">Instancia</td>
+      <td style="padding:8px 0;">{{ formTitle }}</td>
+    </tr>
+    <tr>
+      <td style="padding:8px 0; color:#71717a;">Fecha y hora</td>
+      <td style="padding:8px 0;">{{ eventAt }}</td>
+    </tr>
+    <tr>
+      <td style="padding:8px 0; color:#71717a;">Lugar</td>
+      <td style="padding:8px 0;">{{ venue }}</td>
+    </tr>
+    {% if participationModeLabel %}
+      <tr>
+        <td style="padding:8px 0; color:#71717a;">Forma de participación</td>
+        <td style="padding:8px 0;">{{ participationModeLabel }}</td>
+      </tr>
+    {% endif %}
+    <tr>
+      <td style="padding:8px 0; color:#71717a;">Carácter</td>
+      <td style="padding:8px 0;">{{ characterLabel }}</td>
+    </tr>
+  </table>
+
+  <p style="margin:0 0 24px;">
+    <a href="{{ consultationUrl }}"
+       style="display:inline-block; background-color:#18181b; color:#ffffff; text-decoration:none; padding:12px 24px; border-radius:8px; font-weight:600;">
+      Ver la consulta
+    </a>
+  </p>
+
+  <p style="margin:0; color:#71717a; font-size:12px; line-height:1.6;">
+    {{ privacyNotice }}
+  </p>
+{% endblock %}
