@@ -39,3 +39,19 @@ export async function parseQuery<T>(event: H3Event, schema: ZodType<T>): Promise
   }
   return result.data
 }
+
+/**
+ * Valida un objeto ya materializado (p. ej. campos extraídos de un multipart)
+ * con el mismo formato de error 422 que `parseBody`/`parseQuery`.
+ */
+export function parseData<T>(schema: ZodType<T>, data: unknown): T {
+  const result = schema.safeParse(data)
+  if (!result.success) {
+    throw createError({
+      statusCode: 422,
+      message: VALIDATION_ERROR_MESSAGE,
+      data: formatZodError(result.error)
+    })
+  }
+  return result.data
+}

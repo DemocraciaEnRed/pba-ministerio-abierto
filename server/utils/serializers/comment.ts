@@ -41,6 +41,13 @@ export type CommentEntity = {
   replyCount?: number
   /** URL del avatar del autor, resuelta en el handler (storage async). */
   authorAvatarUrl?: string | null
+  /** Adjunto opcional (solo se expone en la vista admin/moderación). */
+  attachmentAsset?: {
+    id: number
+    originalFilename: string | null
+    mimeType: string | null
+    sizeBytes: number | null
+  } | null
 }
 
 export interface SerializeCommentContext {
@@ -63,6 +70,8 @@ export interface PublicCommentDTO {
   authorMode: CommentAuthorMode
   authorLabel: string | null
   authorAvatarUrl: string | null
+  /** Indica si el comentario tiene un adjunto (solo informativo, sin acceso al archivo). */
+  hasAttachment: boolean
   reactions: CommentReactionsSummary
   createdAt: string
   updatedAt: string
@@ -80,6 +89,13 @@ export interface AdminCommentDTO extends Omit<PublicCommentDTO, 'replies'> {
   /** Título del tema contenedor (null si el comentario es de la consulta). */
   topicTitle: string | null
   topicSlug: string | null
+  /** Adjunto descargable por el endpoint protegido (null si no tiene). */
+  attachment: {
+    filename: string
+    mimeType: string | null
+    sizeBytes: number | null
+    downloadUrl: string
+  } | null
   replies?: AdminCommentDTO[]
 }
 
@@ -147,6 +163,7 @@ export function serializeComment(
     authorMode: comment.authorMode,
     authorLabel: resolveAuthorLabel(comment, context.institutionName),
     authorAvatarUrl: comment.authorAvatarUrl ?? null,
+    hasAttachment: comment.attachmentAsset != null,
     reactions: buildReactionsSummary(comment.reactions, context.currentUserId),
     createdAt: comment.createdAt.toISOString(),
     updatedAt: comment.updatedAt.toISOString(),
@@ -169,7 +186,15 @@ export function serializeComment(
     deletedAt: comment.deletedAt?.toISOString() ?? null,
     deletedByUserId: comment.deletedByUserId,
     topicTitle: comment.topic?.title ?? null,
-    topicSlug: comment.topic?.slug ?? null
+    topicSlug: comment.topic?.slug ?? null,
+    attachment: comment.attachmentAsset
+      ? {
+          filename: comment.attachmentAsset.originalFilename ?? 'adjunto',
+          mimeType: comment.attachmentAsset.mimeType,
+          sizeBytes: comment.attachmentAsset.sizeBytes,
+          downloadUrl: `/api/comments/${comment.id}/attachment`
+        }
+      : null
   }
 
   if (comment.replies) {

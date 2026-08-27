@@ -254,6 +254,7 @@ export interface PublicComment {
   authorMode: CommentAuthorMode
   authorLabel: string | null
   authorAvatarUrl: string | null
+  hasAttachment: boolean
   reactions: CommentReactionsSummary
   createdAt: string
   updatedAt: string

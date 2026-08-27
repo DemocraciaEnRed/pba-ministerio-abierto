@@ -9,6 +9,7 @@ type RegistrationFormEntity = {
   id: number
   consultationId: number
   title: string
+  body: string | null
   eventAt: Date
   opensAt: Date
   closesAt: Date
@@ -23,6 +24,7 @@ type RegistrationFormEntity = {
 export interface PublicConsultationRegistrationFormDTO {
   id: number
   title: string
+  body: string | null
   kind: RegistrationFormKind
   eventAt: string
   opensAt: string
@@ -71,6 +73,7 @@ export function serializeConsultationRegistrationForm(
   const base: PublicConsultationRegistrationFormDTO = {
     id: form.id,
     title: form.title,
+    body: form.body,
     kind: context.kind,
     eventAt: form.eventAt.toISOString(),
     opensAt: form.opensAt.toISOString(),

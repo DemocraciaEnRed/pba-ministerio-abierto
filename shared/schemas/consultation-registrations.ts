@@ -29,6 +29,7 @@ const venueTextField = (label: string, max: number) =>
 export const ConsultationRegistrationFormSchema = z
   .object({
     title: formTitleField,
+    body: optionalText(20000),
     eventAt: dateTimeField('La fecha del evento'),
     opensAt: dateTimeField('La fecha de apertura'),
     closesAt: dateTimeField('La fecha de cierre'),

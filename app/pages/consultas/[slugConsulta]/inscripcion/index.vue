@@ -53,7 +53,8 @@ const themeUi: ThemeUI = {
     // Default title: 'text-5xl sm:text-7xl text-pretty tracking-tight font-bold text-highlighted',
     title: 'text-white text-shadow-lg text-4xl sm:text-5xl font-bold ',
     // Default description: 'text-lg sm:text-xl/8 text-muted',
-    description: 'text-white text-shadow-lg'
+    description: 'text-white text-shadow-lg',
+    headline: 'text-white text-shadow-lg text-lg sm:text-xl/8 font-semibold'
   },
   pageBody: {
     base: 'py-16 mt-0'
@@ -95,6 +96,12 @@ const themeUi: ThemeUI = {
               </div>
             </dl>
           </UPageCard>
+
+          <MarkdownProse
+            v-if="form.body"
+            :content="form.body"
+            class="mb-6"
+          />
 
           <ConsultasInscripcionForm
             v-if="isOpen"

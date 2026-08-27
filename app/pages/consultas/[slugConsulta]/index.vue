@@ -205,6 +205,9 @@ function createScrollAnchor(label: string, icon: PageAnchor['icon'], id: string)
 const consultationPageAnchors: ComputedRef<InteractivePageAnchor[]> = computed(() => {
   const anchors: InteractivePageAnchor[] = [createScrollAnchor('Volver arriba', 'lucide:arrow-up', 'page-hero')]
 
+  if (registrationForm.value) {
+    anchors.push(createScrollAnchor('Formulario de inscripción', 'lucide:clipboard-check', 'formulario-registro-cta'))
+  }
   if (consultation.value?.closedMessage) {
     anchors.push(createScrollAnchor('Mensaje de cierre', 'lucide:message-square', 'mensaje-cierre'))
   }
@@ -327,6 +330,12 @@ const consultationPageAnchors: ComputedRef<InteractivePageAnchor[]> = computed((
             v-if="consultation.body"
             :content="consultation.body"
             :parsed="parsedBody"
+          />
+          <ConsultasInscripcionAlert
+            v-if="registrationForm"
+            :form="registrationForm"
+            :consultation-slug="String(route.params.slugConsulta)"
+            :participation-state="consultation.participationState"
           />
           <UCard
             v-if="consultation.closedMessage"

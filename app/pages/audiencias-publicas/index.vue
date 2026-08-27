@@ -119,6 +119,8 @@ const themeUi: ThemeUI = {
         </UPageBody>
       </UPage>
     </UContainer>
+    <USeparator />
+    <ConsultasSeccionListado section-slug="audiencias-publicas" />
   </UTheme>
 </template>
 

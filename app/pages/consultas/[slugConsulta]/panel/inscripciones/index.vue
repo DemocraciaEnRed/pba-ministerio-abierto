@@ -61,7 +61,6 @@ const { data: registrations, status: listStatus, refresh: refreshRegistrations }
   { watch: [slug, page, form] }
 )
 
-const formOpen = ref(false)
 const confirmOpen = ref(false)
 const deleting = ref(false)
 const detailOpen = ref(false)
@@ -71,8 +70,18 @@ const removingRegistration = ref(false)
 
 const toast = useToast()
 
-function openCreate() {
-  formOpen.value = true
+const createLink = computed(() => `/consultas/${slug.value}/panel/inscripciones/nuevo`)
+const editLink = computed(() => `/consultas/${slug.value}/panel/inscripciones/editar`)
+
+// Enlace público donde la ciudadanía se inscribe (para compartir).
+async function copyRegistrationLink() {
+  const url = `${window.location.origin}/consultas/${slug.value}/inscripcion`
+  try {
+    await navigator.clipboard.writeText(url)
+    toast.add({ title: 'Link copiado', description: url, color: 'success' })
+  } catch {
+    toast.add({ title: 'No se pudo copiar el link', color: 'error' })
+  }
 }
 
 function openDetail(registration: AdminConsultationRegistrationDTO) {
@@ -137,12 +146,19 @@ const headerButtons = computed<ButtonProps[]>(() => {
       {
         label: 'Crear formulario de inscripción',
         icon: 'lucide:plus',
-        onClick: openCreate
+        to: createLink.value
       }
     ]
   }
 
   return [
+    {
+      label: 'Copiar link',
+      icon: 'lucide:link',
+      color: 'neutral',
+      variant: 'subtle',
+      onClick: copyRegistrationLink
+    },
     {
       label: 'Exportar CSV',
       icon: 'lucide:file-text',
@@ -156,7 +172,7 @@ const headerButtons = computed<ButtonProps[]>(() => {
       icon: 'lucide:pencil',
       color: 'neutral',
       variant: 'subtle',
-      onClick: openCreate
+      to: editLink.value
     },
     {
       label: 'Eliminar',
@@ -327,14 +343,6 @@ function prevPage() {
         </div>
       </template>
     </UPageBody>
-
-    <ConsultasRegistrationFormModal
-      v-model:open="formOpen"
-      :consultation-slug="slug"
-      :event-noun="eventNoun"
-      :initial-values="form"
-      @saved="onSaved"
-    />
 
     <ConsultasRegistrationSlideover
       v-model:open="detailOpen"

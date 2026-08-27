@@ -24,6 +24,7 @@ export default defineEventHandler(async (event) => {
     data: {
       consultationId,
       title: body.title,
+      body: body.body,
       eventAt: body.eventAt,
       opensAt: body.opensAt,
       closesAt: body.closesAt,

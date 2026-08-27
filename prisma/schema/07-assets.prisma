@@ -59,6 +59,7 @@ model Asset {
   consultationClosureAsFile  ConsultationClosure[] @relation("ConsultationClosureAttachment")
   regionalMeetingSubmissions RegionalMeetingSubmission[] @relation("RegionalMeetingSubmissionAttachment")
   consultationRegistrationProofs ConsultationRegistration[] @relation("ConsultationRegistrationProof")
+  commentAttachments         Comment[]            @relation("CommentAttachment")
 
   @@index([uploadedByUserId])
   @@index([assetType, mediaType])

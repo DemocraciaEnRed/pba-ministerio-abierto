@@ -18,6 +18,7 @@ model Comment {
   body             String   @db.Text
   authorMode       CommentAuthorMode @default(citizen)
   moderationStatus CommentModerationStatus @default(visible)
+  attachmentAssetId Int?
   deletedAt        DateTime?
   deletedByUserId  Int?
   createdAt        DateTime @default(now())
@@ -30,6 +31,8 @@ model Comment {
   parentComment  Comment?  @relation("CommentReplies", fields: [parentCommentId], references: [id], onDelete: Cascade)
   replies        Comment[] @relation("CommentReplies")
   reactions      CommentReaction[]
+  // Adjunto opcional del comentario: solo lo descargan gestores/admins.
+  attachmentAsset Asset?   @relation("CommentAttachment", fields: [attachmentAssetId], references: [id], onDelete: SetNull)
 
   @@index([consultationId, moderationStatus])
   @@index([topicId, moderationStatus])

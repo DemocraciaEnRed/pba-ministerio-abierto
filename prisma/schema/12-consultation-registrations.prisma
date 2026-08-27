@@ -19,6 +19,8 @@ model ConsultationRegistrationForm {
   id             Int      @id @default(autoincrement())
   consultationId Int      @unique
   title          String
+  /// Cuerpo con formato (markdown) que se muestra en la página de inscripción.
+  body           String?  @db.Text
   /// Fecha y hora en que se realiza la audiencia/consulta.
   eventAt        DateTime
   /// Ventana de inscripción.

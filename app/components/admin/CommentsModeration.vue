@@ -27,6 +27,12 @@ export interface AdminComment {
   deletedAt: string | null
   topicTitle: string | null
   topicSlug: string | null
+  attachment: {
+    filename: string
+    mimeType: string | null
+    sizeBytes: number | null
+    downloadUrl: string
+  } | null
   reactions: {
     counts: Record<CommentReactionType, number>
     mine: CommentReactionType[]
@@ -405,6 +411,22 @@ async function confirmAction(): Promise<void> {
 
           <td class="align-top">
             <div class="flex justify-end gap-1">
+              <UTooltip
+                v-if="comment.attachment"
+                arrow
+                :text="`Descargar adjunto (${comment.attachment.filename})`"
+              >
+                <UButton
+                  :to="comment.attachment.downloadUrl"
+                  external
+                  download
+                  icon="i-lucide-paperclip"
+                  color="neutral"
+                  variant="ghost"
+                  size="xs"
+                  aria-label="Descargar adjunto"
+                />
+              </UTooltip>
               <UTooltip
                 arrow
                 :text="comment.containerType === 'topic' ? 'Abrir tema en nueva pestaña' : 'Abrir consulta en nueva pestaña'"
