@@ -64,6 +64,8 @@ export const ConsultationsQuerySchema = z.object({
   sectionIds: idListField,
   regionSlug: slugField.optional(),
   regionIds: idListField,
+  observatoryWorkGroupSlug: slugField.optional(),
+  observatoryWorkGroupIds: idListField,
   categoryIds: idListField,
   tagIds: idListField,
   page: z.coerce.number().int('La página debe ser un entero').min(1, 'La página mínima es 1').default(1),
