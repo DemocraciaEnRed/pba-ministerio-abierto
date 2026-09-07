@@ -192,6 +192,14 @@
 .prose p img {
   @apply rounded-md max-h-100 mr-auto ;
 }
+
+/* Embed de YouTube dentro del editor (el render público usa `.not-prose`). */
+.prose div[data-youtube-video] {
+  @apply my-6 aspect-video w-full overflow-hidden rounded-lg bg-black;
+}
+.prose div[data-youtube-video] iframe {
+  @apply h-full w-full border-0;
+}
 /* Apply style in the p that wraps img  
 .prose p:has(img) {
   @apply flex justify-center items-center border border-neutral-200 dark:border-neutral-700 rounded-lg p-4 bg-accented/25;

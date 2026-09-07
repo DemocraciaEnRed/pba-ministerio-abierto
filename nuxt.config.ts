@@ -152,5 +152,5 @@ export default defineNuxtConfig({
         dir: './app/assets/icons/pba'
       }
     ]
-  },
+  }
 })

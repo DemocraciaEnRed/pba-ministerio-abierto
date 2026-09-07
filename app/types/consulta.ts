@@ -27,6 +27,7 @@ export interface ConsultationDetail {
   resultsVisibility: ResultsVisibility
   section: ConsultationTaxonomy | null
   region: ConsultationTaxonomy | null
+  observatoryWorkGroup: ConsultationWorkGroup | null
   categories: ConsultationCategory[]
   tags: ConsultationTaxonomy[]
   /** Portada de la consulta para el hero; `null` cuando no hay imagen cargada. */
@@ -163,6 +164,13 @@ export interface ConsultationCategory extends ConsultationTaxonomy {
   isPrimary: boolean
 }
 
+/** Grupo de trabajo del Observatorio, con su presentación para pintar chips. */
+export interface ConsultationWorkGroup extends ConsultationTaxonomy {
+  color: string
+  iconColor: string
+  icon: string
+}
+
 /**
  * Item del listado público de consultas (`GET /api/consultations`, vista
  * pública). Es lo que consume la card de consulta en `/consultas` y la HOME.
@@ -184,6 +192,7 @@ export interface PublicConsultationListItem {
   resultsVisibility: ResultsVisibility
   section: ConsultationTaxonomy | null
   region: ConsultationTaxonomy | null
+  observatoryWorkGroup: ConsultationWorkGroup | null
   categories: ConsultationCategory[]
   tags: ConsultationTaxonomy[]
   /** Portada para la card; `null` cuando no hay imagen cargada. */
@@ -218,6 +227,7 @@ export interface AdminConsultationListItem {
   updatedAt: string
   section: ConsultationTaxonomy | null
   region: ConsultationTaxonomy | null
+  observatoryWorkGroup: ConsultationWorkGroup | null
   categories: ConsultationCategory[]
   tags: ConsultationTaxonomy[]
   topics?: ConsultationTopicSummary[]

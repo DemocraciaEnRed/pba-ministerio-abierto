@@ -125,6 +125,15 @@ const consultationMetadata = computed<ConsultaHeroMetadata[]>(() => {
     })
   }
 
+  if (consultation.value.observatoryWorkGroup) {
+    items.push({
+      title: 'Grupo de trabajo',
+      description: consultation.value.observatoryWorkGroup.name,
+      icon: consultation.value.observatoryWorkGroup.icon,
+      variant: 'subtle'
+    })
+  }
+
   if (consultation.value.categories.length) {
     items.push({
       title: 'Ejes de gestión',

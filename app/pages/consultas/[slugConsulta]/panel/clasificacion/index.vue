@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { consultationTypeAllowsRegion } from '#shared/data/consultation-types'
+import { consultationTypeAllowsRegion, consultationTypeAllowsWorkGroup } from '#shared/data/consultation-types'
 
 definePageMeta({
   layout: 'consultas-control-panel',
@@ -11,6 +11,7 @@ usePrivatePageSeo('Clasificación')
 const { data: consultation, refresh } = useConsultationAdmin()
 
 const allowsRegion = computed(() => consultationTypeAllowsRegion(consultation.value?.section?.slug))
+const allowsWorkGroup = computed(() => consultationTypeAllowsWorkGroup(consultation.value?.section?.slug))
 </script>
 
 <template>
@@ -35,6 +36,12 @@ const allowsRegion = computed(() => consultationTypeAllowsRegion(consultation.va
           v-if="consultation && allowsRegion"
           :consultation-id="consultation.id"
           :initial-region-id="consultation.region?.id ?? null"
+          @saved="refresh"
+        />
+        <AdminConsultationWorkGroupForm
+          v-if="consultation && allowsWorkGroup"
+          :consultation-id="consultation.id"
+          :initial-work-group-id="consultation.observatoryWorkGroup?.id ?? null"
           @saved="refresh"
         />
       </div>

@@ -1,10 +1,13 @@
 <script setup lang="ts">
 import type { ListboxItem, PageHeroProps } from '@nuxt/ui'
+import type { ConsultationTypeSlug } from '#shared/data/consultation-types'
 import type { PublicConsultationListItem } from '~/types/consulta'
 
 definePageMeta({
   layout: false
 })
+
+const OBSERVATORY_SECTION_SLUG = 'observatorio-obras-servicios' satisfies ConsultationTypeSlug
 
 type StatusFilter = 'all' | 'scheduled' | 'open' | 'closed' | 'archived'
 
@@ -21,6 +24,11 @@ interface PublicTaxonomy {
 
 interface PublicCategory extends PublicTaxonomy {
   sectionId: number
+}
+
+interface PublicWorkGroup extends PublicTaxonomy {
+  icon: string
+  displayOrder: number
 }
 
 const route = useRoute()
@@ -50,6 +58,7 @@ const filters = reactive({
   q: typeof route.query.q === 'string' ? route.query.q : '',
   status: parseStatus(route.query.status),
   sectionIds: parseIdList(route.query.sectionIds),
+  workGroupIds: parseIdList(route.query.workGroupIds),
   categoryIds: parseIdList(route.query.categoryIds),
   tagIds: parseIdList(route.query.tagIds)
 })
@@ -99,8 +108,31 @@ const { data: tagsData, status: tagsStatus } = await useAsyncData(
   () => $fetch<PublicTaxonomy[]>('/api/tags')
 )
 
+const { data: workGroupsData, status: workGroupsStatus } = await useAsyncData(
+  'public-observatory-work-groups',
+  () => $fetch<PublicWorkGroup[]>('/api/observatory-work-groups')
+)
+
 const sectionItems = computed<ListboxItem[]>(() =>
   (sectionsData.value ?? []).map(section => ({ label: section.name, value: section.id }))
+)
+
+// Los grupos de trabajo solo aplican al Observatorio: el filtro aparece cuando
+// esa sección está seleccionada y se limpia al deseleccionarla.
+const observatorySectionId = computed(() =>
+  (sectionsData.value ?? []).find(section => section.slug === OBSERVATORY_SECTION_SLUG)?.id ?? null
+)
+
+const showWorkGroupFilter = computed(() =>
+  observatorySectionId.value !== null && filters.sectionIds.includes(observatorySectionId.value)
+)
+
+watch(showWorkGroupFilter, (visible) => {
+  if (!visible && filters.workGroupIds.length) filters.workGroupIds = []
+})
+
+const workGroupItems = computed<ListboxItem[]>(() =>
+  (workGroupsData.value ?? []).map(group => ({ label: group.name, value: group.id, icon: group.icon }))
 )
 
 // Categorías agrupadas por sección (ListboxItem[][]): cada grupo lleva un
@@ -146,6 +178,7 @@ const { data, status } = await useAsyncData(
       q: filters.q || undefined,
       state: filters.status === 'all' ? undefined : filters.status,
       sectionIds: filters.sectionIds.length ? filters.sectionIds.join(',') : undefined,
+      observatoryWorkGroupIds: filters.workGroupIds.length ? filters.workGroupIds.join(',') : undefined,
       categoryIds: filters.categoryIds.length ? filters.categoryIds.join(',') : undefined,
       tagIds: filters.tagIds.length ? filters.tagIds.join(',') : undefined
     }
@@ -155,6 +188,7 @@ const { data, status } = await useAsyncData(
       () => filters.q,
       () => filters.status,
       () => filters.sectionIds.join(','),
+      () => filters.workGroupIds.join(','),
       () => filters.categoryIds.join(','),
       () => filters.tagIds.join(',')
     ]
@@ -163,12 +197,13 @@ const { data, status } = await useAsyncData(
 
 // Sincroniza la URL para que los filtros sean compartibles y funcione atrás/adelante.
 watch(
-  () => [filters.q, filters.status, filters.sectionIds.join(','), filters.categoryIds.join(','), filters.tagIds.join(',')],
+  () => [filters.q, filters.status, filters.sectionIds.join(','), filters.workGroupIds.join(','), filters.categoryIds.join(','), filters.tagIds.join(',')],
   () => {
     const query: Record<string, string> = {}
     if (filters.q) query.q = filters.q
     if (filters.status !== 'all') query.status = filters.status
     if (filters.sectionIds.length) query.sectionIds = filters.sectionIds.join(',')
+    if (filters.workGroupIds.length) query.workGroupIds = filters.workGroupIds.join(',')
     if (filters.categoryIds.length) query.categoryIds = filters.categoryIds.join(',')
     if (filters.tagIds.length) query.tagIds = filters.tagIds.join(',')
     router.replace({ query })
@@ -209,6 +244,25 @@ const consultations = computed(() => data.value?.items ?? [])
             multiple
             :loading="sectionsStatus === 'pending'"
           />
+          <!-- WorkGroup (only for observatorio-obras-servicios) -->
+          <template v-if="showWorkGroupFilter">
+            <USeparator
+              label="Grupos de trabajo"
+              position="start"
+            />
+            <UListbox
+              v-model="filters.workGroupIds"
+              :items="workGroupItems"
+              value-key="value"
+              size="sm"
+              multiple
+              :loading="workGroupsStatus === 'pending'"
+              :ui="{
+                label: 'text-sm'
+              }"
+            />
+          </template>
+
           <!-- Categories -->
           <USeparator
             label="Categorias"
