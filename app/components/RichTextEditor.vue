@@ -1,6 +1,8 @@
 <script setup lang="ts">
-import type { EditorCustomHandlers, EditorToolbarItem } from '#ui/types'
+import type { EditorCustomHandlers, EditorToolbarItem, FormSubmitEvent } from '#ui/types'
 import type { Editor } from '@tiptap/vue-3'
+import { Youtube } from '@tiptap/extension-youtube'
+import { YoutubeEmbedSchema, type YoutubeEmbedInput } from '#shared/schemas/youtube'
 import { ImageUpload } from './RichTextEditorImageUpload'
 
 const props = defineProps<{
@@ -17,11 +19,45 @@ const value = computed({
   }
 })
 
+const YoutubeEmbed = Youtube.configure({
+  nocookie: true,
+  modestBranding: true,
+  rel: 0,
+  width: 640,
+  height: 360
+})
+
+const youtubeModalOpen = ref(false)
+const youtubeState = reactive({ url: '' })
+const youtubeEditor = shallowRef<Editor>()
+
+function openYoutubeModal(editor: Editor): void {
+  youtubeEditor.value = editor
+  youtubeState.url = ''
+  youtubeModalOpen.value = true
+}
+
+function insertYoutubeVideo(event: FormSubmitEvent<YoutubeEmbedInput>): void {
+  youtubeEditor.value?.chain().focus().setYoutubeVideo({ src: event.data.url }).run()
+  youtubeModalOpen.value = false
+}
+
 const customHandlers = {
   imageUpload: {
     canExecute: (editor: Editor) => editor.can().insertContent({ type: 'imageUpload' }),
     execute: (editor: Editor) => editor.chain().focus().insertContent({ type: 'imageUpload' }),
     isActive: (editor: Editor) => editor.isActive('imageUpload'),
+    isDisabled: undefined
+  },
+  youtube: {
+    canExecute: (editor: Editor) => editor.can().insertContent({ type: 'youtube' }),
+    // La inserción ocurre al confirmar el modal; devolvemos una chain vacía
+    // porque UEditorToolbar siempre ejecuta `.run()` sobre el retorno.
+    execute: (editor: Editor) => {
+      openYoutubeModal(editor)
+      return editor.chain()
+    },
+    isActive: (editor: Editor) => editor.isActive('youtube'),
     isDisabled: undefined
   }
 } satisfies EditorCustomHandlers
@@ -54,7 +90,8 @@ const toolbarItems: EditorToolbarItem<typeof customHandlers>[][] = [
   ],
   [
     { kind: 'link', icon: 'i-lucide-link', tooltip: { text: 'Enlace' } },
-    { kind: 'imageUpload', icon: 'i-lucide-image', tooltip: { text: 'Imagen' } }
+    { kind: 'imageUpload', icon: 'i-lucide-image', tooltip: { text: 'Imagen' } },
+    { kind: 'youtube', icon: 'i-simple-icons-youtube', tooltip: { text: 'Video de YouTube' } }
   ],
   [
     { kind: 'undo', icon: 'i-lucide-undo', tooltip: { text: 'Deshacer' } },
@@ -69,7 +106,7 @@ const toolbarItems: EditorToolbarItem<typeof customHandlers>[][] = [
     v-model="value"
     content-type="markdown"
     :mention="false"
-    :extensions="[ImageUpload]"
+    :extensions="[ImageUpload, YoutubeEmbed]"
     :handlers="customHandlers"
     :placeholder="props.placeholder"
     class="w-full rounded-md ring ring-default divide-y divide-default"
@@ -82,5 +119,46 @@ const toolbarItems: EditorToolbarItem<typeof customHandlers>[][] = [
     />
 
     <UEditorDragHandle :editor="editor" />
+
+    <UModal
+      v-model:open="youtubeModalOpen"
+      title="Insertar video de YouTube"
+      description="Pegá el enlace del video que querés embeber."
+    >
+      <template #body>
+        <UForm
+          :schema="YoutubeEmbedSchema"
+          :state="youtubeState"
+          class="space-y-4"
+          @submit="insertYoutubeVideo"
+        >
+          <UFormField
+            label="URL del video"
+            name="url"
+            description="Admite enlaces de youtube.com, youtu.be y Shorts."
+          >
+            <UInput
+              v-model="youtubeState.url"
+              placeholder="https://www.youtube.com/watch?v=..."
+              autofocus
+              class="w-full"
+            />
+          </UFormField>
+
+          <div class="flex justify-end gap-3">
+            <UButton
+              color="neutral"
+              variant="ghost"
+              @click="youtubeModalOpen = false"
+            >
+              Cancelar
+            </UButton>
+            <UButton type="submit">
+              Insertar
+            </UButton>
+          </div>
+        </UForm>
+      </template>
+    </UModal>
   </UEditor>
 </template>
