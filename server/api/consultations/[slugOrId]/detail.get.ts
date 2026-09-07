@@ -32,6 +32,7 @@ export default defineEventHandler(async (event) => {
   const consultation = await resolveConsultationBySlugOrId(identifier, {
     section: true,
     region: true,
+    observatoryWorkGroup: true,
     categoryAssignments: {
       include: { category: true },
       orderBy: [{ isPrimary: 'desc' }, { displayOrder: 'asc' }, { id: 'asc' }]

@@ -16,6 +16,7 @@ export default defineEventHandler(async (event) => {
     {
       section: true,
       region: true,
+      observatoryWorkGroup: true,
       categoryAssignments: {
         include: { category: true },
         orderBy: [{ isPrimary: 'desc' }, { displayOrder: 'asc' }, { id: 'asc' }]

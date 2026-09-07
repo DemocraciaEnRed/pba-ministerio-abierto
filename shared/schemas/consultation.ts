@@ -146,6 +146,10 @@ export const SetConsultationRegionSchema = z.object({
   regionId: z.int().positive('La región debe ser un ID válido').nullable()
 })
 
+export const SetConsultationWorkGroupSchema = z.object({
+  observatoryWorkGroupId: z.int().positive('El grupo de trabajo debe ser un ID válido').nullable()
+})
+
 export const AssignConsultationMemberSchema = z.object({
   userId: z.int().positive('El usuario debe ser un ID válido'),
   role: z.enum(['consultation_admin']).default('consultation_admin')
@@ -168,4 +172,5 @@ export type SetConsultationCategoriesInput = z.output<typeof SetConsultationCate
 export type SetConsultationTagsInput = z.output<typeof SetConsultationTagsSchema>
 export type SetConsultationSectionInput = z.output<typeof SetConsultationSectionSchema>
 export type SetConsultationRegionInput = z.output<typeof SetConsultationRegionSchema>
+export type SetConsultationWorkGroupInput = z.output<typeof SetConsultationWorkGroupSchema>
 export type AssignConsultationMemberInput = z.output<typeof AssignConsultationMemberSchema>

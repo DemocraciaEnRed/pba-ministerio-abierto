@@ -37,6 +37,7 @@ model Consultation {
   resultsVisibility   ResultsVisibility @default(hidden)
   sectionId           Int?
   regionId            Int?
+  observatoryWorkGroupId Int?
   createdByUserId     Int?
   updatedByUserId     Int?
   createdAt           DateTime  @default(now())
@@ -46,6 +47,7 @@ model Consultation {
   updatedBy User? @relation("ConsultationUpdatedBy", fields: [updatedByUserId], references: [id], onDelete: SetNull)
   section   Section? @relation(fields: [sectionId], references: [id], onDelete: SetNull)
   region    Region?  @relation(fields: [regionId], references: [id], onDelete: SetNull)
+  observatoryWorkGroup ObservatoryWorkGroup? @relation(fields: [observatoryWorkGroupId], references: [id], onDelete: SetNull)
   topics    Topic[]
   memberships ConsultationMembership[]
   categoryAssignments ConsultationCategoryAssignment[]
@@ -60,6 +62,7 @@ model Consultation {
   @@index([startsAt, endsAt])
   @@index([regionId])
   @@index([sectionId])
+  @@index([observatoryWorkGroupId])
 }
 
 model ConsultationRelatedLink {

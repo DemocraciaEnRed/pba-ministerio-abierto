@@ -14,6 +14,12 @@ type TaxonomyRelation = {
   name: string
 }
 
+type ObservatoryWorkGroupRelation = TaxonomyRelation & {
+  color: string
+  iconColor: string
+  icon: string
+}
+
 type ConsultationEntity = {
   id: number
   slug: string
@@ -36,6 +42,7 @@ type ConsultationEntity = {
   updatedAt: Date
   section?: TaxonomyRelation | null
   region?: TaxonomyRelation | null
+  observatoryWorkGroup?: ObservatoryWorkGroupRelation | null
   categoryAssignments?: { isPrimary: boolean, category: TaxonomyRelation }[]
   consultationTags?: { tag: TaxonomyRelation }[]
   topics?: TopicSummaryRelation[]
@@ -66,6 +73,13 @@ export interface ConsultationCategoryDTO extends ConsultationTaxonomyDTO {
   isPrimary: boolean
 }
 
+/** Incluye la presentación del grupo para pintar chips sin pedir el catálogo aparte. */
+export interface ConsultationWorkGroupDTO extends ConsultationTaxonomyDTO {
+  color: string
+  iconColor: string
+  icon: string
+}
+
 export interface PublicConsultationDTO {
   id: number
   slug: string
@@ -85,6 +99,7 @@ export interface PublicConsultationDTO {
   resultsVisibility: ResultsVisibility
   section: ConsultationTaxonomyDTO | null
   region: ConsultationTaxonomyDTO | null
+  observatoryWorkGroup: ConsultationWorkGroupDTO | null
   categories: ConsultationCategoryDTO[]
   tags: ConsultationTaxonomyDTO[]
   /** Portada para las cards públicas; `null` cuando no hay imagen cargada. */
@@ -155,6 +170,16 @@ export function serializeConsultation(
           id: consultation.region.id,
           slug: consultation.region.slug,
           name: consultation.region.name
+        }
+      : null,
+    observatoryWorkGroup: consultation.observatoryWorkGroup
+      ? {
+          id: consultation.observatoryWorkGroup.id,
+          slug: consultation.observatoryWorkGroup.slug,
+          name: consultation.observatoryWorkGroup.name,
+          color: consultation.observatoryWorkGroup.color,
+          iconColor: consultation.observatoryWorkGroup.iconColor,
+          icon: consultation.observatoryWorkGroup.icon
         }
       : null,
     categories: (consultation.categoryAssignments ?? []).map(assignment => ({

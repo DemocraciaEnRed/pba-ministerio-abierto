@@ -37,6 +37,8 @@ export interface ConsultationTypeDefinition {
   landingRoute: string | null
   /** Habilita asignar una región a las consultas de este tipo. */
   allowsRegion: boolean
+  /** Habilita asignar un grupo de trabajo del Observatorio a las consultas de este tipo. */
+  allowsWorkGroup: boolean
   /** Habilita crear un formulario de inscripción presencial para la consulta. */
   registrationFormKind: RegistrationFormKind | null
   defaultConsultationFormat: 'single' | 'multiple'
@@ -54,6 +56,7 @@ export const CONSULTATION_TYPES: readonly ConsultationTypeDefinition[] = [
     icon: 'pba:audiencias-publicas',
     landingRoute: '/audiencias-publicas',
     allowsRegion: false,
+    allowsWorkGroup: false,
     registrationFormKind: 'hearing',
     defaultConsultationFormat: 'multiple',
     enabled: true
@@ -67,6 +70,7 @@ export const CONSULTATION_TYPES: readonly ConsultationTypeDefinition[] = [
     icon: 'pba:consultas-publicas',
     landingRoute: '/consultas-publicas',
     allowsRegion: false,
+    allowsWorkGroup: false,
     registrationFormKind: 'consultation',
     defaultConsultationFormat: 'multiple',
     enabled: true
@@ -80,6 +84,7 @@ export const CONSULTATION_TYPES: readonly ConsultationTypeDefinition[] = [
     icon: 'pba:dialogos',
     landingRoute: '/dialogos',
     allowsRegion: false,
+    allowsWorkGroup: false,
     registrationFormKind: null,
     defaultConsultationFormat: 'multiple',
     enabled: true
@@ -93,6 +98,7 @@ export const CONSULTATION_TYPES: readonly ConsultationTypeDefinition[] = [
     icon: 'pba:encuentros-regionales',
     landingRoute: '/encuentros-regionales',
     allowsRegion: true,
+    allowsWorkGroup: false,
     registrationFormKind: null,
     defaultConsultationFormat: 'multiple',
     enabled: true
@@ -104,11 +110,12 @@ export const CONSULTATION_TYPES: readonly ConsultationTypeDefinition[] = [
     tagline: 'Espacio institucional de participación y control ciudadano.',
     displayOrder: 5,
     icon: 'pba:observatorio',
-    landingRoute: null,
+    landingRoute: '/observatorio-obras-servicios',
     allowsRegion: false,
+    allowsWorkGroup: true,
     registrationFormKind: null,
     defaultConsultationFormat: 'multiple',
-    enabled: false
+    enabled: true
   }
 ]
 
@@ -127,6 +134,10 @@ export function isKnownConsultationTypeSlug(slug: string | null | undefined): sl
 
 export function consultationTypeAllowsRegion(slug: string | null | undefined): boolean {
   return getConsultationType(slug)?.allowsRegion ?? false
+}
+
+export function consultationTypeAllowsWorkGroup(slug: string | null | undefined): boolean {
+  return getConsultationType(slug)?.allowsWorkGroup ?? false
 }
 
 export function consultationTypeRegistrationKind(slug: string | null | undefined): RegistrationFormKind | null {

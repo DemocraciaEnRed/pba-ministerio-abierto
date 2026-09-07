@@ -1,0 +1,22 @@
+/// Grupo de trabajo del Observatorio de Obras y Servicios Públicos.
+/// Catálogo fijo sin ABM: se sincroniza desde `shared/data/observatory-work-groups.ts`
+/// vía seed, que también debe correrse en staging/producción.
+model ObservatoryWorkGroup {
+  id           Int      @id @default(autoincrement())
+  slug         String   @unique
+  name         String
+  description  String?  @db.Text
+  /// Color institucional del grupo en hexadecimal (por ejemplo `#5c7ca3`).
+  color        String   @db.VarChar(9)
+  /// Color del ícono sobre el fondo `color`.
+  iconColor    String   @db.VarChar(9)
+  icon         String
+  displayOrder Int      @default(0)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  consultations Consultation[]
+
+  @@index([isActive, displayOrder])
+}

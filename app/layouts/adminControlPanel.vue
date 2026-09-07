@@ -29,6 +29,13 @@ const itemsNavigationMenu = computed<NavigationMenuItem[][]>(() => [
       icon: 'i-lucide-map-pinned',
       active: route.path.startsWith('/encuentros-regionales/panel'),
       trailingIcon: 'i-lucide-external-link'
+    },
+    {
+      label: 'Observatorio',
+      to: '/observatorio-obras-servicios/panel',
+      icon: 'i-lucide-telescope',
+      active: route.path.startsWith('/observatorio-obras-servicios/panel'),
+      trailingIcon: 'i-lucide-external-link'
     }
   ],
   [
