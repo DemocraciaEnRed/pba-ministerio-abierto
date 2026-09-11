@@ -1,0 +1,148 @@
+import * as z from 'zod'
+import {
+  BUENOS_AIRES,
+  PROVINCES,
+  isValidBuenosAiresMunicipality
+} from '#shared/data/argentina'
+import { emailField, phoneField, optionalText } from '#shared/schemas/auth'
+
+const slugField = z
+  .string()
+  .trim()
+  .min(1, 'El slug es requerido')
+  .max(120, 'El slug no puede superar los 120 caracteres')
+  .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'El slug solo puede tener minúsculas, números y guiones')
+
+const nameField = z
+  .string()
+  .trim()
+  .min(1, 'El nombre es requerido')
+  .max(180, 'El nombre no puede superar los 180 caracteres')
+
+const displayOrderField = z.int().min(0, 'El orden no puede ser negativo')
+
+const categoryIdField = z.int().positive('La categoría debe ser un ID válido')
+
+// --- Catálogo de instituciones (ABM de platform-admin) ---
+
+export const CreateObservatoryInstitutionCategorySchema = z.object({
+  slug: slugField,
+  name: nameField,
+  isActive: z.boolean().default(true),
+  displayOrder: displayOrderField.default(0)
+})
+
+export const PatchObservatoryInstitutionCategorySchema = z
+  .object({
+    slug: slugField.optional(),
+    name: nameField.optional(),
+    isActive: z.boolean().optional(),
+    displayOrder: displayOrderField.optional()
+  })
+  .refine(
+    value => Object.values(value).some(field => field !== undefined),
+    'Debés enviar al menos un campo para actualizar'
+  )
+
+export const CreateObservatoryInstitutionSchema = z.object({
+  categoryId: categoryIdField,
+  slug: slugField,
+  name: nameField,
+  isActive: z.boolean().default(true),
+  displayOrder: displayOrderField.default(0)
+})
+
+export const PatchObservatoryInstitutionSchema = z
+  .object({
+    categoryId: categoryIdField.optional(),
+    slug: slugField.optional(),
+    name: nameField.optional(),
+    isActive: z.boolean().optional(),
+    displayOrder: displayOrderField.optional()
+  })
+  .refine(
+    value => Object.values(value).some(field => field !== undefined),
+    'Debés enviar al menos un campo para actualizar'
+  )
+
+// --- Aportes (formulario público) ---
+
+const firstNameField = z
+  .string()
+  .trim()
+  .min(1, 'Ingresá tu nombre')
+  .max(100, 'Máximo 100 caracteres')
+
+const lastNameField = z
+  .string()
+  .trim()
+  .min(1, 'Ingresá tu apellido')
+  .max(100, 'Máximo 100 caracteres')
+
+const provinciaField = z.enum(PROVINCES, { message: 'Elegí tu provincia' })
+
+const contributionLinkSchema = z.object({
+  url: z
+    .string()
+    .trim()
+    .min(1, 'Ingresá un enlace')
+    .max(2000, 'El enlace no puede superar los 2000 caracteres')
+    .pipe(z.url('Ingresá un enlace válido (debe empezar con http:// o https://)')),
+  title: optionalText(160)
+})
+
+export const ObservatoryContributionLinkSchema = contributionLinkSchema
+
+export const ObservatoryContributionsQuerySchema = z.object({
+  page: z.coerce.number().int('La página debe ser un entero').min(1, 'La página mínima es 1').default(1),
+  perPage: z.coerce.number().int('La cantidad debe ser un entero').min(1, 'La cantidad mínima es 1').max(100, 'La cantidad máxima es 100').default(20)
+})
+
+export const CreateObservatoryContributionSchema = z
+  .object({
+    firstName: firstNameField,
+    lastName: lastNameField,
+    email: emailField,
+    phone: phoneField,
+    provincia: provinciaField,
+    municipio: optionalText(120),
+    institutionId: z.int({ error: 'Elegí tu institución' }).positive('Elegí tu institución'),
+    workGroupSlug: z.string({ error: 'Elegí un eje de trabajo' }).trim().min(1, 'Elegí un eje de trabajo'),
+    description: optionalText(5000),
+    enlaces: z.array(contributionLinkSchema).max(20, 'No podés agregar más de 20 enlaces').default([]),
+    /// El archivo viaja aparte del JSON (multipart). Este flag permite validar en
+    /// el formulario que haya al menos un contenido; el server lo re-verifica
+    /// contra el archivo real recibido.
+    hasAttachment: z.boolean().default(false),
+    // Campo trampa (honeypot): las personas no lo ven, los bots suelen completarlo.
+    website: z.string().optional()
+  })
+  .superRefine((data, ctx) => {
+    // El municipio solo es obligatorio (y validado contra la lista) cuando la
+    // provincia es Buenos Aires. Para el resto se ignora (se guarda como null).
+    if (data.provincia === BUENOS_AIRES) {
+      if (!data.municipio) {
+        ctx.addIssue({ code: 'custom', path: ['municipio'], message: 'Elegí tu municipio' })
+      } else if (!isValidBuenosAiresMunicipality(data.municipio)) {
+        ctx.addIssue({ code: 'custom', path: ['municipio'], message: 'Municipio inválido' })
+      }
+    }
+
+    // Un aporte necesita contenido: la descripción es opcional, pero entonces
+    // tiene que venir acompañada de un archivo adjunto o de un enlace.
+    if (!data.description && !data.hasAttachment && data.enlaces.length === 0) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['description'],
+        message: 'Describí tu aporte o adjuntá un archivo o enlace'
+      })
+    }
+  })
+
+export type CreateObservatoryInstitutionCategoryInput = z.output<typeof CreateObservatoryInstitutionCategorySchema>
+export type PatchObservatoryInstitutionCategoryInput = z.output<typeof PatchObservatoryInstitutionCategorySchema>
+export type CreateObservatoryInstitutionInput = z.output<typeof CreateObservatoryInstitutionSchema>
+export type PatchObservatoryInstitutionInput = z.output<typeof PatchObservatoryInstitutionSchema>
+export type ObservatoryContributionLinkInput = z.output<typeof ObservatoryContributionLinkSchema>
+export type ObservatoryContributionsQueryInput = z.output<typeof ObservatoryContributionsQuerySchema>
+export type CreateObservatoryContributionInput = z.output<typeof CreateObservatoryContributionSchema>

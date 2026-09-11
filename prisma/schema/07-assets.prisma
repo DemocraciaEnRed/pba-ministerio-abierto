@@ -58,6 +58,7 @@ model Asset {
   symbolDarkPlatform         PlatformSettings[]   @relation("PlatformSymbolDark")
   consultationClosureAsFile  ConsultationClosure[] @relation("ConsultationClosureAttachment")
   regionalMeetingSubmissions RegionalMeetingSubmission[] @relation("RegionalMeetingSubmissionAttachment")
+  observatoryContributions   ObservatoryContribution[]   @relation("ObservatoryContributionAttachment")
   consultationRegistrationProofs ConsultationRegistration[] @relation("ConsultationRegistrationProof")
   commentAttachments         Comment[]            @relation("CommentAttachment")
 

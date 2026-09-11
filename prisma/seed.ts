@@ -6,6 +6,7 @@ import { PrismaClient } from './generated/client'
 import { seedBaseUsers } from './seeds/base-users'
 import { seedConsultationsDemo } from './seeds/consultations-demo'
 import { seedInstitution } from './seeds/institution'
+import { seedObservatoryInstitutions } from './seeds/observatory-institutions'
 import { seedObservatoryWorkGroups } from './seeds/observatory-work-groups'
 import { seedRegions } from './seeds/regions'
 import { seedRegionalMeetingsAgenda } from './seeds/regional-meetings-agenda'
@@ -13,7 +14,7 @@ import { seedRegionalMeetingsMetrics } from './seeds/regional-meetings-metrics'
 import { seedRegionalMeetingsTestimonials } from './seeds/regional-meetings-testimonials'
 import { seedSections } from './seeds/sections'
 
-type SeedProfile = 'base' | 'institution' | 'regions' | 'observatory-work-groups' | 'regional-meetings' | 'regional-meetings-metrics' | 'regional-meetings-testimonials' | 'demo'
+type SeedProfile = 'base' | 'institution' | 'regions' | 'observatory-work-groups' | 'observatory-institutions' | 'regional-meetings' | 'regional-meetings-metrics' | 'regional-meetings-testimonials' | 'demo'
 
 interface SeedRunOptions {
   demoCount?: number
@@ -29,10 +30,12 @@ const seedProfiles: Record<
     await seedSections(prisma)
     await seedRegions(prisma)
     await seedObservatoryWorkGroups(prisma)
+    await seedObservatoryInstitutions(prisma)
   },
   'institution': prisma => seedInstitution(prisma),
   'regions': prisma => seedRegions(prisma),
   'observatory-work-groups': prisma => seedObservatoryWorkGroups(prisma),
+  'observatory-institutions': prisma => seedObservatoryInstitutions(prisma),
   'regional-meetings': prisma => seedRegionalMeetingsAgenda(prisma),
   'regional-meetings-metrics': prisma => seedRegionalMeetingsMetrics(prisma),
   'regional-meetings-testimonials': prisma => seedRegionalMeetingsTestimonials(prisma),

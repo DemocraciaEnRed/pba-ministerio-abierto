@@ -26,6 +26,12 @@ const itemsNavigationMenu = computed<NavigationMenuItem[][]>(() => [
         color: 'neutral'
       },
       active: route.path.startsWith('/observatorio-obras-servicios/panel/consultas')
+    },
+    {
+      label: 'Aportes',
+      to: '/observatorio-obras-servicios/panel/aportes',
+      icon: 'i-lucide-inbox',
+      active: route.path.startsWith('/observatorio-obras-servicios/panel/aportes')
     }
   ],
   [
@@ -38,6 +44,12 @@ const itemsNavigationMenu = computed<NavigationMenuItem[][]>(() => [
       to: '/observatorio-obras-servicios/panel/grupos-trabajo',
       icon: 'i-lucide-users',
       active: route.path.startsWith('/observatorio-obras-servicios/panel/grupos-trabajo')
+    },
+    {
+      label: 'Instituciones',
+      to: '/observatorio-obras-servicios/panel/instituciones',
+      icon: 'i-lucide-building-2',
+      active: route.path.startsWith('/observatorio-obras-servicios/panel/instituciones')
     }
   ]
 ])

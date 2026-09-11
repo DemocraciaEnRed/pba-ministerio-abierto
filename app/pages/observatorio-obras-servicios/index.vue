@@ -30,7 +30,17 @@ const { data: workGroups } = await useAsyncData('observatory-work-groups', () =>
       title="Observatorio de Obras y Servicios Públicos"
       :description="consultationType?.description"
       :ui="{ root: 'bg-primary', title: 'text-white', description: 'text-white' }"
-    />
+    >
+      <template #links>
+        <UButton
+          to="/observatorio-obras-servicios/formulario"
+          label="Presentá tu aporte"
+          icon="lucide:send"
+          size="xl"
+          color="neutral"
+        />
+      </template>
+    </UPageHero>
 
     <UContainer>
       <UPageSection

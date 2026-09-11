@@ -17,6 +17,95 @@ model ObservatoryWorkGroup {
   updatedAt    DateTime @updatedAt
 
   consultations Consultation[]
+  contributions ObservatoryContribution[]
 
   @@index([isActive, displayOrder])
+}
+
+/// Categoría del catálogo de instituciones del Observatorio (universidades,
+/// cámaras empresariales, etc.). A diferencia de los grupos de trabajo tiene ABM
+/// desde el panel: se crea y se edita, pero nunca se elimina —se desactiva con
+/// `isActive`— para no romper el historial de aportes ya recibidos.
+model ObservatoryInstitutionCategory {
+  id           Int      @id @default(autoincrement())
+  slug         String   @unique
+  name         String
+  isActive     Boolean  @default(true)
+  displayOrder Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  institutions ObservatoryInstitution[]
+
+  @@index([isActive, displayOrder])
+}
+
+/// Institución que puede presentar aportes al Observatorio. Mismo criterio que
+/// la categoría: ABM sin borrado, baja lógica vía `isActive`.
+model ObservatoryInstitution {
+  id           Int      @id @default(autoincrement())
+  categoryId   Int
+  slug         String   @unique
+  name         String
+  isActive     Boolean  @default(true)
+  displayOrder Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  category      ObservatoryInstitutionCategory @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  contributions ObservatoryContribution[]
+
+  @@index([categoryId, displayOrder])
+  @@index([isActive, displayOrder])
+}
+
+/// Aporte institucional enviado desde el formulario público del Observatorio
+/// (sin login). Solo se crea vía el POST público; toda lectura es exclusiva de
+/// platform-admin. Es inmutable: no se edita ni se borra.
+model ObservatoryContribution {
+  id            Int     @id @default(autoincrement())
+  firstName     String
+  lastName      String
+  email         String
+  phone         String
+  provincia     String
+  municipio     String?
+  institutionId Int?
+  /// Snapshot del catálogo al momento del envío: el aporte conserva el nombre y
+  /// la categoría tal como se eligieron, aunque después se editen o desactiven.
+  institutionName         String
+  institutionCategoryName String
+  /// Grupo de trabajo elegido. El catálogo es fijo (sin ABM), así que alcanza
+  /// con la relación: `reuniones-plenarias` queda excluido a nivel aplicación.
+  workGroupId Int
+  description String? @db.Text
+  /// Archivo adjunto opcional (PDF/Word, ≤8MB). Se sirve solo a platform-admin
+  /// mediante un endpoint protegido, nunca por URL pública.
+  attachmentAssetId Int?
+  createdAt         DateTime @default(now())
+
+  institution     ObservatoryInstitution?       @relation(fields: [institutionId], references: [id], onDelete: SetNull)
+  workGroup       ObservatoryWorkGroup          @relation(fields: [workGroupId], references: [id], onDelete: Restrict)
+  attachmentAsset Asset?                        @relation("ObservatoryContributionAttachment", fields: [attachmentAssetId], references: [id], onDelete: SetNull)
+  links           ObservatoryContributionLink[]
+
+  @@index([createdAt])
+  @@index([email])
+  @@index([institutionId])
+  @@index([workGroupId])
+  @@index([attachmentAssetId])
+}
+
+/// Enlace en la nube asociado a un aporte del Observatorio. El orden no importa:
+/// se listan como llegan.
+model ObservatoryContributionLink {
+  id             Int      @id @default(autoincrement())
+  contributionId Int
+  url            String   @db.Text
+  title          String?
+  createdAt      DateTime @default(now())
+
+  contribution ObservatoryContribution @relation(fields: [contributionId], references: [id], onDelete: Cascade)
+
+  @@index([contributionId])
 }

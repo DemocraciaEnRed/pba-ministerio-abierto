@@ -119,3 +119,14 @@ export function getObservatoryWorkGroup(slug: string | null | undefined): Observ
 export function isKnownObservatoryWorkGroupSlug(slug: string | null | undefined): slug is ObservatoryWorkGroupSlug {
   return !!slug && observatoryWorkGroupBySlug.has(slug)
 }
+
+/**
+ * Grupo que no recibe aportes: las reuniones plenarias son instancias de
+ * consenso general, no un eje de trabajo al que se le presenten propuestas.
+ */
+const CONTRIBUTION_EXCLUDED_WORK_GROUP_SLUG: ObservatoryWorkGroupSlug = 'reuniones-plenarias'
+
+/** Ejes de trabajo elegibles en el formulario de aportes del Observatorio. */
+export function isContributionWorkGroupSlug(slug: string | null | undefined): slug is ObservatoryWorkGroupSlug {
+  return isKnownObservatoryWorkGroupSlug(slug) && slug !== CONTRIBUTION_EXCLUDED_WORK_GROUP_SLUG
+}
