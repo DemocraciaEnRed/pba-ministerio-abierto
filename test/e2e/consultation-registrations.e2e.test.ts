@@ -91,7 +91,9 @@ describe('Server e2e: formulario de inscripción', async () => {
   const runId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
   const hearingSlug = `inscripcion-e2e-audiencia-${runId}`
   const publicSlug = `inscripcion-e2e-consulta-${runId}`
-  const dialogosSlug = `inscripcion-e2e-dialogos-${runId}`
+  // Encuentros Regionales es hoy un tipo sin formulario de inscripción
+  // (diálogos sí lo admite desde que se habilitó el tipo `dialogue`).
+  const noFormSlug = `inscripcion-e2e-sin-formulario-${runId}`
 
   const createdConsultationIds: number[] = []
 
@@ -146,7 +148,7 @@ describe('Server e2e: formulario de inscripción', async () => {
 
     await createConsultation(hearingSlug, 'audiencias-publicas')
     await createConsultation(publicSlug, 'consultas-publicas')
-    await createConsultation(dialogosSlug, 'dialogos')
+    await createConsultation(noFormSlug, 'encuentros-regionales')
   })
 
   afterAll(async () => {
@@ -158,7 +160,7 @@ describe('Server e2e: formulario de inscripción', async () => {
 
   describe('Alta del formulario', () => {
     it('rechaza el alta en un tipo de consulta que no admite inscripción (422)', async () => {
-      const res = await api(`/api/consultations/${dialogosSlug}/registration-form`, {
+      const res = await api(`/api/consultations/${noFormSlug}/registration-form`, {
         method: 'POST',
         cookie: adminCookie,
         body: formBody()
