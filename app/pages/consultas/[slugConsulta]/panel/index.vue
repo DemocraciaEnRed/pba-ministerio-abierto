@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { consultationTypeAllowsRegion } from '#shared/data/consultation-types'
+import { consultationTypeAllowsRegion, consultationTypeAllowsRegistrationForm } from '#shared/data/consultation-types'
+import type { AdminConsultationRegistrationFormDTO } from '~~/server/utils/serializers/consultationRegistrationForm'
 
 definePageMeta({
   layout: 'consultas-control-panel',
@@ -41,6 +42,39 @@ const { data: topics } = await useAsyncData(
 const topicList = computed(() => topics.value ?? [])
 const visibleCount = computed(() => topicList.value.filter(topic => topic.visibility === 'visible').length)
 const hiddenCount = computed(() => topicList.value.filter(topic => topic.visibility === 'hidden').length)
+
+// Estadísticas del formulario de inscripción (solo en tipos que lo admiten).
+const allowsRegistrationForm = computed(() => consultationTypeAllowsRegistrationForm(consultation.value?.section?.slug))
+
+const { data: registrationForm } = await useAsyncData(
+  () => `admin-panel-registration-form-${slug.value}`,
+  async () => {
+    if (!allowsRegistrationForm.value) return null
+    try {
+      return await requestFetch<AdminConsultationRegistrationFormDTO>(`/api/consultations/${slug.value}/registration-form`)
+    } catch {
+      return null
+    }
+  },
+  { watch: [slug] }
+)
+
+const registrationStateLabels: Record<'scheduled' | 'open' | 'closed', string> = {
+  scheduled: 'Programada',
+  open: 'Abierta',
+  closed: 'Cerrada'
+}
+const registrationStateColors: Record<'scheduled' | 'open' | 'closed', 'success' | 'warning' | 'neutral'> = {
+  scheduled: 'warning',
+  open: 'success',
+  closed: 'neutral'
+}
+const accreditationStateLabels: Record<'disabled' | 'scheduled' | 'open' | 'closed', string> = {
+  disabled: 'Deshabilitada',
+  scheduled: 'Programada',
+  open: 'Abierta',
+  closed: 'Cerrada'
+}
 
 function topicEstadoBadge(topic: AdminTopic) {
   return topicStateBadge(topic.visibility, topic.participationState)
@@ -202,6 +236,36 @@ const classificationDescription = computed(() => {
                 </p>
               </div>
             </AdminPanelStat>
+          </div>
+        </section>
+
+        <section
+          v-if="registrationForm"
+          class="space-y-3"
+        >
+          <h2 class="text-sm font-medium text-muted">
+            Formulario de inscripción
+          </h2>
+          <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <AdminPanelStat
+              icon="i-lucide-clipboard-list"
+              label="Inscripciones"
+              :value="registrationForm.registrationsCount"
+              :color="registrationStateColors[registrationForm.registrationState]"
+              :hint="`Estado: ${registrationStateLabels[registrationForm.registrationState]}`"
+              :to="`/consultas/${slug}/panel/inscripciones`"
+            />
+
+            <AdminPanelStat
+              icon="i-lucide-qr-code"
+              label="Acreditaciones"
+              :value="registrationForm.accreditation ? registrationForm.accreditation.entriesCount : 'Deshabilitadas'"
+              :color="registrationForm.accreditation && registrationForm.accreditation.state === 'open' ? 'success' : 'neutral'"
+              :hint="registrationForm.accreditation
+                ? `Estado: ${accreditationStateLabels[registrationForm.accreditation.state]}`
+                : 'No habilitadas'"
+              :to="`/consultas/${slug}/panel/inscripciones/acreditaciones`"
+            />
           </div>
         </section>
 

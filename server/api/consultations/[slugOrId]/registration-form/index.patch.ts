@@ -1,6 +1,8 @@
 import { ConsultationRegistrationFormSchema } from '#shared/schemas/consultation-registrations'
 import { serializeConsultationRegistrationForm } from '~~/server/utils/serializers/consultationRegistrationForm'
+import { serializeAccreditation } from '~~/server/utils/serializers/accreditation'
 import { resolveRegistrationConsultation } from '~~/server/utils/consultations/registration-form'
+import { syncFormAccreditation, loadFormAccreditation } from '~~/server/utils/consultations/accreditation'
 
 export default defineEventHandler(async (event) => {
   const body = await parseBody(event, ConsultationRegistrationFormSchema)
@@ -33,8 +35,18 @@ export default defineEventHandler(async (event) => {
     include: { _count: { select: { registrations: true } } }
   })
 
+  await syncFormAccreditation(form.id, {
+    enabled: body.accreditationEnabled,
+    opensAt: body.accreditationOpensAt,
+    closesAt: body.accreditationClosesAt
+  })
+  const accreditation = await loadFormAccreditation(form.id)
+
   return serializeConsultationRegistrationForm(form, 'admin', {
     kind,
-    registrationsCount: form._count.registrations
+    registrationsCount: form._count.registrations,
+    accreditation: accreditation
+      ? serializeAccreditation(accreditation, 'admin', { entriesCount: accreditation._count.entries })
+      : null
   })
 })

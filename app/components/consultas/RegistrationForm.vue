@@ -13,6 +13,9 @@ export interface RegistrationFormPayload {
   venueAddress: string
   venueCity: string
   venueProvince: string
+  accreditationEnabled: boolean
+  accreditationOpensAt: string | null
+  accreditationClosesAt: string | null
 }
 
 const props = withDefaults(defineProps<{
@@ -39,8 +42,14 @@ const form = reactive({
   venueName: '',
   venueAddress: '',
   venueCity: '',
-  venueProvince: 'Buenos Aires' as Province
+  venueProvince: 'Buenos Aires' as Province,
+  accreditationEnabled: false,
+  accreditationOpensAt: null as string | null,
+  accreditationClosesAt: null as string | null
 })
+
+// Cantidad de ingresos ya registrados: si hay, deshabilitar conserva el historial.
+const accreditationEntriesCount = computed(() => props.initialValues?.accreditation?.entriesCount ?? 0)
 
 type FieldName = keyof RegistrationFormPayload
 const errors = reactive<Partial<Record<FieldName, string>>>({})
@@ -55,6 +64,10 @@ function hydrate(values: AdminConsultationRegistrationFormDTO | null) {
   form.venueAddress = values?.venueAddress ?? ''
   form.venueCity = values?.venueCity ?? ''
   form.venueProvince = (values?.venueProvince as Province | undefined) ?? 'Buenos Aires'
+  form.accreditationEnabled = values?.accreditation?.enabled ?? false
+  // Prefill de la ventana aunque esté histórica, para reutilizarla al reactivar.
+  form.accreditationOpensAt = values?.accreditation?.opensAt ?? null
+  form.accreditationClosesAt = values?.accreditation?.closesAt ?? null
 }
 
 watch(() => props.initialValues, hydrate, { immediate: true })
@@ -69,7 +82,10 @@ function buildPayload(): RegistrationFormPayload {
     venueName: form.venueName.trim(),
     venueAddress: form.venueAddress.trim(),
     venueCity: form.venueCity.trim(),
-    venueProvince: form.venueProvince
+    venueProvince: form.venueProvince,
+    accreditationEnabled: form.accreditationEnabled,
+    accreditationOpensAt: form.accreditationEnabled ? form.accreditationOpensAt : null,
+    accreditationClosesAt: form.accreditationEnabled ? form.accreditationClosesAt : null
   }
 }
 
@@ -216,6 +232,50 @@ const titleMax = 200
           class="w-full"
         />
       </UFormField>
+    </div>
+
+    <USeparator />
+
+    <div class="space-y-4">
+      <UFormField
+        label="Acreditaciones"
+        description="Habilitá el registro de asistencia por QR el día del evento. Los asistentes escanean e ingresan su DNI."
+      >
+        <USwitch
+          v-model="form.accreditationEnabled"
+          :label="form.accreditationEnabled ? 'Acreditaciones habilitadas' : 'Acreditaciones deshabilitadas'"
+        />
+      </UFormField>
+
+      <UAlert
+        v-if="!form.accreditationEnabled && accreditationEntriesCount > 0"
+        icon="i-lucide-info"
+        color="warning"
+        variant="subtle"
+        title="Ya hay acreditaciones registradas"
+        :description="`Si guardás con las acreditaciones deshabilitadas, se conservarán los ${accreditationEntriesCount} ingreso(s) ya registrados como historial, pero el QR público dejará de estar disponible.`"
+      />
+
+      <div
+        v-if="form.accreditationEnabled"
+        class="grid gap-4 md:grid-cols-2"
+      >
+        <UFormField
+          label="Apertura de acreditaciones"
+          required
+          :error="errors.accreditationOpensAt"
+        >
+          <DateTimeField v-model="form.accreditationOpensAt" />
+        </UFormField>
+
+        <UFormField
+          label="Cierre de acreditaciones"
+          required
+          :error="errors.accreditationClosesAt"
+        >
+          <DateTimeField v-model="form.accreditationClosesAt" />
+        </UFormField>
+      </div>
     </div>
 
     <div class="flex justify-end gap-2">

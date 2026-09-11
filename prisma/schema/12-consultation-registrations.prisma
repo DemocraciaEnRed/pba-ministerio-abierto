@@ -35,6 +35,7 @@ model ConsultationRegistrationForm {
 
   consultation  Consultation               @relation(fields: [consultationId], references: [id], onDelete: Cascade)
   registrations ConsultationRegistration[]
+  accreditation Accreditation?
 
   @@index([opensAt, closesAt])
 }
@@ -69,6 +70,7 @@ model ConsultationRegistration {
   user      User?                              @relation("ConsultationRegistrationUser", fields: [userId], references: [id], onDelete: SetNull)
   proofAsset Asset?                            @relation("ConsultationRegistrationProof", fields: [proofAssetId], references: [id], onDelete: SetNull)
   questions ConsultationRegistrationQuestion[]
+  accreditationEntries AccreditationEntry[]    @relation("AccreditationEntryRegistration")
 
   @@unique([formId, userId])
   @@index([formId, createdAt])
@@ -85,4 +87,48 @@ model ConsultationRegistrationQuestion {
   registration ConsultationRegistration @relation(fields: [registrationId], references: [id], onDelete: Cascade)
 
   @@index([registrationId, displayOrder])
+}
+
+/// Configuración del workflow de acreditaciones de un formulario de inscripción.
+/// Es opcional y 1:1 con el formulario. Cuando existe habilita el ingreso de
+/// asistentes mediante un QR público durante la ventana `opensAt`–`closesAt`.
+model Accreditation {
+  id        Int      @id @default(autoincrement())
+  formId    Int      @unique
+  /// Identificador público corto (8 caracteres alfanuméricos en minúsculas) usado
+  /// en la URL del QR; independiente del id interno para no ser predecible.
+  publicId  String   @unique @db.VarChar(16)
+  /// `false` la conserva como histórica: el QR público queda inhabilitado pero se
+  /// preservan los ingresos ya registrados.
+  enabled   Boolean  @default(true)
+  /// Ventana de acreditación (check-in).
+  opensAt   DateTime
+  closesAt  DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  form    ConsultationRegistrationForm @relation(fields: [formId], references: [id], onDelete: Cascade)
+  entries AccreditationEntry[]
+
+  @@index([opensAt, closesAt])
+}
+
+/// Cada ingreso registrado en una acreditación. El DNI se guarda tal como se
+/// ingresa (sin normalizar) y se admiten repetidos: no hay unicidad. `registrationId`
+/// vincula el ingreso a una inscripción del mismo formulario cuando el DNI coincide.
+model AccreditationEntry {
+  id              Int      @id @default(autoincrement())
+  accreditationId Int
+  registrationId  Int?
+  dni             String
+  firstName       String?
+  lastName        String?
+  email           String?
+  accreditedAt    DateTime @default(now())
+
+  accreditation Accreditation             @relation(fields: [accreditationId], references: [id], onDelete: Cascade)
+  registration  ConsultationRegistration? @relation("AccreditationEntryRegistration", fields: [registrationId], references: [id], onDelete: SetNull)
+
+  @@index([accreditationId, accreditedAt])
+  @@index([registrationId])
 }

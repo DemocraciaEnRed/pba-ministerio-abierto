@@ -168,6 +168,13 @@ const headerButtons = computed<ButtonProps[]>(() => {
       external: true
     },
     {
+      label: 'Acreditaciones',
+      icon: 'lucide:qr-code',
+      color: 'neutral',
+      variant: 'subtle',
+      to: `/consultas/${slug.value}/panel/inscripciones/acreditaciones`
+    },
+    {
       label: 'Editar',
       icon: 'lucide:pencil',
       color: 'neutral',

@@ -19,6 +19,15 @@ const dateTimeField = (label: string) =>
     .refine(value => !Number.isNaN(Date.parse(value)), `${label} debe ser una fecha válida`)
     .transform(value => new Date(value))
 
+/** Fecha opcional: acepta cadena vacía o `null` y la normaliza a `null`. */
+const nullableDateTimeField = (label: string) =>
+  z
+    .union([z.string(), z.null()])
+    .transform(value => (typeof value === 'string' ? value.trim() : value))
+    .refine(value => !value || !Number.isNaN(Date.parse(value)), `${label} debe ser una fecha válida`)
+    .transform(value => (value ? new Date(value) : null))
+    .default(null)
+
 const venueTextField = (label: string, max: number) =>
   z
     .string()
@@ -36,7 +45,11 @@ export const ConsultationRegistrationFormSchema = z
     venueName: venueTextField('El lugar', 160),
     venueAddress: venueTextField('La dirección', 200),
     venueCity: venueTextField('La ciudad', 120),
-    venueProvince: z.enum(PROVINCES, { error: 'Elegí una provincia' })
+    venueProvince: z.enum(PROVINCES, { error: 'Elegí una provincia' }),
+    // Workflow de acreditaciones (opcional): cuando se habilita exige su ventana.
+    accreditationEnabled: z.boolean().default(false),
+    accreditationOpensAt: nullableDateTimeField('La apertura de acreditaciones'),
+    accreditationClosesAt: nullableDateTimeField('El cierre de acreditaciones')
   })
   .superRefine((data, ctx) => {
     if (data.opensAt >= data.closesAt) {
@@ -52,6 +65,34 @@ export const ConsultationRegistrationFormSchema = z
         code: 'custom',
         path: ['eventAt'],
         message: 'El evento no puede ser anterior a la apertura de inscripciones'
+      })
+    }
+
+    if (!data.accreditationEnabled) return
+
+    if (!data.accreditationOpensAt) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['accreditationOpensAt'],
+        message: 'Ingresá la fecha de apertura de las acreditaciones'
+      })
+    }
+    if (!data.accreditationClosesAt) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['accreditationClosesAt'],
+        message: 'Ingresá la fecha de cierre de las acreditaciones'
+      })
+    }
+    if (
+      data.accreditationOpensAt
+      && data.accreditationClosesAt
+      && data.accreditationOpensAt >= data.accreditationClosesAt
+    ) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['accreditationClosesAt'],
+        message: 'El cierre debe ser posterior a la apertura'
       })
     }
   })

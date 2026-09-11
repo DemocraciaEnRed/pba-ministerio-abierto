@@ -41,13 +41,14 @@ const itemsNavigationMenu = computed<NavigationMenuItem[][]>(() => {
         icon: 'i-lucide-layout-dashboard',
         to: basePath.value,
         active: route.path === basePath.value
-      },
-      {
-        label: 'Temas de participación',
-        icon: 'i-lucide-list-tree',
-        to: `${basePath.value}/temas`,
-        active: route.path.startsWith(`${basePath.value}/temas`)
       }
+      // },
+      // {
+      //   label: 'Temas de participación',
+      //   icon: 'i-lucide-list-tree',
+      //   to: `${basePath.value}/temas`,
+      //   active: route.path.startsWith(`${basePath.value}/temas`)
+      // }
     ],
     [
       {
@@ -120,21 +121,7 @@ const itemsNavigationMenu = computed<NavigationMenuItem[][]>(() => {
             active: route.path.startsWith(`${basePath.value}/inscripciones`)
           }
         ]
-      : [],
-    [
-      {
-        label: 'Participación',
-        icon: 'i-lucide-users',
-        disabled: true,
-        badge: { label: 'Próximamente', color: 'neutral', variant: 'subtle' }
-      },
-      {
-        label: 'Resultados',
-        icon: 'i-lucide-chart-column',
-        disabled: true,
-        badge: { label: 'Próximamente', color: 'neutral', variant: 'subtle' }
-      }
-    ]
+      : []
   ]
 
   return groups.filter(group => group.length > 0)
@@ -149,23 +136,20 @@ const itemsNavigationMenu = computed<NavigationMenuItem[][]>(() => {
         <UPage>
           <template #left>
             <UPageAside>
-              <div class="space-y-2 pb-2">
+              <div class="space-y-1 pb-2">
+                <UBadge
+                  v-if="consultation && estadoBadge"
+                  :label="estadoBadge.label"
+                  :color="estadoBadge.color"
+                  variant="subtle"
+                  size="sm"
+                />
                 <div class="flex justify-between items-start gap-2">
-                  <div class="flex flex-col text-xs text-muted">
-                    <p class="">
+                  <div class="flex justify-between gap-2 items-end text-muted w-full">
+                    <p class="text-xs">
                       {{ consultation?.section?.name || 'Consulta' }}
                     </p>
-                    <p class="font-medium uppercase">
-                      Instancia de participación
-                    </p>
                   </div>
-                  <UBadge
-                    v-if="consultation && estadoBadge"
-                    :label="estadoBadge.label"
-                    :color="estadoBadge.color"
-                    variant="soft"
-                    size="sm"
-                  />
                 </div>
                 <p class="font-semibold leading-tight text-sm">
                   {{ consultation?.title || slug }}
