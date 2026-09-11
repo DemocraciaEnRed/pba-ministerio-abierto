@@ -103,7 +103,7 @@ function downloadPng() {
 
         <div
           ref="qrContainer"
-          class="group relative bg-white rounded-2xl p-6 shadow-lg"
+          class="group relative bg-white rounded-2xl p-6 shadow-lg border-accented border "
         >
           <Qrcode
             :value="qrUrl"
