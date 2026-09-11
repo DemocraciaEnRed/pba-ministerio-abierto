@@ -13,7 +13,14 @@ export const REGISTRATION_PARTICIPATION_MODE_LABELS = {
 
 /** Nombre de la instancia según el tipo de consulta, para los textos de la UI. */
 export function registrationEventNoun(kind: RegistrationFormKind): string {
-  return kind === 'hearing' ? 'audiencia pública' : 'consulta pública'
+  switch (kind) {
+    case 'hearing':
+      return 'audiencia pública'
+    case 'dialogue':
+      return 'instancia de diálogo'
+    default:
+      return 'consulta pública'
+  }
 }
 
 export const REGISTRATION_PRIVACY_NOTICE
