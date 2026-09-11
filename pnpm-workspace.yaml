@@ -6,6 +6,26 @@ allowBuilds:
   prisma: true
   unrs-resolver: false
   vue-demi: false
+overrides:
+  '@tiptap/core': 3.31.3
+  '@tiptap/extension-bubble-menu': 3.31.3
+  '@tiptap/extension-code': 3.31.3
+  '@tiptap/extension-collaboration': 3.31.3
+  '@tiptap/extension-drag-handle': 3.31.3
+  '@tiptap/extension-drag-handle-vue-3': 3.31.3
+  '@tiptap/extension-floating-menu': 3.31.3
+  '@tiptap/extension-horizontal-rule': 3.31.3
+  '@tiptap/extension-image': 3.31.3
+  '@tiptap/extension-mention': 3.31.3
+  '@tiptap/extension-node-range': 3.31.3
+  '@tiptap/extension-placeholder': 3.31.3
+  '@tiptap/extension-youtube': 3.31.3
+  '@tiptap/markdown': 3.31.3
+  '@tiptap/pm': 3.31.3
+  '@tiptap/starter-kit': 3.31.3
+  '@tiptap/suggestion': 3.31.3
+  '@tiptap/vue-3': 3.31.3
+  '@tiptap/y-tiptap': 3.0.9
 minimumReleaseAgeExclude:
   - '@nuxt/kit@4.5.1'
   - '@nuxt/nitro-server@4.5.1'
