@@ -56,7 +56,7 @@ const { data: registrationForm } = await useAsyncData(
       return null
     }
   },
-  { watch: [slug] }
+  { watch: [slug, allowsRegistrationForm] }
 )
 
 const registrationStateLabels: Record<'scheduled' | 'open' | 'closed', string> = {
