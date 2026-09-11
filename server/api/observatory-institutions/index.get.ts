@@ -1,4 +1,5 @@
 import { serializeObservatoryInstitution } from '~~/server/utils/serializers/observatoryInstitution'
+import { institutionLogoSelect, withLogoUrls } from '~~/server/utils/observatory/institution-logo'
 
 // Público: solo instituciones activas dentro de categorías activas (una
 // categoría dada de baja oculta también sus instituciones en el formulario).
@@ -13,12 +14,15 @@ export default defineEventHandler(async (event) => {
 
   const institutions = await prisma.observatoryInstitution.findMany({
     where: isAdmin ? undefined : { isActive: true, category: { isActive: true } },
-    orderBy: [{ displayOrder: 'asc' }, { name: 'asc' }]
+    orderBy: [{ displayOrder: 'asc' }, { name: 'asc' }],
+    include: { logoAsset: { select: institutionLogoSelect } }
   })
 
+  const withLogos = await withLogoUrls(institutions)
+
   if (isAdmin) {
-    return institutions.map(institution => serializeObservatoryInstitution(institution, 'admin'))
+    return withLogos.map(institution => serializeObservatoryInstitution(institution, 'admin'))
   }
 
-  return institutions.map(institution => serializeObservatoryInstitution(institution, 'public'))
+  return withLogos.map(institution => serializeObservatoryInstitution(institution, 'public'))
 })

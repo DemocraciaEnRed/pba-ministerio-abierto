@@ -187,6 +187,9 @@ const pageActions = computed<ButtonProps[]>(() => [
                 <th class="text-center">
                   Orden
                 </th>
+                <th class="text-center">
+                  Logo
+                </th>
                 <th>Nombre</th>
                 <th class="text-center">
                   Identificador
@@ -206,7 +209,35 @@ const pageActions = computed<ButtonProps[]>(() => [
                 <td class="text-center">
                   {{ institution.displayOrder }}
                 </td>
-                <td>{{ institution.name }}</td>
+                <td>
+                  <div class="flex justify-center">
+                    <img
+                      v-if="institution.logoUrl"
+                      :src="institution.logoUrl"
+                      :alt="institution.name"
+                      class="h-8 w-auto max-w-24 object-contain"
+                      loading="lazy"
+                    >
+                    <UIcon
+                      v-else
+                      name="lucide:image-off"
+                      class="size-4 text-muted"
+                      title="Sin logo"
+                    />
+                  </div>
+                </td>
+                <td>
+                  {{ institution.name }}
+                  <ULink
+                    v-if="institution.websiteUrl"
+                    :to="institution.websiteUrl"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="block text-xs"
+                  >
+                    {{ institution.websiteUrl }}
+                  </ULink>
+                </td>
                 <td class="text-center font-mono text-xs">
                   {{ institution.slug }}
                 </td>

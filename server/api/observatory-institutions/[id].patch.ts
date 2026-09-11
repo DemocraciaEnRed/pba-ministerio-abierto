@@ -1,6 +1,11 @@
 import { PatchObservatoryInstitutionSchema } from '#shared/schemas/observatory'
 import { parsePositiveIntParam } from '~~/server/utils/http/params'
 import { serializeObservatoryInstitution } from '~~/server/utils/serializers/observatoryInstitution'
+import {
+  assertLogoAssetIsImage,
+  institutionLogoSelect,
+  withLogoUrls
+} from '~~/server/utils/observatory/institution-logo'
 
 function getPrismaErrorCode(error: unknown): string | null {
   if (typeof error === 'object' && error !== null && 'code' in error && typeof error.code === 'string') {
@@ -38,13 +43,19 @@ export default defineEventHandler(async (event) => {
     }
   }
 
+  if (body.logoAssetId) {
+    await assertLogoAssetIsImage(body.logoAssetId)
+  }
+
   try {
     const updated = await prisma.observatoryInstitution.update({
       where: { id: institutionId },
-      data: body
+      data: body,
+      include: { logoAsset: { select: institutionLogoSelect } }
     })
+    const [withLogo] = await withLogoUrls([updated])
 
-    return serializeObservatoryInstitution(updated, 'admin')
+    return serializeObservatoryInstitution(withLogo!, 'admin')
   } catch (error) {
     if (getPrismaErrorCode(error) === 'P2002') {
       throw createError({

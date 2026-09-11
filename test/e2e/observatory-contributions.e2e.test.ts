@@ -49,6 +49,8 @@ interface InstitutionDTO {
   categoryId: number
   slug: string
   name: string
+  logoUrl: string | null
+  websiteUrl: string | null
   isActive?: boolean
 }
 
@@ -447,6 +449,92 @@ describe('Server e2e: aportes del Observatorio', async () => {
         cookie: adminCookie,
         body: { name: 'Institución e2e' }
       })
+    })
+  })
+
+  describe('logo y sitio web', () => {
+    /** Sube un SVG mínimo y devuelve el id del asset creado. */
+    async function uploadLogo(): Promise<number> {
+      const formData = new FormData()
+      formData.append(
+        'file',
+        new Blob(['<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 4 4"></svg>'], { type: 'image/svg+xml' }),
+        'logo.svg'
+      )
+
+      const res = await fetch(url('/api/assets'), {
+        method: 'POST',
+        headers: { cookie: adminCookie },
+        body: formData
+      })
+
+      expect(res.status).toBe(201)
+      const asset = (await res.json()) as { id: number }
+      return asset.id
+    }
+
+    it('expone logoUrl y websiteUrl en el DTO público', async () => {
+      const logoAssetId = await uploadLogo()
+
+      await api(`/api/observatory-institutions/${institutionId}`, {
+        method: 'PATCH',
+        cookie: adminCookie,
+        body: { logoAssetId, websiteUrl: 'https://institucion.example' }
+      })
+
+      const res = await api<InstitutionDTO[]>('/api/observatory-institutions')
+      const institution = res.data.find(item => item.id === institutionId)
+
+      expect(institution!.logoUrl).toBeTruthy()
+      expect(institution!.websiteUrl).toBe('https://institucion.example')
+    })
+
+    it('permite quitar el logo y el sitio web', async () => {
+      const res = await api<InstitutionDTO>(`/api/observatory-institutions/${institutionId}`, {
+        method: 'PATCH',
+        cookie: adminCookie,
+        body: { logoAssetId: null, websiteUrl: null }
+      })
+
+      expect(res.status).toBe(200)
+      expect(res.data.logoUrl).toBeNull()
+      expect(res.data.websiteUrl).toBeNull()
+    })
+
+    it('rechaza un logo inexistente', async () => {
+      const res = await api(`/api/observatory-institutions/${institutionId}`, {
+        method: 'PATCH',
+        cookie: adminCookie,
+        body: { logoAssetId: 99999999 }
+      })
+
+      expect(res.status).toBe(422)
+    })
+
+    it('rechaza un sitio web con formato inválido', async () => {
+      const res = await api(`/api/observatory-institutions/${institutionId}`, {
+        method: 'PATCH',
+        cookie: adminCookie,
+        body: { websiteUrl: 'no-es-una-url' }
+      })
+
+      expect(res.status).toBe(422)
+    })
+
+    it('sirve los SVG del storage local con sandbox', async () => {
+      const logoAssetId = await uploadLogo()
+
+      const asset = await api<{ url: string | null }>(`/api/assets/${logoAssetId}`, { cookie: adminCookie })
+      const logoUrl = asset.data.url
+
+      // Con driver s3 la URL es externa y esta comprobación no aplica.
+      if (!logoUrl?.startsWith('/uploads/')) return
+
+      const res = await fetch(url(logoUrl))
+      expect(res.status).toBe(200)
+      expect(res.headers.get('content-type')).toContain('image/svg+xml')
+      expect(res.headers.get('content-security-policy')).toContain('sandbox')
+      expect(res.headers.get('x-content-type-options')).toBe('nosniff')
     })
   })
 })

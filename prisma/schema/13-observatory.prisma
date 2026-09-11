@@ -47,16 +47,22 @@ model ObservatoryInstitution {
   categoryId   Int
   slug         String   @unique
   name         String
+  /// Logo institucional opcional. Si no hay, la muestra pública cae al nombre.
+  logoAssetId  Int?
+  /// Sitio web oficial, opcional: si es null la tarjeta pública no enlaza.
+  websiteUrl   String?  @db.VarChar(500)
   isActive     Boolean  @default(true)
   displayOrder Int      @default(0)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
   category      ObservatoryInstitutionCategory @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  logoAsset     Asset?                         @relation("ObservatoryInstitutionLogo", fields: [logoAssetId], references: [id], onDelete: SetNull)
   contributions ObservatoryContribution[]
 
   @@index([categoryId, displayOrder])
   @@index([isActive, displayOrder])
+  @@index([logoAssetId])
 }
 
 /// Aporte institucional enviado desde el formulario público del Observatorio

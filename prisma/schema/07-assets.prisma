@@ -59,6 +59,7 @@ model Asset {
   consultationClosureAsFile  ConsultationClosure[] @relation("ConsultationClosureAttachment")
   regionalMeetingSubmissions RegionalMeetingSubmission[] @relation("RegionalMeetingSubmissionAttachment")
   observatoryContributions   ObservatoryContribution[]   @relation("ObservatoryContributionAttachment")
+  observatoryInstitutionLogos ObservatoryInstitution[]   @relation("ObservatoryInstitutionLogo")
   consultationRegistrationProofs ConsultationRegistration[] @relation("ConsultationRegistrationProof")
   commentAttachments         Comment[]            @relation("CommentAttachment")
 

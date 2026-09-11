@@ -67,6 +67,13 @@ const { data: workGroups } = await useAsyncData('observatory-work-groups', () =>
           </div>
         </UPageGrid>
       </UPageSection>
+
+      <UPageSection
+        title="Instituciones que integran el Observatorio"
+        description="Universidades, colegios profesionales, cámaras empresariales, sindicatos y organizaciones de la sociedad civil que participan del espacio."
+      >
+        <ObservatorioInstitutionsShowcase />
+      </UPageSection>
     </UContainer>
   </div>
 </template>

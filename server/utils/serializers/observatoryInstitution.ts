@@ -15,10 +15,14 @@ type InstitutionEntity = {
   categoryId: number
   slug: string
   name: string
+  logoAssetId: number | null
+  websiteUrl: string | null
   isActive: boolean
   displayOrder: number
   createdAt: Date
   updatedAt: Date
+  /// URL del logo ya resuelta en el handler: el serializer es síncrono.
+  logoUrl?: string | null
 }
 
 export interface PublicObservatoryInstitutionCategoryDTO {
@@ -39,9 +43,12 @@ export interface PublicObservatoryInstitutionDTO {
   categoryId: number
   slug: string
   name: string
+  logoUrl: string | null
+  websiteUrl: string | null
 }
 
 export interface AdminObservatoryInstitutionDTO extends PublicObservatoryInstitutionDTO {
+  logoAssetId: number | null
   isActive: boolean
   displayOrder: number
   createdAt: string
@@ -95,7 +102,9 @@ export function serializeObservatoryInstitution(
     id: institution.id,
     categoryId: institution.categoryId,
     slug: institution.slug,
-    name: institution.name
+    name: institution.name,
+    logoUrl: institution.logoUrl ?? null,
+    websiteUrl: institution.websiteUrl
   }
 
   if (view === 'public') {
@@ -104,6 +113,7 @@ export function serializeObservatoryInstitution(
 
   return {
     ...base,
+    logoAssetId: institution.logoAssetId,
     isActive: institution.isActive,
     displayOrder: institution.displayOrder,
     createdAt: institution.createdAt.toISOString(),

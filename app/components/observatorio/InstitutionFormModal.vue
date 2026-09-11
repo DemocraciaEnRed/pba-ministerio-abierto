@@ -35,12 +35,16 @@ const state = reactive<{
   categoryId: number | undefined
   slug: string
   name: string
+  logoAssetId: number | null
+  websiteUrl: string
   isActive: boolean
   displayOrder: number
 }>({
   categoryId: undefined,
   slug: '',
   name: '',
+  logoAssetId: null,
+  websiteUrl: '',
   isActive: true,
   displayOrder: 0
 })
@@ -70,6 +74,8 @@ function hydrate() {
   state.categoryId = values?.categoryId
   state.slug = values?.slug ?? ''
   state.name = values?.name ?? ''
+  state.logoAssetId = values?.logoAssetId ?? null
+  state.websiteUrl = values?.websiteUrl ?? ''
   state.isActive = values?.isActive ?? true
   state.displayOrder = values?.displayOrder ?? 0
   slugTouched.value = Boolean(values?.slug)
@@ -165,6 +171,33 @@ async function onSubmit(event: FormSubmitEvent<CreateObservatoryInstitutionInput
         >
           <UInput
             v-model="state.name"
+            class="w-full"
+          />
+        </UFormField>
+
+        <UFormField
+          label="Logo"
+          name="logoAssetId"
+          help="Opcional. JPG, PNG, WebP, GIF o SVG. Si no cargás uno, en la página pública se muestra el nombre."
+        >
+          <AdminAssetUploader
+            v-model="state.logoAssetId"
+            media-type="image"
+            accept="image/*"
+            label="Subir logo"
+          />
+        </UFormField>
+
+        <UFormField
+          label="Sitio web"
+          name="websiteUrl"
+          help="Opcional. Si lo completás, la tarjeta pública enlaza al sitio."
+        >
+          <UInput
+            v-model="state.websiteUrl"
+            type="url"
+            inputmode="url"
+            placeholder="https://..."
             class="w-full"
           />
         </UFormField>

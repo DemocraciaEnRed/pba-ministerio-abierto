@@ -23,6 +23,19 @@ const displayOrderField = z.int().min(0, 'El orden no puede ser negativo')
 
 const categoryIdField = z.int().positive('La categoría debe ser un ID válido')
 
+const logoAssetIdField = z.int().positive('El logo debe ser un ID válido').nullable()
+
+const websiteUrlField = z
+  .string()
+  .trim()
+  .max(500, 'El enlace no puede superar los 500 caracteres')
+  .nullable()
+  .transform(value => (value ? value : null))
+  .refine(
+    value => value === null || z.url().safeParse(value).success,
+    'Ingresá un enlace válido (debe empezar con http:// o https://)'
+  )
+
 // --- Catálogo de instituciones (ABM de platform-admin) ---
 
 export const CreateObservatoryInstitutionCategorySchema = z.object({
@@ -48,6 +61,8 @@ export const CreateObservatoryInstitutionSchema = z.object({
   categoryId: categoryIdField,
   slug: slugField,
   name: nameField,
+  logoAssetId: logoAssetIdField.default(null),
+  websiteUrl: websiteUrlField.default(null),
   isActive: z.boolean().default(true),
   displayOrder: displayOrderField.default(0)
 })
@@ -57,6 +72,8 @@ export const PatchObservatoryInstitutionSchema = z
     categoryId: categoryIdField.optional(),
     slug: slugField.optional(),
     name: nameField.optional(),
+    logoAssetId: logoAssetIdField.optional(),
+    websiteUrl: websiteUrlField.optional(),
     isActive: z.boolean().optional(),
     displayOrder: displayOrderField.optional()
   })
