@@ -36,22 +36,23 @@ export default defineEventHandler(async (event) => {
     prisma.consultation.count({ where: { AND: [sectionWhere, consultationStateWhere('scheduled', now)] } }),
     prisma.consultation.count({ where: { AND: [sectionWhere, consultationStateWhere('open', now)] } }),
     prisma.consultation.count({ where: { AND: [sectionWhere, consultationStateWhere('closed', now)] } }),
-    prisma.consultation.count({ where: { ...sectionWhere, observatoryWorkGroupId: null } }),
+    prisma.consultation.count({ where: { ...sectionWhere, workGroupAssignments: { none: {} } } }),
     prisma.observatoryWorkGroup.findMany({
       where: { isActive: true },
       orderBy: { displayOrder: 'asc' },
       select: { id: true, slug: true, name: true, color: true, iconColor: true, icon: true }
     }),
-    prisma.consultation.groupBy({
-      by: ['observatoryWorkGroupId'],
-      where: { ...sectionWhere, observatoryWorkGroupId: { not: null } },
+    // Una consulta puede pertenecer a varios grupos: la suma de counts puede superar el total.
+    prisma.consultationObservatoryWorkGroup.groupBy({
+      by: ['workGroupId'],
+      where: { consultation: sectionWhere },
       _count: { _all: true }
     }),
     getCommentMetrics(sectionCommentsWhere(SECTION_SLUG), range, now)
   ])
 
   const totalByWorkGroupId = new Map(
-    countsByWorkGroup.map(row => [row.observatoryWorkGroupId, row._count._all])
+    countsByWorkGroup.map(row => [row.workGroupId, row._count._all])
   )
 
   return {

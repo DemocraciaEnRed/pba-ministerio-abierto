@@ -16,8 +16,8 @@ model ObservatoryWorkGroup {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  consultations Consultation[]
-  contributions ObservatoryContribution[]
+  consultationAssignments ConsultationObservatoryWorkGroup[]
+  contributionAssignments ObservatoryContributionWorkGroup[]
 
   @@index([isActive, displayOrder])
 }
@@ -81,9 +81,6 @@ model ObservatoryContribution {
   /// la categoría tal como se eligieron, aunque después se editen o desactiven.
   institutionName         String
   institutionCategoryName String
-  /// Grupo de trabajo elegido. El catálogo es fijo (sin ABM), así que alcanza
-  /// con la relación: `reuniones-plenarias` queda excluido a nivel aplicación.
-  workGroupId Int
   description String? @db.Text
   /// Archivo adjunto opcional (PDF/Word, ≤8MB). Se sirve solo a platform-admin
   /// mediante un endpoint protegido, nunca por URL pública.
@@ -91,15 +88,48 @@ model ObservatoryContribution {
   createdAt         DateTime @default(now())
 
   institution     ObservatoryInstitution?       @relation(fields: [institutionId], references: [id], onDelete: SetNull)
-  workGroup       ObservatoryWorkGroup          @relation(fields: [workGroupId], references: [id], onDelete: Restrict)
   attachmentAsset Asset?                        @relation("ObservatoryContributionAttachment", fields: [attachmentAssetId], references: [id], onDelete: SetNull)
   links           ObservatoryContributionLink[]
+  /// Grupos de trabajo elegidos (uno o varios). El catálogo es fijo (sin ABM):
+  /// `reuniones-plenarias` queda excluido a nivel aplicación.
+  workGroupAssignments ObservatoryContributionWorkGroup[]
 
   @@index([createdAt])
   @@index([email])
   @@index([institutionId])
-  @@index([workGroupId])
   @@index([attachmentAssetId])
+}
+
+/// Asignación de un grupo de trabajo del Observatorio a una consulta. Reemplaza
+/// la antigua FK única `Consultation.observatoryWorkGroupId`: una consulta puede
+/// pertenecer a varios grupos de trabajo.
+model ConsultationObservatoryWorkGroup {
+  id             Int      @id @default(autoincrement())
+  consultationId Int
+  workGroupId    Int
+  createdAt      DateTime @default(now())
+
+  consultation Consultation         @relation(fields: [consultationId], references: [id], onDelete: Cascade)
+  workGroup    ObservatoryWorkGroup @relation(fields: [workGroupId], references: [id], onDelete: Cascade)
+
+  @@unique([consultationId, workGroupId])
+  @@index([workGroupId])
+}
+
+/// Asignación de un grupo de trabajo del Observatorio a un aporte institucional.
+/// Reemplaza la antigua FK única `ObservatoryContribution.workGroupId`: un aporte
+/// puede sumar a uno o varios grupos (mínimo uno, validado en la aplicación).
+model ObservatoryContributionWorkGroup {
+  id             Int      @id @default(autoincrement())
+  contributionId Int
+  workGroupId    Int
+  createdAt      DateTime @default(now())
+
+  contribution ObservatoryContribution @relation(fields: [contributionId], references: [id], onDelete: Cascade)
+  workGroup    ObservatoryWorkGroup    @relation(fields: [workGroupId], references: [id], onDelete: Restrict)
+
+  @@unique([contributionId, workGroupId])
+  @@index([workGroupId])
 }
 
 /// Enlace en la nube asociado a un aporte del Observatorio. El orden no importa:

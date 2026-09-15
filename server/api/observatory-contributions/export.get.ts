@@ -33,7 +33,10 @@ export default defineEventHandler(async (event) => {
     orderBy: { createdAt: 'desc' },
     include: {
       links: true,
-      workGroup: { select: { name: true } },
+      workGroupAssignments: {
+        include: { workGroup: { select: { name: true } } },
+        orderBy: { workGroup: { displayOrder: 'asc' } }
+      },
       attachmentAsset: { select: { originalFilename: true } }
     }
   })
@@ -59,7 +62,7 @@ export default defineEventHandler(async (event) => {
       contribution.municipio ?? '',
       contribution.institutionCategoryName,
       contribution.institutionName,
-      contribution.workGroup.name,
+      contribution.workGroupAssignments.map(assignment => assignment.workGroup.name).join(', '),
       contribution.description ?? '',
       enlaces,
       contribution.attachmentAsset?.originalFilename ?? '',

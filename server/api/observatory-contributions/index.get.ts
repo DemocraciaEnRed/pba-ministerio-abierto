@@ -17,7 +17,10 @@ export default defineEventHandler(async (event) => {
       take: query.perPage,
       include: {
         links: true,
-        workGroup: { select: { slug: true, name: true } },
+        workGroupAssignments: {
+          include: { workGroup: { select: { slug: true, name: true } } },
+          orderBy: { workGroup: { displayOrder: 'asc' } }
+        },
         attachmentAsset: {
           select: { originalFilename: true, mimeType: true, sizeBytes: true }
         }

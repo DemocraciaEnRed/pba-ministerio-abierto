@@ -148,8 +148,9 @@ export const SetConsultationRegionSchema = z.object({
   regionId: z.int().positive('La región debe ser un ID válido').nullable()
 })
 
-export const SetConsultationWorkGroupSchema = z.object({
-  observatoryWorkGroupId: z.int().positive('El grupo de trabajo debe ser un ID válido').nullable()
+export const SetConsultationWorkGroupsSchema = z.object({
+  observatoryWorkGroupIds: z
+    .array(z.int().positive('El grupo de trabajo debe ser un ID válido'))
 })
 
 export const AssignConsultationMemberSchema = z.object({
@@ -174,5 +175,5 @@ export type SetConsultationCategoriesInput = z.output<typeof SetConsultationCate
 export type SetConsultationTagsInput = z.output<typeof SetConsultationTagsSchema>
 export type SetConsultationSectionInput = z.output<typeof SetConsultationSectionSchema>
 export type SetConsultationRegionInput = z.output<typeof SetConsultationRegionSchema>
-export type SetConsultationWorkGroupInput = z.output<typeof SetConsultationWorkGroupSchema>
+export type SetConsultationWorkGroupsInput = z.output<typeof SetConsultationWorkGroupsSchema>
 export type AssignConsultationMemberInput = z.output<typeof AssignConsultationMemberSchema>

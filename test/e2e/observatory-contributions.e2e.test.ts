@@ -9,6 +9,7 @@ const CITIZEN_EMAIL = 'ciudadania@consultas.local'
 const DEV_PASSWORD = 'Cambiar1234'
 
 const WORK_GROUP_SLUG = 'plan-estrategico-infraestructura'
+const SECOND_WORK_GROUP_SLUG = 'desarrollo-sostenible'
 const PLENARY_WORK_GROUP_SLUG = 'reuniones-plenarias'
 
 interface ContributionPayload {
@@ -19,7 +20,7 @@ interface ContributionPayload {
   provincia?: string
   municipio?: string
   institutionId?: number
-  workGroupSlug?: string
+  workGroupIds?: number[]
   description?: string
   enlaces?: { url: string, title?: string }[]
   hasAttachment?: boolean
@@ -32,8 +33,7 @@ interface AdminContribution {
   institutionId: number | null
   institutionName: string
   institutionCategoryName: string
-  workGroupSlug: string
-  workGroupName: string
+  workGroups: { slug: string, name: string }[]
   description: string | null
   links: { id: number, url: string, title: string | null }[]
   attachment: { filename: string | null } | null
@@ -112,6 +112,9 @@ describe('Server e2e: aportes del Observatorio', async () => {
   let inactiveInstitutionId: number
   let institutionInInactiveCategoryId: number
   let inactiveCategoryId: number
+  let workGroupId: number
+  let secondWorkGroupId: number
+  let plenaryWorkGroupId: number
 
   const createdEmails: string[] = []
   const createdCategoryIds: number[] = []
@@ -125,7 +128,7 @@ describe('Server e2e: aportes del Observatorio', async () => {
       provincia: 'Buenos Aires',
       municipio: 'La Plata',
       institutionId,
-      workGroupSlug: WORK_GROUP_SLUG,
+      workGroupIds: [workGroupId],
       description: 'Propuesta institucional de mejora de procesos.',
       ...overrides
     }
@@ -136,6 +139,14 @@ describe('Server e2e: aportes del Observatorio', async () => {
 
     adminCookie = await login(ADMIN_EMAIL, DEV_PASSWORD)
     citizenCookie = await login(CITIZEN_EMAIL, DEV_PASSWORD)
+
+    const workGroups = await prisma.observatoryWorkGroup.findMany({
+      where: { slug: { in: [WORK_GROUP_SLUG, SECOND_WORK_GROUP_SLUG, PLENARY_WORK_GROUP_SLUG] } },
+      select: { id: true, slug: true }
+    })
+    workGroupId = workGroups.find(group => group.slug === WORK_GROUP_SLUG)!.id
+    secondWorkGroupId = workGroups.find(group => group.slug === SECOND_WORK_GROUP_SLUG)!.id
+    plenaryWorkGroupId = workGroups.find(group => group.slug === PLENARY_WORK_GROUP_SLUG)!.id
 
     const suffix = Date.now()
 
@@ -194,7 +205,20 @@ describe('Server e2e: aportes del Observatorio', async () => {
       expect(stored!.institutionId).toBe(institutionId)
       expect(stored!.institutionName).toBe('Institución e2e')
       expect(stored!.institutionCategoryName).toBe('Categoría e2e')
-      expect(stored!.workGroupSlug).toBe(WORK_GROUP_SLUG)
+      expect(stored!.workGroups.map(group => group.slug)).toEqual([WORK_GROUP_SLUG])
+    })
+
+    it('acepta un aporte con varios ejes de trabajo', async () => {
+      const payload = buildPayload({ workGroupIds: [workGroupId, secondWorkGroupId] })
+      createdEmails.push(payload.email!)
+
+      const res = await postContribution(payload)
+      expect(res.status).toBe(201)
+
+      const stored = await findContributionByEmail(payload.email!)
+      expect(stored!.workGroups.map(group => group.slug).sort()).toEqual(
+        [WORK_GROUP_SLUG, SECOND_WORK_GROUP_SLUG].sort()
+      )
     })
 
     it('acepta un aporte de una persona logueada', async () => {
@@ -216,12 +240,22 @@ describe('Server e2e: aportes del Observatorio', async () => {
     })
 
     it('rechaza el grupo de reuniones plenarias', async () => {
-      const res = await postContribution(buildPayload({ workGroupSlug: PLENARY_WORK_GROUP_SLUG }))
+      const res = await postContribution(buildPayload({ workGroupIds: [plenaryWorkGroupId] }))
       expect(res.status).toBe(422)
     })
 
     it('rechaza un eje de trabajo inexistente', async () => {
-      const res = await postContribution(buildPayload({ workGroupSlug: 'eje-que-no-existe' }))
+      const res = await postContribution(buildPayload({ workGroupIds: [999999] }))
+      expect(res.status).toBe(422)
+    })
+
+    it('exige elegir al menos un eje de trabajo', async () => {
+      const res = await postContribution(buildPayload({ workGroupIds: [] }))
+      expect(res.status).toBe(422)
+    })
+
+    it('rechaza ejes de trabajo duplicados', async () => {
+      const res = await postContribution(buildPayload({ workGroupIds: [workGroupId, workGroupId] }))
       expect(res.status).toBe(422)
     })
 

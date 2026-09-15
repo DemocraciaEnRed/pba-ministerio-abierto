@@ -32,7 +32,10 @@ export default defineEventHandler(async (event) => {
   const consultation = await resolveConsultationBySlugOrId(identifier, {
     section: true,
     region: true,
-    observatoryWorkGroup: true,
+    workGroupAssignments: {
+      include: { workGroup: true },
+      orderBy: { workGroup: { displayOrder: 'asc' } }
+    },
     categoryAssignments: {
       include: { category: true },
       orderBy: [{ isPrimary: 'desc' }, { displayOrder: 'asc' }, { id: 'asc' }]

@@ -95,18 +95,21 @@ export default defineEventHandler(async (event) => {
   }
 
   // Las reuniones plenarias no reciben aportes: no alcanza con ocultarlas en el
-  // formulario, el slug se verifica también acá.
-  if (!isContributionWorkGroupSlug(body.workGroupSlug)) {
-    throw createError({ statusCode: 422, message: 'Elegí un eje de trabajo válido.' })
+  // formulario, se verifica también acá contra cada eje elegido.
+  const workGroupIds = Array.from(new Set(body.workGroupIds))
+  if (workGroupIds.length !== body.workGroupIds.length) {
+    throw createError({ statusCode: 422, message: 'No repitas ejes de trabajo.' })
   }
 
-  const workGroup = await prisma.observatoryWorkGroup.findFirst({
-    where: { slug: body.workGroupSlug, isActive: true },
-    select: { id: true }
+  const workGroups = await prisma.observatoryWorkGroup.findMany({
+    where: { id: { in: workGroupIds }, isActive: true },
+    select: { id: true, slug: true }
   })
 
-  if (!workGroup) {
-    throw createError({ statusCode: 422, message: 'Elegí un eje de trabajo válido.' })
+  const allEligible = workGroups.length === workGroupIds.length
+    && workGroups.every(group => isContributionWorkGroupSlug(group.slug))
+  if (!allEligible) {
+    throw createError({ statusCode: 422, message: 'Elegí ejes de trabajo válidos.' })
   }
 
   // El aporte guarda el nombre de la institución y su categoría tal como están
@@ -176,9 +179,11 @@ export default defineEventHandler(async (event) => {
         institutionId: institution.id,
         institutionName: institution.name,
         institutionCategoryName: institution.category.name,
-        workGroupId: workGroup.id,
         description: body.description,
         attachmentAssetId,
+        workGroupAssignments: {
+          create: workGroupIds.map(workGroupId => ({ workGroupId }))
+        },
         links: {
           create: body.enlaces.map(link => ({ url: link.url, title: link.title }))
         }

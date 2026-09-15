@@ -124,7 +124,9 @@ export const CreateObservatoryContributionSchema = z
     provincia: provinciaField,
     municipio: optionalText(120),
     institutionId: z.int({ error: 'Elegí tu institución' }).positive('Elegí tu institución'),
-    workGroupSlug: z.string({ error: 'Elegí un eje de trabajo' }).trim().min(1, 'Elegí un eje de trabajo'),
+    workGroupIds: z
+      .array(z.int().positive('El eje de trabajo debe ser un ID válido'))
+      .min(1, 'Elegí al menos un eje de trabajo'),
     description: optionalText(5000),
     enlaces: z.array(contributionLinkSchema).max(20, 'No podés agregar más de 20 enlaces').default([]),
     /// El archivo viaja aparte del JSON (multipart). Este flag permite validar en

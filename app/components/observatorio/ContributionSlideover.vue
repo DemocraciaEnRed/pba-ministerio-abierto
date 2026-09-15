@@ -95,10 +95,10 @@ const fullName = computed(() => {
           <dl class="space-y-2 text-sm">
             <div class="flex flex-col">
               <dt class="text-muted">
-                Eje de trabajo
+                Ejes de trabajo
               </dt>
               <dd class="text-highlighted">
-                {{ contribution.workGroupName }}
+                {{ contribution.workGroups.map(group => group.name).join(', ') }}
               </dd>
             </div>
             <div class="flex flex-col">

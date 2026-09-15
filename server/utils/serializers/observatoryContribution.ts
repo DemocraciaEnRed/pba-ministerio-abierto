@@ -30,7 +30,7 @@ type ContributionEntity = {
   institutionCategoryName: string
   description: string | null
   createdAt: Date
-  workGroup: ContributionWorkGroupEntity
+  workGroupAssignments: { workGroup: ContributionWorkGroupEntity }[]
   links: ContributionLinkEntity[]
   attachmentAsset: ContributionAttachmentEntity | null
 }
@@ -47,6 +47,11 @@ export interface ObservatoryContributionAttachmentDTO {
   sizeBytes: number | null
 }
 
+export interface ObservatoryContributionWorkGroupDTO {
+  slug: string
+  name: string
+}
+
 export interface AdminObservatoryContributionDTO {
   id: number
   firstName: string
@@ -58,8 +63,7 @@ export interface AdminObservatoryContributionDTO {
   institutionId: number | null
   institutionName: string
   institutionCategoryName: string
-  workGroupSlug: string
-  workGroupName: string
+  workGroups: ObservatoryContributionWorkGroupDTO[]
   description: string | null
   links: ObservatoryContributionLinkDTO[]
   attachment: ObservatoryContributionAttachmentDTO | null
@@ -83,8 +87,10 @@ export function serializeObservatoryContribution(
     institutionId: contribution.institutionId,
     institutionName: contribution.institutionName,
     institutionCategoryName: contribution.institutionCategoryName,
-    workGroupSlug: contribution.workGroup.slug,
-    workGroupName: contribution.workGroup.name,
+    workGroups: contribution.workGroupAssignments.map(assignment => ({
+      slug: assignment.workGroup.slug,
+      name: assignment.workGroup.name
+    })),
     description: contribution.description,
     links: contribution.links.map(link => ({
       id: link.id,

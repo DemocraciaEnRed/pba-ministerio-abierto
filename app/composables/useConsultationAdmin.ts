@@ -17,7 +17,7 @@ export interface AdminConsultationSummary {
   resultsVisibility: 'hidden' | 'participants_only' | 'public'
   section: { id: number, slug: string, name: string } | null
   region: { id: number, slug: string, name: string } | null
-  observatoryWorkGroup: { id: number, slug: string, name: string, color: string, iconColor: string, icon: string } | null
+  observatoryWorkGroups: { id: number, slug: string, name: string, color: string, iconColor: string, icon: string }[]
   categories: { id: number, slug: string, name: string, isPrimary: boolean }[]
   tags: { id: number, slug: string, name: string }[]
   /** Portada de la consulta; `null` cuando no hay imagen cargada. */

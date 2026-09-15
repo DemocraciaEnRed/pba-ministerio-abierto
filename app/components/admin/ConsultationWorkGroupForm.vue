@@ -11,7 +11,7 @@ interface WorkGroupOption {
 
 const props = defineProps<{
   consultationId: number
-  initialWorkGroupId: number | null
+  initialWorkGroupIds: number[]
 }>()
 
 const emit = defineEmits<{
@@ -26,40 +26,39 @@ const { data: workGroups, status: workGroupsStatus } = await useAsyncData(
   () => $fetch<WorkGroupOption[]>('/api/observatory-work-groups')
 )
 
-const selectedWorkGroupId = ref<number>(0)
+const selectedWorkGroupIds = ref<number[]>([])
 
 function hydrate() {
-  selectedWorkGroupId.value = props.initialWorkGroupId ?? 0
+  selectedWorkGroupIds.value = [...props.initialWorkGroupIds]
 }
 
-watch(() => props.initialWorkGroupId, hydrate, { immediate: true })
+watch(() => props.initialWorkGroupIds, hydrate, { immediate: true, deep: true })
 
-const workGroupItems = computed(() => [
-  { label: 'Sin grupo de trabajo', value: 0 },
-  ...(workGroups.value ?? []).map(group => ({ label: group.name, value: group.id }))
-])
+const workGroupItems = computed(() =>
+  (workGroups.value ?? []).map(group => ({ label: group.name, value: group.id }))
+)
 
-const selectedWorkGroup = computed(() =>
-  (workGroups.value ?? []).find(group => group.id === selectedWorkGroupId.value) ?? null
+const selectedWorkGroups = computed(() =>
+  (workGroups.value ?? []).filter(group => selectedWorkGroupIds.value.includes(group.id))
 )
 
 async function save() {
   saving.value = true
   try {
-    await $fetch(`/api/consultations/${props.consultationId}/observatory-work-group`, {
+    await $fetch(`/api/consultations/${props.consultationId}/observatory-work-groups`, {
       method: 'PUT',
-      body: { observatoryWorkGroupId: selectedWorkGroupId.value === 0 ? null : selectedWorkGroupId.value }
+      body: { observatoryWorkGroupIds: selectedWorkGroupIds.value }
     })
 
     toast.add({
-      title: 'Grupo de trabajo actualizado',
+      title: 'Grupos de trabajo actualizados',
       color: 'success'
     })
     emit('saved')
   } catch (error) {
     const e = error as { data?: { message?: string }, message?: string }
     toast.add({
-      title: 'No se pudo guardar el grupo de trabajo',
+      title: 'No se pudieron guardar los grupos de trabajo',
       description: e.data?.message || e.message || 'Ocurrió un error inesperado.',
       color: 'error'
     })
@@ -71,45 +70,58 @@ async function save() {
 
 <template>
   <UCard
-    title="Grupo de trabajo"
-    description="Para que esta consulta forme parte del Observatorio de Obras y Servicios Públicos, es importante que tenga un grupo de trabajo asociado."
+    title="Grupos de trabajo"
+    description="Para que esta consulta forme parte del Observatorio de Obras y Servicios Públicos, es importante que tenga uno o varios grupos de trabajo asociados."
   >
     <UFormField
       orientation="vertical"
-      label="Grupo de trabajo"
-      description="Grupo de trabajo del Observatorio al que se asocia la consulta (opcional)."
+      label="Grupos de trabajo"
+      description="Grupos de trabajo del Observatorio a los que se asocia la consulta (podés elegir varios)."
     >
-      <USelect
-        v-model="selectedWorkGroupId"
+      <USelectMenu
+        v-model="selectedWorkGroupIds"
         :items="workGroupItems"
         value-key="value"
+        multiple
         :loading="workGroupsStatus === 'pending'"
+        placeholder="Elegí grupos de trabajo"
         class="w-full"
       />
     </UFormField>
 
     <div
-      v-if="selectedWorkGroup"
-      class="mt-4 flex gap-3 rounded-lg p-3"
-      :style="{ backgroundColor: selectedWorkGroup.color }"
+      v-if="selectedWorkGroups.length"
+      class="mt-4 space-y-2"
     >
-      <UIcon
-        :name="selectedWorkGroup.icon"
-        class="size-6 shrink-0"
-        :style="{ color: selectedWorkGroup.iconColor }"
-      />
-      <p
-        class="text-sm"
-        :style="{ color: selectedWorkGroup.iconColor }"
+      <div
+        v-for="group in selectedWorkGroups"
+        :key="group.id"
+        class="flex gap-3 rounded-lg p-3"
+        :style="{ backgroundColor: group.color }"
       >
-        {{ selectedWorkGroup.description }}
-      </p>
+        <UIcon
+          :name="group.icon"
+          class="size-6 shrink-0"
+          :style="{ color: group.iconColor }"
+        />
+        <div :style="{ color: group.iconColor }">
+          <p class="text-sm font-medium">
+            {{ group.name }}
+          </p>
+          <p
+            v-if="group.description"
+            class="text-sm"
+          >
+            {{ group.description }}
+          </p>
+        </div>
+      </div>
     </div>
 
     <template #footer>
       <div class="flex justify-end">
         <UButton
-          label="Guardar grupo de trabajo"
+          label="Guardar grupos de trabajo"
           icon="i-lucide-save"
           :loading="saving"
           @click="save"

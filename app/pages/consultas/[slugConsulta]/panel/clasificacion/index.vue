@@ -41,7 +41,7 @@ const allowsWorkGroup = computed(() => consultationTypeAllowsWorkGroup(consultat
         <AdminConsultationWorkGroupForm
           v-if="consultation && allowsWorkGroup"
           :consultation-id="consultation.id"
-          :initial-work-group-id="consultation.observatoryWorkGroup?.id ?? null"
+          :initial-work-group-ids="consultation.observatoryWorkGroups?.map(group => group.id) ?? []"
           @saved="refresh"
         />
       </div>

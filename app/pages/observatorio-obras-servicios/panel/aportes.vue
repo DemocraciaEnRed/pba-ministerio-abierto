@@ -118,7 +118,7 @@ const headerButtons = computed<ButtonProps[]>(() => [
               {{ contribution.institutionName }}
               <span class="block text-xs text-muted">{{ contribution.institutionCategoryName }}</span>
             </td>
-            <td>{{ contribution.workGroupName }}</td>
+            <td>{{ contribution.workGroups.map(group => group.name).join(', ') }}</td>
             <td class="text-center">
               <div class="flex items-center justify-center gap-3 text-muted">
                 <span

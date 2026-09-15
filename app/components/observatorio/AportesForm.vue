@@ -29,6 +29,7 @@ interface WorkGroupOption {
 
 interface CatalogTreeItem extends TreeItem {
   value: string
+  workGroupId?: number
   children?: CatalogTreeItem[]
 }
 
@@ -73,7 +74,7 @@ const state = reactive<{
   provincia: Province
   municipio?: BuenosAiresMunicipality
   institutionId?: number
-  workGroupSlug?: string
+  workGroupIds: number[]
   description?: string
   enlaces: ObservatoryContributionLinkInput[]
   hasAttachment: boolean
@@ -86,7 +87,7 @@ const state = reactive<{
   provincia: BUENOS_AIRES,
   municipio: undefined,
   institutionId: undefined,
-  workGroupSlug: undefined,
+  workGroupIds: [],
   description: undefined,
   enlaces: [],
   hasAttachment: false,
@@ -165,16 +166,18 @@ watch(institucionElegida, (institution) => {
   state.institutionId = institution?.id
 })
 
-// --- Selección del eje de trabajo ---
+// --- Selección de los ejes de trabajo (uno o varios) ---
 const ejeTrabajoTree = computed<CatalogTreeItem[]>(() =>
-  contributionWorkGroups.value.map(group => ({ value: group.slug, label: group.name }))
+  contributionWorkGroups.value.map(group => ({ value: group.slug, workGroupId: group.id, label: group.name }))
 )
 
-const ejeTrabajoSeleccionado = ref<CatalogTreeItem>()
+const ejeTrabajoSeleccionados = ref<CatalogTreeItem[]>([])
 
-watch(ejeTrabajoSeleccionado, (seleccion) => {
-  state.workGroupSlug = seleccion?.value
-})
+watch(ejeTrabajoSeleccionados, (seleccion) => {
+  state.workGroupIds = seleccion
+    .map(item => item.workGroupId)
+    .filter((id): id is number => typeof id === 'number')
+}, { deep: true })
 
 // --- Enlaces en la nube ---
 const linkModalOpen = ref(false)
@@ -469,14 +472,15 @@ async function handleSubmit(event: FormSubmitEvent<Schema>) {
 
         <div class="space-y-6">
           <UFormField
-            name="workGroupSlug"
-            label="¿A qué eje de trabajo querés sumar aportes?"
+            name="workGroupIds"
+            label="¿A qué ejes de trabajo querés sumar aportes?"
             required
           >
             <UTree
-              v-model="ejeTrabajoSeleccionado"
+              v-model="ejeTrabajoSeleccionados"
               :items="ejeTrabajoTree"
               :get-key="(item) => (item as CatalogTreeItem).value"
+              multiple
               color="primary"
               class="w-full border border-accented rounded-md p-2 bg-white dark:bg-neutral-900"
             />
