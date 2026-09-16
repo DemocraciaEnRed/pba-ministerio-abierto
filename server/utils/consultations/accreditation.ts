@@ -100,14 +100,13 @@ export async function loadFormAccreditation(formId: number) {
 
 /**
  * Busca una inscripción del mismo formulario cuyo DNI coincida exactamente con el
- * ingresado, para vincular el ingreso sin modificar la inscripción. Devuelve la
- * más antigua o `null` si no hay coincidencia.
+ * ingresado, para vincular el ingreso y copiar sus datos sin modificar la
+ * inscripción. Devuelve la más antigua o `null` si no hay coincidencia.
  */
-export async function findRegistrationIdByDni(formId: number, dni: string): Promise<number | null> {
-  const match = await prisma.consultationRegistration.findFirst({
+export async function findRegistrationByDni(formId: number, dni: string) {
+  return prisma.consultationRegistration.findFirst({
     where: { formId, dni },
-    select: { id: true },
+    select: { id: true, firstName: true, lastName: true, email: true },
     orderBy: { createdAt: 'asc' }
   })
-  return match?.id ?? null
 }

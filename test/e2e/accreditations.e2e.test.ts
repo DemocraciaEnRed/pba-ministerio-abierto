@@ -164,6 +164,7 @@ describe('Server e2e: acreditaciones', async () => {
     it('acepta un ingreso con DNI y admite duplicados', async () => {
       const first = await postEntry(publicId, { dni: '40111222' })
       expect(first.status).toBe(201)
+      expect((first.data as { linkedToRegistration: boolean }).linkedToRegistration).toBe(false)
 
       const second = await postEntry(publicId, { dni: '40111222' })
       expect(second.status).toBe(201)
@@ -174,7 +175,7 @@ describe('Server e2e: acreditaciones', async () => {
       expect(count).toBe(2)
     })
 
-    it('permite completar nombre y apellido después de acreditarse', async () => {
+    it('permite completar datos después de acreditarse', async () => {
       const created = await postEntry(publicId, { dni: '41222333' })
       expect(created.status).toBe(201)
       const id = (created.data as { id: number }).id
@@ -182,13 +183,14 @@ describe('Server e2e: acreditaciones', async () => {
 
       const patched = await api(`/api/accreditations/${publicId}/entries/${id}`, {
         method: 'PATCH',
-        body: { firstName: 'Carla', lastName: 'Ruiz' }
+        body: { firstName: 'Carla', lastName: 'Ruiz', email: 'CARLA@EXAMPLE.COM' }
       })
       expect(patched.status).toBe(200)
 
       const entry = await prisma.accreditationEntry.findUniqueOrThrow({ where: { id } })
       expect(entry.firstName).toBe('Carla')
       expect(entry.lastName).toBe('Ruiz')
+      expect(entry.email).toBe('carla@example.com')
     })
 
     it('vincula el ingreso a una inscripción cuando el DNI coincide', async () => {
@@ -212,11 +214,15 @@ describe('Server e2e: acreditaciones', async () => {
 
       const res = await postEntry(publicId, { dni: linkedDni })
       expect(res.status).toBe(201)
+      expect((res.data as { linkedToRegistration: boolean }).linkedToRegistration).toBe(true)
 
       const entry = await prisma.accreditationEntry.findFirstOrThrow({
         where: { accreditation: { publicId }, dni: linkedDni }
       })
       expect(entry.registrationId).not.toBeNull()
+      expect(entry.firstName).toBe('Lucía')
+      expect(entry.lastName).toBe('Gómez')
+      expect(entry.email).toBe('lucia@example.com')
     })
   })
 

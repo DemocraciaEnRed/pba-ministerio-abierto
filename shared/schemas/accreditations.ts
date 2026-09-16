@@ -36,10 +36,11 @@ export const AccreditationEntrySchema = z.object({
   email: optionalEmail
 })
 
-// Completar (opcionalmente) nombre y apellido de un ingreso ya registrado.
+// Completar (opcionalmente) los datos de un ingreso ya registrado.
 export const AccreditationEntryDetailsSchema = z.object({
   firstName: optionalPersonName,
-  lastName: optionalPersonName
+  lastName: optionalPersonName,
+  email: optionalEmail
 })
 
 export const AccreditationEntriesQuerySchema = z.object({

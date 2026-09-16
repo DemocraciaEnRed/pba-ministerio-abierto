@@ -36,15 +36,17 @@ const state = reactive({ dni: '' })
 const submitting = ref(false)
 const done = ref(false)
 const entryId = ref<number | null>(null)
+const linkedToRegistration = ref(false)
 
 async function onSubmit(event: FormSubmitEvent<AccreditationEntryInput>) {
   submitting.value = true
   try {
-    const res = await $fetch<{ id: number }>(`/api/accreditations/${publicId.value}/entries`, {
+    const res = await $fetch<{ id: number, linkedToRegistration: boolean }>(`/api/accreditations/${publicId.value}/entries`, {
       method: 'POST',
       body: { dni: event.data.dni }
     })
     entryId.value = res.id
+    linkedToRegistration.value = res.linkedToRegistration
     done.value = true
   } catch (err) {
     toast.add({
@@ -58,7 +60,7 @@ async function onSubmit(event: FormSubmitEvent<AccreditationEntryInput>) {
 }
 
 // --- Paso 2 (opcional): nombre y apellido ---
-const details = reactive({ firstName: '', lastName: '' })
+const details = reactive({ firstName: '', lastName: '', email: '' })
 const savingDetails = ref(false)
 const detailsSaved = ref(false)
 
@@ -169,7 +171,7 @@ async function onSaveDetails(event: FormSubmitEvent<AccreditationEntryDetailsInp
             </p>
           </div>
 
-          <template v-if="!detailsSaved">
+          <template v-if="!detailsSaved && !linkedToRegistration">
             <USeparator label="Opcional" />
             <div class="pt-4">
               <p class="text-sm text-toned text-center mb-4">
@@ -203,6 +205,18 @@ async function onSaveDetails(event: FormSubmitEvent<AccreditationEntryDetailsInp
                     />
                   </UFormField>
                 </div>
+                <UFormField
+                  label="Correo electrónico"
+                  name="email"
+                >
+                  <UInput
+                    v-model="details.email"
+                    type="email"
+                    placeholder="Opcional"
+                    autocomplete="email"
+                    class="w-full"
+                  />
+                </UFormField>
                 <UButton
                   type="submit"
                   label="Guardar mis datos"
@@ -216,7 +230,7 @@ async function onSaveDetails(event: FormSubmitEvent<AccreditationEntryDetailsInp
           </template>
 
           <p
-            v-else
+            v-else-if="detailsSaved"
             class="text-sm text-success text-center py-2"
           >
             ¡Listo! Guardamos tus datos.

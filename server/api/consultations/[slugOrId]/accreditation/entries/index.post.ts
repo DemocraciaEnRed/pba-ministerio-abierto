@@ -1,7 +1,7 @@
 import { AccreditationEntrySchema } from '#shared/schemas/accreditations'
 import { serializeAccreditationEntry } from '~~/server/utils/serializers/accreditation'
 import { resolveRegistrationConsultation } from '~~/server/utils/consultations/registration-form'
-import { findRegistrationIdByDni } from '~~/server/utils/consultations/accreditation'
+import { findRegistrationByDni } from '~~/server/utils/consultations/accreditation'
 
 // Alta manual de un ingreso desde administración. A diferencia del ingreso
 // público, puede registrarse fuera de la ventana configurada.
@@ -20,16 +20,16 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 404, message: 'Esta consulta todavía no tiene acreditación habilitada' })
   }
 
-  const registrationId = await findRegistrationIdByDni(accreditation.formId, body.dni)
+  const registration = await findRegistrationByDni(accreditation.formId, body.dni)
 
   const entry = await prisma.accreditationEntry.create({
     data: {
       accreditationId: accreditation.id,
-      registrationId,
+      registrationId: registration?.id ?? null,
       dni: body.dni,
-      firstName: body.firstName,
-      lastName: body.lastName,
-      email: body.email
+      firstName: registration?.firstName ?? body.firstName,
+      lastName: registration?.lastName ?? body.lastName,
+      email: registration?.email ?? body.email
     }
   })
 

@@ -1,8 +1,8 @@
 import { AccreditationEntryDetailsSchema } from '#shared/schemas/accreditations'
 import { parsePositiveIntParam } from '~~/server/utils/http/params'
 
-// Completar (opcional y público) el nombre y apellido de un ingreso ya
-// registrado, justo después de acreditarse. Solo sobre acreditaciones activas.
+// Completar (opcional y público) los datos de un ingreso ya registrado, justo
+// después de acreditarse. Solo sobre acreditaciones activas.
 export default defineEventHandler(async (event) => {
   const publicId = getRouterParam(event, 'publicId')?.toLowerCase()
   const entryId = parsePositiveIntParam(event, 'id', 'ingreso')
@@ -23,7 +23,7 @@ export default defineEventHandler(async (event) => {
 
   await prisma.accreditationEntry.update({
     where: { id: entry.id },
-    data: { firstName: body.firstName, lastName: body.lastName }
+    data: { firstName: body.firstName, lastName: body.lastName, email: body.email }
   })
 
   return { success: true }

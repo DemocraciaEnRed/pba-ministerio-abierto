@@ -1,6 +1,6 @@
 import { AccreditationEntrySchema } from '#shared/schemas/accreditations'
 import { resolveAccreditationState } from '~~/server/utils/serializers/accreditation'
-import { findRegistrationIdByDni } from '~~/server/utils/consultations/accreditation'
+import { findRegistrationByDni } from '~~/server/utils/consultations/accreditation'
 
 // Ingreso público de acreditación (sin login): registra la presencia por DNI.
 // Acepta el DNI tal como se ingresa y admite repetidos; si coincide con una
@@ -32,19 +32,19 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const registrationId = await findRegistrationIdByDni(accreditation.formId, body.dni)
+  const registration = await findRegistrationByDni(accreditation.formId, body.dni)
 
   const entry = await prisma.accreditationEntry.create({
     data: {
       accreditationId: accreditation.id,
-      registrationId,
+      registrationId: registration?.id ?? null,
       dni: body.dni,
-      firstName: body.firstName,
-      lastName: body.lastName,
-      email: body.email
+      firstName: registration?.firstName ?? body.firstName,
+      lastName: registration?.lastName ?? body.lastName,
+      email: registration?.email ?? body.email
     }
   })
 
   setResponseStatus(event, 201)
-  return { id: entry.id }
+  return { id: entry.id, linkedToRegistration: registration !== null }
 })
