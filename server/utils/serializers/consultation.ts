@@ -46,6 +46,8 @@ type ConsultationEntity = {
   categoryAssignments?: { isPrimary: boolean, category: TaxonomyRelation }[]
   consultationTags?: { tag: TaxonomyRelation }[]
   topics?: TopicSummaryRelation[]
+  /** Presencia (no contenido) del formulario de inscripción; opcional, solo si el handler la incluye. */
+  registrationForm?: { id: number } | null
   /** URL de la portada resuelta por el handler (role `cover`); opcional. */
   coverUrl?: string | null
   /** Texto alternativo de la portada; opcional. */
@@ -133,6 +135,11 @@ export interface AdminConsultationDTO extends PublicConsultationDTO {
    * vistas admin permanece `undefined`.
    */
   topics?: ConsultationTopicSummaryDTO[]
+  /**
+   * Si la consulta ya tiene un formulario de inscripción cargado. Solo se
+   * completa cuando el handler incluye la relación (p. ej. listado admin).
+   */
+  hasRegistrationForm?: boolean
 }
 
 export function serializeConsultation(consultation: ConsultationEntity, view: 'public'): PublicConsultationDTO
@@ -206,6 +213,9 @@ export function serializeConsultation(
     updatedByUserId: consultation.updatedByUserId,
     createdAt: consultation.createdAt.toISOString(),
     updatedAt: consultation.updatedAt.toISOString(),
+    ...(consultation.registrationForm !== undefined
+      ? { hasRegistrationForm: Boolean(consultation.registrationForm) }
+      : {}),
     ...(consultation.topics
       ? {
           topics: consultation.topics.map(topic => ({

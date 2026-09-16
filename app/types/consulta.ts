@@ -231,6 +231,8 @@ export interface AdminConsultationListItem {
   categories: ConsultationCategory[]
   tags: ConsultationTaxonomy[]
   topics?: ConsultationTopicSummary[]
+  /** Si ya tiene un formulario de inscripción cargado; solo la completa el listado admin. */
+  hasRegistrationForm?: boolean
 }
 
 export type CommentAuthorMode = 'citizen' | 'institution'

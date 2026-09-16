@@ -50,6 +50,9 @@ export default defineEventHandler(async (event) => {
         consultationTags: {
           include: { tag: true }
         },
+        registrationForm: {
+          select: { id: true }
+        },
         topics: {
           select: {
             id: true,

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { consultationTypeAllowsRegistrationForm } from '#shared/data/consultation-types'
 import type { AdminConsultationListItem, ConsultationTopicSummary, ResultsVisibility } from '~/types/consulta'
 
 const props = defineProps<{
@@ -11,6 +12,10 @@ const estadoBadge = computed(() =>
 
 const formatLabel = computed(() =>
   props.consultation.consultationFormat === 'single' ? 'Única' : 'Múltiple'
+)
+
+const allowsRegistrationForm = computed(() =>
+  consultationTypeAllowsRegistrationForm(props.consultation.section?.slug)
 )
 
 const resultsVisibilityLabels: Record<ResultsVisibility, string> = {
@@ -136,6 +141,22 @@ function topicBadge(topic: ConsultationTopicSummary) {
           variant="outline"
           size="sm"
         />
+        <UBadge
+          v-if="allowsRegistrationForm && consultation.hasRegistrationForm"
+          label="Con formulario de inscripción"
+          icon="i-lucide-clipboard-check"
+          color="success"
+          variant="subtle"
+          size="sm"
+        />
+        <UBadge
+          v-else-if="allowsRegistrationForm"
+          label="Sin formulario de inscripción"
+          icon="i-lucide-clipboard-x"
+          color="neutral"
+          variant="outline"
+          size="sm"
+        />
         <UFieldGroup
           v-if="consultation.section"
           size="sm"
@@ -182,6 +203,22 @@ function topicBadge(topic: ConsultationTopicSummary) {
           variant="soft"
           size="sm"
         />
+        <div
+          v-for="group in consultation.observatoryWorkGroups"
+          :key="`work-group-${group.id}`"
+          class="flex items-center gap-1 rounded-full py-0.5 pr-2 pl-1"
+          :style="{ backgroundColor: group.color }"
+        >
+          <UIcon
+            :name="group.icon"
+            class="size-3.5"
+            :style="{ color: group.iconColor }"
+          />
+          <span
+            class="text-xs font-medium"
+            :style="{ color: group.iconColor }"
+          >{{ group.name }}</span>
+        </div>
       </div>
     </div>
 
