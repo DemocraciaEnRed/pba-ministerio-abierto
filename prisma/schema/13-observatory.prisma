@@ -145,3 +145,49 @@ model ObservatoryContributionLink {
 
   @@index([contributionId])
 }
+
+/// Publicación del Observatorio (documento en PDF). ABM de platform-admin con
+/// borrado real. La descarga sale de un PDF subido o de una URL externa: se
+/// exige uno u otro (validado en la aplicación, no en la base).
+model ObservatoryPublication {
+  id          Int     @id @default(autoincrement())
+  title       String
+  description String? @db.Text
+  /// Año de publicación: ordena el listado público (más reciente primero).
+  publicationYear Int
+  /// Portada obligatoria a nivel formulario; asset de tipo imagen.
+  coverAssetId    Int?
+  /// PDF subido. Alternativa a `externalUrl`: se guarda uno de los dos.
+  documentAssetId Int?
+  /// URL de descarga externa, alternativa al PDF subido.
+  externalUrl String? @db.VarChar(500)
+  isActive     Boolean  @default(true)
+  displayOrder Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  coverAsset    Asset? @relation("ObservatoryPublicationCover", fields: [coverAssetId], references: [id], onDelete: SetNull)
+  documentAsset Asset? @relation("ObservatoryPublicationDocument", fields: [documentAssetId], references: [id], onDelete: SetNull)
+
+  @@index([isActive, publicationYear, displayOrder])
+  @@index([coverAssetId])
+  @@index([documentAssetId])
+}
+
+/// Video del registro audiovisual del Observatorio. Se muestra en un carrusel
+/// público. ABM de platform-admin con borrado real. El thumbnail se deriva del
+/// ID de YouTube, por eso no se sube portada.
+model ObservatoryVideo {
+  id    Int    @id @default(autoincrement())
+  title String
+  /// Link a YouTube: del ID se derivan el thumbnail y el embed.
+  youtubeUrl String    @db.VarChar(500)
+  /// Fecha del video, opcional.
+  videoDate  DateTime? @db.Date
+  isActive     Boolean  @default(true)
+  displayOrder Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([isActive, displayOrder])
+}

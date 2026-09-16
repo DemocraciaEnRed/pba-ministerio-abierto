@@ -38,7 +38,7 @@ const groups = computed(() =>
         {{ group.category.name }}
       </h3>
 
-      <ul class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+      <ul class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 justify-center">
         <li
           v-for="institution in group.institutions"
           :key="institution.id"
@@ -48,18 +48,18 @@ const groups = computed(() =>
             :href="institution.websiteUrl || undefined"
             :target="institution.websiteUrl ? '_blank' : undefined"
             :rel="institution.websiteUrl ? 'noopener noreferrer' : undefined"
-            class="flex h-full min-h-28 flex-col items-center justify-center gap-2 rounded-xl border border-accented bg-default p-4 text-center transition hover:border-primary"
+            class="flex h-full min-h-24 flex-col items-center justify-center gap-2 rounded-xl border border-accented dark:bg-white p-4 text-center transition hover:border-primary dark:hover:shadow-md dark:hover:shadow-primary/60"
           >
             <img
               v-if="institution.logoUrl"
               :src="institution.logoUrl"
               :alt="institution.name"
-              class="h-12 w-auto max-w-full object-contain"
+              class="h-14 w-auto max-w-full object-contain"
               loading="lazy"
             >
             <span
               v-else
-              class="text-sm font-medium leading-tight text-highlighted"
+              class="text-sm font-medium leading-tight text-highlighted dark:text-black"
             >
               {{ institution.name }}
             </span>

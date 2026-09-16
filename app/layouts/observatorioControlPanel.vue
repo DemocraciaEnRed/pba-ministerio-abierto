@@ -50,6 +50,18 @@ const itemsNavigationMenu = computed<NavigationMenuItem[][]>(() => [
       to: '/observatorio-obras-servicios/panel/instituciones',
       icon: 'i-lucide-building-2',
       active: route.path.startsWith('/observatorio-obras-servicios/panel/instituciones')
+    },
+    {
+      label: 'Publicaciones',
+      to: '/observatorio-obras-servicios/panel/publicaciones',
+      icon: 'i-lucide-book-open',
+      active: route.path.startsWith('/observatorio-obras-servicios/panel/publicaciones')
+    },
+    {
+      label: 'Registro audiovisual',
+      to: '/observatorio-obras-servicios/panel/registro-audiovisual',
+      icon: 'i-lucide-video',
+      active: route.path.startsWith('/observatorio-obras-servicios/panel/registro-audiovisual')
     }
   ]
 ])

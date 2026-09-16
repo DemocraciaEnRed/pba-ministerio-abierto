@@ -60,6 +60,8 @@ model Asset {
   regionalMeetingSubmissions RegionalMeetingSubmission[] @relation("RegionalMeetingSubmissionAttachment")
   observatoryContributions   ObservatoryContribution[]   @relation("ObservatoryContributionAttachment")
   observatoryInstitutionLogos ObservatoryInstitution[]   @relation("ObservatoryInstitutionLogo")
+  observatoryPublicationCovers    ObservatoryPublication[] @relation("ObservatoryPublicationCover")
+  observatoryPublicationDocuments ObservatoryPublication[] @relation("ObservatoryPublicationDocument")
   consultationRegistrationProofs ConsultationRegistration[] @relation("ConsultationRegistrationProof")
   commentAttachments         Comment[]            @relation("CommentAttachment")
 

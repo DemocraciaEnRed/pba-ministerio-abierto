@@ -190,28 +190,48 @@ const themeUi: ThemeUI = {
           <div
             v-for="group in workGroups || []"
             :key="group.id"
-            class="flex flex-col gap-3 rounded-xl p-5"
-            :style="{ backgroundColor: group.color, color: group.iconColor }"
+            class="flex gap-5 p-2"
           >
-            <UIcon
-              :name="group.icon"
-              class="size-10"
-            />
-            <h3 class="text-lg font-semibold leading-tight">
-              {{ group.name }}
-            </h3>
-            <p class="text-sm opacity-90">
-              {{ group.description }}
-            </p>
+            <div
+              class="size-23 flex items-center justify-center p-3 rounded-3xl"
+              :style="{ backgroundColor: group.color }"
+            >
+              <UIcon
+                :name="group.icon"
+                class="size-23 text-white"
+              />
+            </div>
+            <div class="w-full flex flex-col gap-2">
+              <h3 class="text-lg font-bold leading-tight">
+                {{ group.name }}
+              </h3>
+              <p class="text-sm opacity-90">
+                {{ group.description }}
+              </p>
+            </div>
           </div>
         </UPageGrid>
       </UPageSection>
-
+      <USeparator />
       <UPageSection
         title="Instituciones que integran el Observatorio"
         description="Universidades, colegios profesionales, cámaras empresariales, sindicatos y organizaciones de la sociedad civil que participan del espacio."
       >
         <ObservatorioInstitutionsShowcase />
+      </UPageSection>
+      <USeparator />
+      <UPageSection
+        title="Publicaciones"
+        description="Documentos, estudios e informes producidos en el marco del Observatorio, disponibles para su descarga."
+      >
+        <ObservatorioPublicationsShowcase />
+      </UPageSection>
+      <USeparator />
+      <UPageSection
+        title="Registro audiovisual"
+        description="Registros de las reuniones, encuentros y presentaciones del Observatorio."
+      >
+        <ObservatorioVideosCarousel />
       </UPageSection>
     </UContainer>
   </UTheme>

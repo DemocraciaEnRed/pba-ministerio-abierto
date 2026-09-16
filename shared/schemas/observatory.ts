@@ -5,6 +5,7 @@ import {
   isValidBuenosAiresMunicipality
 } from '#shared/data/argentina'
 import { emailField, phoneField, optionalText } from '#shared/schemas/auth'
+import { isValidYoutubeUrl } from '#shared/utils/youtube'
 
 const slugField = z
   .string()
@@ -74,6 +75,157 @@ export const PatchObservatoryInstitutionSchema = z
     name: nameField.optional(),
     logoAssetId: logoAssetIdField.optional(),
     websiteUrl: websiteUrlField.optional(),
+    isActive: z.boolean().optional(),
+    displayOrder: displayOrderField.optional()
+  })
+  .refine(
+    value => Object.values(value).some(field => field !== undefined),
+    'Debés enviar al menos un campo para actualizar'
+  )
+
+// --- Publicaciones (ABM de platform-admin, borrado real) ---
+
+const publicationTitleField = z
+  .string()
+  .trim()
+  .min(1, 'El título es requerido')
+  .max(200, 'El título no puede superar los 200 caracteres')
+
+const publicationYearField = z
+  .int('El año debe ser un número entero')
+  .min(1900, 'El año debe ser mayor a 1900')
+  .max(2100, 'El año no puede superar 2100')
+
+const coverAssetIdField = z.int('La portada debe ser un ID válido').positive('La portada debe ser un ID válido').nullable()
+
+const documentAssetIdField = z.int().positive('El documento debe ser un ID válido').nullable()
+
+const downloadUrlField = z
+  .string()
+  .trim()
+  .max(500, 'El enlace no puede superar los 500 caracteres')
+  .nullable()
+  .transform(value => (value ? value : null))
+  .refine(
+    value => value === null || z.url().safeParse(value).success,
+    'Ingresá un enlace válido (debe empezar con http:// o https://)'
+  )
+
+// Regla de negocio: la descarga sale de un PDF subido o de una URL externa.
+// Se exige exactamente una de las dos.
+function assertCoverRequired(
+  coverAssetId: number | null | undefined,
+  ctx: z.RefinementCtx
+) {
+  if (coverAssetId == null) {
+    ctx.addIssue({
+      code: 'custom',
+      path: ['coverAssetId'],
+      message: 'La portada es requerida'
+    })
+  }
+}
+
+function assertSingleDownloadSource(
+  documentAssetId: number | null | undefined,
+  externalUrl: string | null | undefined,
+  ctx: z.RefinementCtx
+) {
+  const hasDocument = documentAssetId != null
+  const hasUrl = externalUrl != null
+
+  if (!hasDocument && !hasUrl) {
+    ctx.addIssue({
+      code: 'custom',
+      path: ['documentAssetId'],
+      message: 'Subí un PDF o ingresá una URL de descarga'
+    })
+  }
+
+  if (hasDocument && hasUrl) {
+    ctx.addIssue({
+      code: 'custom',
+      path: ['externalUrl'],
+      message: 'Elegí una sola opción: PDF subido o URL de descarga'
+    })
+  }
+}
+
+export const CreateObservatoryPublicationSchema = z
+  .object({
+    title: publicationTitleField,
+    description: optionalText(5000),
+    publicationYear: publicationYearField,
+    coverAssetId: coverAssetIdField.default(null),
+    documentAssetId: documentAssetIdField.default(null),
+    externalUrl: downloadUrlField.default(null),
+    isActive: z.boolean().default(true),
+    displayOrder: displayOrderField.default(0)
+  })
+  .superRefine((data, ctx) => {
+    assertCoverRequired(data.coverAssetId, ctx)
+    assertSingleDownloadSource(data.documentAssetId, data.externalUrl, ctx)
+  })
+
+export const PatchObservatoryPublicationSchema = z
+  .object({
+    title: publicationTitleField.optional(),
+    description: optionalText(5000),
+    publicationYear: publicationYearField.optional(),
+    coverAssetId: coverAssetIdField.unwrap().optional(),
+    documentAssetId: documentAssetIdField.optional(),
+    externalUrl: downloadUrlField.optional(),
+    isActive: z.boolean().optional(),
+    displayOrder: displayOrderField.optional()
+  })
+  .refine(
+    value => Object.values(value).some(field => field !== undefined),
+    'Debés enviar al menos un campo para actualizar'
+  )
+  .superRefine((data, ctx) => {
+    // En el PATCH solo controlamos que no lleguen ambas fuentes a la vez; el
+    // handler resuelve el estado final (limpia la fuente que no se usa).
+    if (data.documentAssetId != null && data.externalUrl != null) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['externalUrl'],
+        message: 'Elegí una sola opción: PDF subido o URL de descarga'
+      })
+    }
+  })
+
+// --- Registro audiovisual (ABM de platform-admin, borrado real) ---
+
+const youtubeUrlField = z
+  .string()
+  .trim()
+  .min(1, 'Ingresá el enlace del video')
+  .max(500, 'El enlace no puede superar los 500 caracteres')
+  .refine(isValidYoutubeUrl, 'Ingresá un enlace válido de YouTube')
+
+const videoDateField = z
+  .string()
+  .trim()
+  .nullable()
+  .transform(value => (value ? value : null))
+  .refine(
+    value => value === null || /^\d{4}-\d{2}-\d{2}$/.test(value),
+    'Ingresá una fecha válida (AAAA-MM-DD)'
+  )
+
+export const CreateObservatoryVideoSchema = z.object({
+  title: publicationTitleField,
+  youtubeUrl: youtubeUrlField,
+  videoDate: videoDateField.default(null),
+  isActive: z.boolean().default(true),
+  displayOrder: displayOrderField.default(0)
+})
+
+export const PatchObservatoryVideoSchema = z
+  .object({
+    title: publicationTitleField.optional(),
+    youtubeUrl: youtubeUrlField.optional(),
+    videoDate: videoDateField.optional(),
     isActive: z.boolean().optional(),
     displayOrder: displayOrderField.optional()
   })
@@ -162,6 +314,10 @@ export type CreateObservatoryInstitutionCategoryInput = z.output<typeof CreateOb
 export type PatchObservatoryInstitutionCategoryInput = z.output<typeof PatchObservatoryInstitutionCategorySchema>
 export type CreateObservatoryInstitutionInput = z.output<typeof CreateObservatoryInstitutionSchema>
 export type PatchObservatoryInstitutionInput = z.output<typeof PatchObservatoryInstitutionSchema>
+export type CreateObservatoryPublicationInput = z.output<typeof CreateObservatoryPublicationSchema>
+export type PatchObservatoryPublicationInput = z.output<typeof PatchObservatoryPublicationSchema>
+export type CreateObservatoryVideoInput = z.output<typeof CreateObservatoryVideoSchema>
+export type PatchObservatoryVideoInput = z.output<typeof PatchObservatoryVideoSchema>
 export type ObservatoryContributionLinkInput = z.output<typeof ObservatoryContributionLinkSchema>
 export type ObservatoryContributionsQueryInput = z.output<typeof ObservatoryContributionsQuerySchema>
 export type CreateObservatoryContributionInput = z.output<typeof CreateObservatoryContributionSchema>
