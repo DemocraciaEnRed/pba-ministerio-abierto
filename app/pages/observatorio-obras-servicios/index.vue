@@ -221,6 +221,12 @@ const themeUi: ThemeUI = {
       </UPageSection>
     </UContainer>
     <USeparator />
+    <UPageSection
+      title="Reuniones"
+      description="Reuniones, encuentros y consultas realizadas en el marco del Observatorio."
+    >
+      <ObservatorioConsultasCardLists />
+    </UPageSection>
     <div class="bg-accented/25 dark:bg-accented/10 py-12 sm:py-16 drop-shadow-md">
       <UContainer>
         <LazyObservatorioNumbersAlcance />
