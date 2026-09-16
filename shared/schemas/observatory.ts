@@ -234,6 +234,25 @@ export const PatchObservatoryVideoSchema = z
     'Debés enviar al menos un campo para actualizar'
   )
 
+// --- Métricas de alcance (catálogo fijo de platform-admin) ---
+
+const metricLabelField = z
+  .string()
+  .trim()
+  .min(1, 'La etiqueta es requerida')
+  .max(80, 'La etiqueta no puede superar los 80 caracteres')
+
+const metricValueField = z
+  .string()
+  .trim()
+  .min(1, 'El valor es requerido')
+  .max(20, 'El valor no puede superar los 20 caracteres')
+
+export const UpdateObservatoryMetricSchema = z.object({
+  label: metricLabelField,
+  value: metricValueField
+})
+
 // --- Aportes (formulario público) ---
 
 const firstNameField = z
@@ -318,6 +337,7 @@ export type CreateObservatoryPublicationInput = z.output<typeof CreateObservator
 export type PatchObservatoryPublicationInput = z.output<typeof PatchObservatoryPublicationSchema>
 export type CreateObservatoryVideoInput = z.output<typeof CreateObservatoryVideoSchema>
 export type PatchObservatoryVideoInput = z.output<typeof PatchObservatoryVideoSchema>
+export type UpdateObservatoryMetricInput = z.output<typeof UpdateObservatoryMetricSchema>
 export type ObservatoryContributionLinkInput = z.output<typeof ObservatoryContributionLinkSchema>
 export type ObservatoryContributionsQueryInput = z.output<typeof ObservatoryContributionsQuerySchema>
 export type CreateObservatoryContributionInput = z.output<typeof CreateObservatoryContributionSchema>

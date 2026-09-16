@@ -219,7 +219,15 @@ const themeUi: ThemeUI = {
       >
         <ObservatorioInstitutionsShowcase />
       </UPageSection>
-      <USeparator />
+    </UContainer>
+    <USeparator />
+    <div class="bg-accented/25 dark:bg-accented/10 py-12 sm:py-16 drop-shadow-md">
+      <UContainer>
+        <LazyObservatorioNumbersAlcance />
+      </UContainer>
+    </div>
+    <USeparator />
+    <UContainer>
       <UPageSection
         title="Publicaciones"
         description="Documentos, estudios e informes producidos en el marco del Observatorio, disponibles para su descarga."

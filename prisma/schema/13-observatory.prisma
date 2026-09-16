@@ -22,6 +22,20 @@ model ObservatoryWorkGroup {
   @@index([isActive, displayOrder])
 }
 
+/// Métrica editorial de alcance del Observatorio. Es un catálogo fijo: el
+/// panel permite editar sólo etiqueta y valor, sin alta, baja ni reordenamiento.
+model ObservatoryMetric {
+  id           Int      @id @default(autoincrement())
+  key          String   @unique
+  label        String
+  value        String
+  displayOrder Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([displayOrder])
+}
+
 /// Categoría del catálogo de instituciones del Observatorio (universidades,
 /// cámaras empresariales, etc.). A diferencia de los grupos de trabajo tiene ABM
 /// desde el panel: se crea y se edita, pero nunca se elimina —se desactiva con

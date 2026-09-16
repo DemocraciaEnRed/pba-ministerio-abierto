@@ -52,6 +52,12 @@ const itemsNavigationMenu = computed<NavigationMenuItem[][]>(() => [
       active: route.path.startsWith('/observatorio-obras-servicios/panel/instituciones')
     },
     {
+      label: 'Métricas',
+      to: '/observatorio-obras-servicios/panel/metricas',
+      icon: 'i-lucide-chart-no-axes-column',
+      active: route.path.startsWith('/observatorio-obras-servicios/panel/metricas')
+    },
+    {
       label: 'Publicaciones',
       to: '/observatorio-obras-servicios/panel/publicaciones',
       icon: 'i-lucide-book-open',
