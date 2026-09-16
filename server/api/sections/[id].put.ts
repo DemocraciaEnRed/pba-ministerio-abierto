@@ -22,7 +22,9 @@ export default defineEventHandler(async (event) => {
 
   const updated = await prisma.section.update({
     where: { id: sectionId },
-    data: body
+    // El slug identifica al tipo de consulta en el código (catálogo fijo), así
+    // que se ignora el que llegue: renombrarlo rompería la lógica por tipo.
+    data: { name: body.name, description: body.description }
   })
 
   return serializeSection(updated, 'admin')

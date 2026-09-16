@@ -20,9 +20,10 @@ export type ConsultationTypeSlug = typeof CONSULTATION_TYPE_SLUGS[number]
 
 /**
  * Variante del formulario de inscripción. `hearing` suma la forma de
- * participación (asistente/expositor) y la sección de exposición.
+ * participación (asistente/expositor) y la sección de exposición; `consultation`
+ * y `dialogue` solo registran asistentes y cambian el texto de la instancia.
  */
-export type RegistrationFormKind = 'hearing' | 'consultation'
+export type RegistrationFormKind = 'hearing' | 'consultation' | 'dialogue'
 
 export interface ConsultationTypeDefinition {
   slug: ConsultationTypeSlug
@@ -85,7 +86,7 @@ export const CONSULTATION_TYPES: readonly ConsultationTypeDefinition[] = [
     landingRoute: '/dialogos',
     allowsRegion: false,
     allowsWorkGroup: false,
-    registrationFormKind: null,
+    registrationFormKind: 'dialogue',
     defaultConsultationFormat: 'multiple',
     enabled: true
   },

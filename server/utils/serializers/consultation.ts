@@ -42,10 +42,12 @@ type ConsultationEntity = {
   updatedAt: Date
   section?: TaxonomyRelation | null
   region?: TaxonomyRelation | null
-  observatoryWorkGroup?: ObservatoryWorkGroupRelation | null
+  workGroupAssignments?: { workGroup: ObservatoryWorkGroupRelation }[]
   categoryAssignments?: { isPrimary: boolean, category: TaxonomyRelation }[]
   consultationTags?: { tag: TaxonomyRelation }[]
   topics?: TopicSummaryRelation[]
+  /** Presencia (no contenido) del formulario de inscripción; opcional, solo si el handler la incluye. */
+  registrationForm?: { id: number } | null
   /** URL de la portada resuelta por el handler (role `cover`); opcional. */
   coverUrl?: string | null
   /** Texto alternativo de la portada; opcional. */
@@ -99,7 +101,7 @@ export interface PublicConsultationDTO {
   resultsVisibility: ResultsVisibility
   section: ConsultationTaxonomyDTO | null
   region: ConsultationTaxonomyDTO | null
-  observatoryWorkGroup: ConsultationWorkGroupDTO | null
+  observatoryWorkGroups: ConsultationWorkGroupDTO[]
   categories: ConsultationCategoryDTO[]
   tags: ConsultationTaxonomyDTO[]
   /** Portada para las cards públicas; `null` cuando no hay imagen cargada. */
@@ -133,6 +135,11 @@ export interface AdminConsultationDTO extends PublicConsultationDTO {
    * vistas admin permanece `undefined`.
    */
   topics?: ConsultationTopicSummaryDTO[]
+  /**
+   * Si la consulta ya tiene un formulario de inscripción cargado. Solo se
+   * completa cuando el handler incluye la relación (p. ej. listado admin).
+   */
+  hasRegistrationForm?: boolean
 }
 
 export function serializeConsultation(consultation: ConsultationEntity, view: 'public'): PublicConsultationDTO
@@ -172,16 +179,14 @@ export function serializeConsultation(
           name: consultation.region.name
         }
       : null,
-    observatoryWorkGroup: consultation.observatoryWorkGroup
-      ? {
-          id: consultation.observatoryWorkGroup.id,
-          slug: consultation.observatoryWorkGroup.slug,
-          name: consultation.observatoryWorkGroup.name,
-          color: consultation.observatoryWorkGroup.color,
-          iconColor: consultation.observatoryWorkGroup.iconColor,
-          icon: consultation.observatoryWorkGroup.icon
-        }
-      : null,
+    observatoryWorkGroups: (consultation.workGroupAssignments ?? []).map(assignment => ({
+      id: assignment.workGroup.id,
+      slug: assignment.workGroup.slug,
+      name: assignment.workGroup.name,
+      color: assignment.workGroup.color,
+      iconColor: assignment.workGroup.iconColor,
+      icon: assignment.workGroup.icon
+    })),
     categories: (consultation.categoryAssignments ?? []).map(assignment => ({
       id: assignment.category.id,
       slug: assignment.category.slug,
@@ -208,6 +213,9 @@ export function serializeConsultation(
     updatedByUserId: consultation.updatedByUserId,
     createdAt: consultation.createdAt.toISOString(),
     updatedAt: consultation.updatedAt.toISOString(),
+    ...(consultation.registrationForm !== undefined
+      ? { hasRegistrationForm: Boolean(consultation.registrationForm) }
+      : {}),
     ...(consultation.topics
       ? {
           topics: consultation.topics.map(topic => ({

@@ -67,6 +67,29 @@ const footerSlot = computed(() => (props.orientation === 'horizontal' ? 'authors
             class="size-10 text-primary-500/60"
           />
         </div>
+
+        <!-- Grupos de trabajo del Observatorio asignados a la consulta -->
+        <div
+          v-if="consultation.observatoryWorkGroups.length"
+          class="absolute top-2 right-2 z-10 flex flex-wrap justify-end gap-1"
+        >
+          <UTooltip
+            v-for="group in consultation.observatoryWorkGroups"
+            :key="`work-group-${group.id}`"
+            :text="group.name"
+          >
+            <div
+              class="flex size-7 items-center justify-center rounded-full shadow-sm"
+              :style="{ backgroundColor: group.color }"
+            >
+              <UIcon
+                :name="group.icon"
+                class="size-4"
+                :style="{ color: group.iconColor }"
+              />
+            </div>
+          </UTooltip>
+        </div>
       </div>
     </template>
 

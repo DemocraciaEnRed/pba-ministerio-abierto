@@ -1,6 +1,6 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
-  modules: ['@nuxt/eslint', '@nuxt/ui', 'nuxt-auth-utils', '@nuxt/scripts'],
+  modules: ['@nuxt/eslint', '@nuxt/ui', 'nuxt-auth-utils', '@nuxt/scripts', 'nuxt-qrcode'],
   $production: {
     scripts: {
       registry: {
@@ -103,7 +103,8 @@ export default defineNuxtConfig({
         '@nuxt/ui > prosemirror-model',
         '@nuxt/ui > prosemirror-view',
         '@nuxt/ui > prosemirror-gapcursor'
-      ]
+      ],
+      exclude: ['vue-qrcode-reader']
     }
   },
 

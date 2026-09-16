@@ -27,7 +27,7 @@ export interface ConsultationDetail {
   resultsVisibility: ResultsVisibility
   section: ConsultationTaxonomy | null
   region: ConsultationTaxonomy | null
-  observatoryWorkGroup: ConsultationWorkGroup | null
+  observatoryWorkGroups: ConsultationWorkGroup[]
   categories: ConsultationCategory[]
   tags: ConsultationTaxonomy[]
   /** Portada de la consulta para el hero; `null` cuando no hay imagen cargada. */
@@ -192,7 +192,7 @@ export interface PublicConsultationListItem {
   resultsVisibility: ResultsVisibility
   section: ConsultationTaxonomy | null
   region: ConsultationTaxonomy | null
-  observatoryWorkGroup: ConsultationWorkGroup | null
+  observatoryWorkGroups: ConsultationWorkGroup[]
   categories: ConsultationCategory[]
   tags: ConsultationTaxonomy[]
   /** Portada para la card; `null` cuando no hay imagen cargada. */
@@ -227,10 +227,12 @@ export interface AdminConsultationListItem {
   updatedAt: string
   section: ConsultationTaxonomy | null
   region: ConsultationTaxonomy | null
-  observatoryWorkGroup: ConsultationWorkGroup | null
+  observatoryWorkGroups: ConsultationWorkGroup[]
   categories: ConsultationCategory[]
   tags: ConsultationTaxonomy[]
   topics?: ConsultationTopicSummary[]
+  /** Si ya tiene un formulario de inscripción cargado; solo la completa el listado admin. */
+  hasRegistrationForm?: boolean
 }
 
 export type CommentAuthorMode = 'citizen' | 'institution'

@@ -142,10 +142,10 @@ export function buildConsultationFilters(query: ConsultationsQueryInput, now: Da
     ...(query.regionSlug ? { region: { slug: query.regionSlug } } : {}),
     ...(query.regionIds ? { regionId: { in: query.regionIds } } : {}),
     ...(query.observatoryWorkGroupSlug
-      ? { observatoryWorkGroup: { slug: query.observatoryWorkGroupSlug } }
+      ? { workGroupAssignments: { some: { workGroup: { slug: query.observatoryWorkGroupSlug } } } }
       : {}),
     ...(query.observatoryWorkGroupIds
-      ? { observatoryWorkGroupId: { in: query.observatoryWorkGroupIds } }
+      ? { workGroupAssignments: { some: { workGroupId: { in: query.observatoryWorkGroupIds } } } }
       : {}),
     ...(query.categoryIds
       ? { categoryAssignments: { some: { categoryId: { in: query.categoryIds } } } }

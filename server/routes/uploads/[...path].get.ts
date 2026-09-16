@@ -30,7 +30,22 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 404, statusMessage: 'Not Found' })
   }
 
-  setResponseHeader(event, 'Content-Type', lookup(key) || 'application/octet-stream')
+  const contentType = lookup(key) || 'application/octet-stream'
+
+  setResponseHeader(event, 'Content-Type', contentType)
+  setResponseHeader(event, 'X-Content-Type-Options', 'nosniff')
+
+  // Un SVG puede incluir scripts, que se ejecutarían en nuestro origen si alguien
+  // abre la URL directa. Al usarse como <img> el navegador ya los ignora, así que
+  // el sandbox no afecta cómo se muestran los logos.
+  if (contentType === 'image/svg+xml') {
+    setResponseHeader(
+      event,
+      'Content-Security-Policy',
+      'default-src \'none\'; style-src \'unsafe-inline\'; sandbox'
+    )
+  }
+
   setResponseHeader(event, 'Cache-Control', 'public, max-age=31536000, immutable')
   return file
 })

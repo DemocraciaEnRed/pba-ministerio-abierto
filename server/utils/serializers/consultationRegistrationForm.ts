@@ -1,4 +1,5 @@
 import type { RegistrationFormKind } from '#shared/data/consultation-types'
+import type { AdminAccreditationDTO } from '~~/server/utils/serializers/accreditation'
 
 export type ConsultationRegistrationFormView = 'public' | 'admin'
 
@@ -39,6 +40,7 @@ export interface PublicConsultationRegistrationFormDTO {
 export interface AdminConsultationRegistrationFormDTO extends PublicConsultationRegistrationFormDTO {
   consultationId: number
   registrationsCount: number
+  accreditation: AdminAccreditationDTO | null
   createdAt: string
   updatedAt: string
 }
@@ -46,6 +48,7 @@ export interface AdminConsultationRegistrationFormDTO extends PublicConsultation
 export interface SerializeRegistrationFormContext {
   kind: RegistrationFormKind
   registrationsCount?: number
+  accreditation?: AdminAccreditationDTO | null
   now?: Date
 }
 
@@ -93,6 +96,7 @@ export function serializeConsultationRegistrationForm(
     ...base,
     consultationId: form.consultationId,
     registrationsCount: context.registrationsCount ?? 0,
+    accreditation: context.accreditation ?? null,
     createdAt: form.createdAt.toISOString(),
     updatedAt: form.updatedAt.toISOString()
   }

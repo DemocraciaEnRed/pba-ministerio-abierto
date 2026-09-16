@@ -16,7 +16,192 @@ model ObservatoryWorkGroup {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  consultations Consultation[]
+  consultationAssignments ConsultationObservatoryWorkGroup[]
+  contributionAssignments ObservatoryContributionWorkGroup[]
+
+  @@index([isActive, displayOrder])
+}
+
+/// Métrica editorial de alcance del Observatorio. Es un catálogo fijo: el
+/// panel permite editar sólo etiqueta y valor, sin alta, baja ni reordenamiento.
+model ObservatoryMetric {
+  id           Int      @id @default(autoincrement())
+  key          String   @unique
+  label        String
+  value        String
+  displayOrder Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([displayOrder])
+}
+
+/// Categoría del catálogo de instituciones del Observatorio (universidades,
+/// cámaras empresariales, etc.). A diferencia de los grupos de trabajo tiene ABM
+/// desde el panel: se crea y se edita, pero nunca se elimina —se desactiva con
+/// `isActive`— para no romper el historial de aportes ya recibidos.
+model ObservatoryInstitutionCategory {
+  id           Int      @id @default(autoincrement())
+  slug         String   @unique
+  name         String
+  isActive     Boolean  @default(true)
+  displayOrder Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  institutions ObservatoryInstitution[]
+
+  @@index([isActive, displayOrder])
+}
+
+/// Institución que puede presentar aportes al Observatorio. Mismo criterio que
+/// la categoría: ABM sin borrado, baja lógica vía `isActive`.
+model ObservatoryInstitution {
+  id           Int      @id @default(autoincrement())
+  categoryId   Int
+  slug         String   @unique
+  name         String
+  /// Logo institucional opcional. Si no hay, la muestra pública cae al nombre.
+  logoAssetId  Int?
+  /// Sitio web oficial, opcional: si es null la tarjeta pública no enlaza.
+  websiteUrl   String?  @db.VarChar(500)
+  isActive     Boolean  @default(true)
+  displayOrder Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  category      ObservatoryInstitutionCategory @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  logoAsset     Asset?                         @relation("ObservatoryInstitutionLogo", fields: [logoAssetId], references: [id], onDelete: SetNull)
+  contributions ObservatoryContribution[]
+
+  @@index([categoryId, displayOrder])
+  @@index([isActive, displayOrder])
+  @@index([logoAssetId])
+}
+
+/// Aporte institucional enviado desde el formulario público del Observatorio
+/// (sin login). Solo se crea vía el POST público; toda lectura es exclusiva de
+/// platform-admin. Es inmutable: no se edita ni se borra.
+model ObservatoryContribution {
+  id            Int     @id @default(autoincrement())
+  firstName     String
+  lastName      String
+  email         String
+  phone         String
+  provincia     String
+  municipio     String?
+  institutionId Int?
+  /// Snapshot del catálogo al momento del envío: el aporte conserva el nombre y
+  /// la categoría tal como se eligieron, aunque después se editen o desactiven.
+  institutionName         String
+  institutionCategoryName String
+  description String? @db.Text
+  /// Archivo adjunto opcional (PDF/Word, ≤8MB). Se sirve solo a platform-admin
+  /// mediante un endpoint protegido, nunca por URL pública.
+  attachmentAssetId Int?
+  createdAt         DateTime @default(now())
+
+  institution     ObservatoryInstitution?       @relation(fields: [institutionId], references: [id], onDelete: SetNull)
+  attachmentAsset Asset?                        @relation("ObservatoryContributionAttachment", fields: [attachmentAssetId], references: [id], onDelete: SetNull)
+  links           ObservatoryContributionLink[]
+  /// Grupos de trabajo elegidos (uno o varios). El catálogo es fijo (sin ABM):
+  /// `reuniones-plenarias` queda excluido a nivel aplicación.
+  workGroupAssignments ObservatoryContributionWorkGroup[]
+
+  @@index([createdAt])
+  @@index([email])
+  @@index([institutionId])
+  @@index([attachmentAssetId])
+}
+
+/// Asignación de un grupo de trabajo del Observatorio a una consulta. Reemplaza
+/// la antigua FK única `Consultation.observatoryWorkGroupId`: una consulta puede
+/// pertenecer a varios grupos de trabajo.
+model ConsultationObservatoryWorkGroup {
+  id             Int      @id @default(autoincrement())
+  consultationId Int
+  workGroupId    Int
+  createdAt      DateTime @default(now())
+
+  consultation Consultation         @relation(fields: [consultationId], references: [id], onDelete: Cascade)
+  workGroup    ObservatoryWorkGroup @relation(fields: [workGroupId], references: [id], onDelete: Cascade)
+
+  @@unique([consultationId, workGroupId])
+  @@index([workGroupId])
+}
+
+/// Asignación de un grupo de trabajo del Observatorio a un aporte institucional.
+/// Reemplaza la antigua FK única `ObservatoryContribution.workGroupId`: un aporte
+/// puede sumar a uno o varios grupos (mínimo uno, validado en la aplicación).
+model ObservatoryContributionWorkGroup {
+  id             Int      @id @default(autoincrement())
+  contributionId Int
+  workGroupId    Int
+  createdAt      DateTime @default(now())
+
+  contribution ObservatoryContribution @relation(fields: [contributionId], references: [id], onDelete: Cascade)
+  workGroup    ObservatoryWorkGroup    @relation(fields: [workGroupId], references: [id], onDelete: Restrict)
+
+  @@unique([contributionId, workGroupId])
+  @@index([workGroupId])
+}
+
+/// Enlace en la nube asociado a un aporte del Observatorio. El orden no importa:
+/// se listan como llegan.
+model ObservatoryContributionLink {
+  id             Int      @id @default(autoincrement())
+  contributionId Int
+  url            String   @db.Text
+  title          String?
+  createdAt      DateTime @default(now())
+
+  contribution ObservatoryContribution @relation(fields: [contributionId], references: [id], onDelete: Cascade)
+
+  @@index([contributionId])
+}
+
+/// Publicación del Observatorio (documento en PDF). ABM de platform-admin con
+/// borrado real. La descarga sale de un PDF subido o de una URL externa: se
+/// exige uno u otro (validado en la aplicación, no en la base).
+model ObservatoryPublication {
+  id          Int     @id @default(autoincrement())
+  title       String
+  description String? @db.Text
+  /// Año de publicación: ordena el listado público (más reciente primero).
+  publicationYear Int
+  /// Portada obligatoria a nivel formulario; asset de tipo imagen.
+  coverAssetId    Int?
+  /// PDF subido. Alternativa a `externalUrl`: se guarda uno de los dos.
+  documentAssetId Int?
+  /// URL de descarga externa, alternativa al PDF subido.
+  externalUrl String? @db.VarChar(500)
+  isActive     Boolean  @default(true)
+  displayOrder Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  coverAsset    Asset? @relation("ObservatoryPublicationCover", fields: [coverAssetId], references: [id], onDelete: SetNull)
+  documentAsset Asset? @relation("ObservatoryPublicationDocument", fields: [documentAssetId], references: [id], onDelete: SetNull)
+
+  @@index([isActive, publicationYear, displayOrder])
+  @@index([coverAssetId])
+  @@index([documentAssetId])
+}
+
+/// Video del registro audiovisual del Observatorio. Se muestra en un carrusel
+/// público. ABM de platform-admin con borrado real. El thumbnail se deriva del
+/// ID de YouTube, por eso no se sube portada.
+model ObservatoryVideo {
+  id    Int    @id @default(autoincrement())
+  title String
+  /// Link a YouTube: del ID se derivan el thumbnail y el embed.
+  youtubeUrl String    @db.VarChar(500)
+  /// Fecha del video, opcional.
+  videoDate  DateTime? @db.Date
+  isActive     Boolean  @default(true)
+  displayOrder Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   @@index([isActive, displayOrder])
 }

@@ -125,11 +125,11 @@ const consultationMetadata = computed<ConsultaHeroMetadata[]>(() => {
     })
   }
 
-  if (consultation.value.observatoryWorkGroup) {
+  if (consultation.value.observatoryWorkGroups.length) {
     items.push({
-      title: 'Grupo de trabajo',
-      description: consultation.value.observatoryWorkGroup.name,
-      icon: consultation.value.observatoryWorkGroup.icon,
+      title: 'Grupos de trabajo',
+      description: consultation.value.observatoryWorkGroups.map(group => group.name).join(', '),
+      icon: consultation.value.observatoryWorkGroups[0]!.icon,
       variant: 'subtle'
     })
   }

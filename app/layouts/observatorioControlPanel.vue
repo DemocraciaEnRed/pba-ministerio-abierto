@@ -26,6 +26,12 @@ const itemsNavigationMenu = computed<NavigationMenuItem[][]>(() => [
         color: 'neutral'
       },
       active: route.path.startsWith('/observatorio-obras-servicios/panel/consultas')
+    },
+    {
+      label: 'Aportes',
+      to: '/observatorio-obras-servicios/panel/aportes',
+      icon: 'i-lucide-inbox',
+      active: route.path.startsWith('/observatorio-obras-servicios/panel/aportes')
     }
   ],
   [
@@ -38,6 +44,30 @@ const itemsNavigationMenu = computed<NavigationMenuItem[][]>(() => [
       to: '/observatorio-obras-servicios/panel/grupos-trabajo',
       icon: 'i-lucide-users',
       active: route.path.startsWith('/observatorio-obras-servicios/panel/grupos-trabajo')
+    },
+    {
+      label: 'Instituciones',
+      to: '/observatorio-obras-servicios/panel/instituciones',
+      icon: 'i-lucide-building-2',
+      active: route.path.startsWith('/observatorio-obras-servicios/panel/instituciones')
+    },
+    {
+      label: 'Métricas',
+      to: '/observatorio-obras-servicios/panel/metricas',
+      icon: 'i-lucide-chart-no-axes-column',
+      active: route.path.startsWith('/observatorio-obras-servicios/panel/metricas')
+    },
+    {
+      label: 'Publicaciones',
+      to: '/observatorio-obras-servicios/panel/publicaciones',
+      icon: 'i-lucide-book-open',
+      active: route.path.startsWith('/observatorio-obras-servicios/panel/publicaciones')
+    },
+    {
+      label: 'Registro audiovisual',
+      to: '/observatorio-obras-servicios/panel/registro-audiovisual',
+      icon: 'i-lucide-video',
+      active: route.path.startsWith('/observatorio-obras-servicios/panel/registro-audiovisual')
     }
   ]
 ])
