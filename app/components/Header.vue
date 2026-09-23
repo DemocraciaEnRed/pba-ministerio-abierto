@@ -148,6 +148,12 @@ const items = computed<NavigationMenuItem[]>(() => [
     active: route.path.startsWith('/acerca-de'),
     children: [
       {
+        label: 'Acerca de',
+        to: '/acerca-de',
+        description: 'Conocé la iniciativa Ministerio Abierto y sus espacios de participación.',
+        active: isPathExclusivelyActive('/acerca-de')
+      },
+      {
         label: 'Términos y condiciones',
         to: '/acerca-de/terminos-y-condiciones',
         description: 'Marco legal y condiciones para participar en la plataforma.',
@@ -225,6 +231,12 @@ const itemsMobile = computed<NavigationMenuItem[][]>(() => [
       icon: 'lucide:plus',
       type: 'label',
       ui: { label: 'font-medium text-primary text-base' }
+    },
+    {
+      label: 'Acerca de',
+      to: '/acerca-de',
+      description: 'Conocé la iniciativa Ministerio Abierto y sus espacios de participación.',
+      active: isPathExclusivelyActive('/acerca-de')
     },
     {
       label: 'Términos y condiciones',
