@@ -14,9 +14,10 @@ usePageSeo({
   <div>
     <UPageHero
       title="Formulario de aportes"
-      :description="consultationType?.description"
+      description="Sumá el conocimiento y la experiencia de tu institución"
       :ui="{ root: 'bg-primary', title: 'text-white', description: 'text-white' }"
     />
+    <ObservatorioSubNav />
 
     <UContainer class="max-w-5xl">
       <UPage>
