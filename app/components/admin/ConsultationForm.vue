@@ -34,25 +34,14 @@ export interface ConsultationFormPayload {
   commentsEnabled: boolean
   commentsGuidance: string | null
   resultsVisibility: ResultsVisibility
-  adjustTopics: boolean
-}
-
-/** Tema de la consulta, para previsualizar el ajuste de fechas al mover la ventana. */
-export interface ConsultationFormTopic {
-  id: number
-  title: string
-  participationStartsAt: string | null
-  participationEndsAt: string | null
 }
 
 const props = withDefaults(defineProps<{
   mode: 'create' | 'edit'
   initialValues?: ConsultationFormInitialValues | null
-  topics?: ConsultationFormTopic[] | null
   loading?: boolean
 }>(), {
   initialValues: null,
-  topics: null,
   loading: false
 })
 
@@ -166,9 +155,7 @@ function buildPayload(): ConsultationFormPayload {
     closedMessage: (form.closedMessage ?? '').trim() || null,
     commentsEnabled: form.commentsEnabled,
     commentsGuidance: (form.commentsGuidance ?? '').trim() || null,
-    resultsVisibility: form.resultsVisibility,
-    // El ajuste no es opcional: si hay temas fuera de la ventana, se recortan al guardar.
-    adjustTopics: topicChanges.value.length > 0
+    resultsVisibility: form.resultsVisibility
   }
 }
 
@@ -206,77 +193,6 @@ watch(() => [form.startsAt, form.endsAt], () => {
   } else if (errors.endsAt === 'La fecha de fin no puede ser anterior al inicio.') {
     errors.endsAt = undefined
   }
-})
-
-// La UI de fechas maneja precisión de minutos; truncamos segundos al comparar.
-function floorMinute(date: Date): number {
-  return Math.floor(date.getTime() / 60_000)
-}
-
-// Previsualiza cómo se recortarían las fechas de los temas que quedan fuera de la
-// ventana elegida. Refleja la misma lógica de `clampTopicWindowToConsultation`.
-const topicChanges = computed(() => {
-  const list = props.topics ?? []
-  const cStart = form.startsAt ? new Date(form.startsAt) : null
-  const cEnd = form.endsAt ? new Date(form.endsAt) : null
-  if (!cStart) return []
-
-  return list.flatMap((topic) => {
-    const tStart = topic.participationStartsAt ? new Date(topic.participationStartsAt) : null
-    const tEnd = topic.participationEndsAt ? new Date(topic.participationEndsAt) : null
-    let newStart = tStart
-    let newEnd = tEnd
-    let changed = false
-
-    if (tStart && floorMinute(tStart) < floorMinute(cStart)) {
-      newStart = cStart
-      changed = true
-    }
-    if (tEnd && cEnd && floorMinute(tEnd) > floorMinute(cEnd)) {
-      newEnd = cEnd
-      changed = true
-    }
-    if (newStart && newEnd && floorMinute(newEnd) < floorMinute(newStart)) {
-      newEnd = cEnd
-      changed = true
-    }
-
-    if (!changed) return []
-    return [{
-      id: topic.id,
-      title: topic.title,
-      fromStart: topic.participationStartsAt,
-      toStart: newStart ? newStart.toISOString() : null,
-      fromEnd: topic.participationEndsAt,
-      toEnd: newEnd ? newEnd.toISOString() : null
-    }]
-  })
-})
-
-/** Compara dos fechas ISO (nullables) a nivel de minuto. */
-function sameMinute(a: string | null, b: string | null): boolean {
-  if (a === null && b === null) return true
-  if (a === null || b === null) return false
-  return floorMinute(new Date(a)) === floorMinute(new Date(b))
-}
-
-// Temas que NO definen cierre propio: heredan el de la consulta. No requieren
-// ajuste, pero si el cierre de la consulta cambia, su cierre efectivo cambia
-// también; lo mostramos a modo informativo.
-const inheritedEndChanges = computed(() => {
-  const originalEnd = props.initialValues?.endsAt ?? null
-  const newEnd = form.endsAt ?? null
-  if (sameMinute(originalEnd, newEnd)) return []
-
-  const adjustedIds = new Set(topicChanges.value.map(change => change.id))
-  return (props.topics ?? [])
-    .filter(topic => topic.participationEndsAt === null && !adjustedIds.has(topic.id))
-    .map(topic => ({
-      id: topic.id,
-      title: topic.title,
-      fromEnd: originalEnd,
-      toEnd: newEnd
-    }))
 })
 
 const titleMax = 180
@@ -423,16 +339,6 @@ const titleMax = 180
           placeholder="Sin definir"
         />
       </UFormField>
-
-      <div
-        v-if="mode === 'edit' && (topicChanges.length > 0 || inheritedEndChanges.length > 0)"
-        class="md:col-span-2"
-      >
-        <AdminConsultationTopicWindowPreview
-          :changes="topicChanges"
-          :inherited="inheritedEndChanges"
-        />
-      </div>
 
       <UFormField
         label="Mensaje de cierre"

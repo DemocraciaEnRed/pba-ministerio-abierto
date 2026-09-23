@@ -101,10 +101,7 @@ export const UpdateConsultationSchema = z.object({
   closedMessage: textAreaField,
   commentsEnabled: commentsEnabledField,
   commentsGuidance: textAreaField.default(null),
-  resultsVisibility: z.enum(['hidden', 'participants_only', 'public']),
-  // Si es true, al guardar se recortan las fechas de los temas que quedan fuera
-  // de la nueva ventana de la consulta (ver clampTopicWindowToConsultation).
-  adjustTopics: z.boolean().default(false)
+  resultsVisibility: z.enum(['hidden', 'participants_only', 'public'])
 })
 
 export const SetConsultationVisibilitySchema = z.object({

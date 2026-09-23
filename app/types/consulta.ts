@@ -73,18 +73,6 @@ export interface ConsultationTopic {
 }
 
 /**
- * Resumen liviano de un tema embebido en el listado admin de consultas
- * (`GET /api/admin/consultations`). Solo lo necesario para un pantallazo.
- */
-export interface ConsultationTopicSummary {
-  id: number
-  slug: string
-  title: string
-  visibility: Visibility
-  participationState: ParticipationState
-}
-
-/**
  * Enlace relacionado de un tema, tal como lo devuelve
  * `GET /api/consultations/:slug/topics/:temaSlug/links` (vista pública).
  */
@@ -230,7 +218,6 @@ export interface AdminConsultationListItem {
   observatoryWorkGroups: ConsultationWorkGroup[]
   categories: ConsultationCategory[]
   tags: ConsultationTaxonomy[]
-  topics?: ConsultationTopicSummary[]
   /** Si ya tiene un formulario de inscripción cargado; solo la completa el listado admin. */
   hasRegistrationForm?: boolean
 }

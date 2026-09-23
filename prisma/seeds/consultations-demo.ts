@@ -1,25 +1,15 @@
 import { fakerES as faker } from '@faker-js/faker'
 import type { PrismaClient } from '../generated/client'
 import {
-  CommentAuthorMode,
-  CommentReactionType,
   ConsultationFormat,
   ConsultationRole,
-  MechanismType,
   ResultsVisibility,
-  UserStatus,
-  Visibility,
-  VoteValue
+  Visibility
 } from '../generated/client'
-import { hashSeedPassword } from './password'
 
 // Prefijo con el que se identifican todos los datos de este perfil.
 // La regeneración completa borra por este prefijo antes de recrear.
 const DEMO_SLUG_PREFIX = 'demo-'
-const DEMO_CITIZEN_EMAIL_PREFIX = 'demo-vecino-'
-const DEMO_CITIZEN_COUNT = 16
-const DEMO_PASSWORD = 'Cambiar1234'
-
 // Pool de personas colaboradoras (rol de plataforma "collaborator", creadas por
 // el perfil base) entre las que se reparte la creación y administración de las
 // consultas demo. La administración se materializa con filas ConsultationMembership.
@@ -35,8 +25,6 @@ const DEFAULT_CONSULTATION_COUNT = 12
 const MAX_CONSULTATION_COUNT = 15
 
 const DAY_MS = 24 * 60 * 60 * 1000
-
-const REACTION_TYPES = Object.values(CommentReactionType)
 
 type DemoMechanism = 'support' | 'vote' | 'survey'
 
@@ -60,8 +48,7 @@ interface DemoConsultationTemplate {
 /**
  * Catálogo curado de consultas imaginadas para municipios de la Provincia de
  * Buenos Aires. Los títulos y resúmenes son fijos (temáticas reales de gestión
- * municipal); las descripciones largas y los textos de comentarios se completan
- * con Faker para dar variedad.
+ * municipal); las descripciones largas se completan con Faker para dar variedad.
  */
 const CONSULTATION_TEMPLATES: DemoConsultationTemplate[] = [
   {
@@ -424,12 +411,6 @@ export interface DemoSeedOptions {
   count?: number
 }
 
-interface DemoUser {
-  id: number
-}
-
-type DemoLifecycle = 'open' | 'scheduled' | 'closed'
-
 function clampCount(requested: number | undefined): number {
   if (requested === undefined || Number.isNaN(requested)) {
     return DEFAULT_CONSULTATION_COUNT
@@ -505,35 +486,6 @@ function buildConsultationDates(lifecycle: DemoLifecycle, now: Date): Consultati
   }
 }
 
-function mechanismEnum(mechanism: DemoMechanism): MechanismType {
-  switch (mechanism) {
-    case 'support':
-      return MechanismType.support
-    case 'vote':
-      return MechanismType.vote
-    case 'survey':
-      return MechanismType.survey
-  }
-}
-
-function randomVoteValue(): VoteValue {
-  return faker.helpers.weightedArrayElement([
-    { weight: 5, value: VoteValue.in_favor },
-    { weight: 3, value: VoteValue.against },
-    { weight: 2, value: VoteValue.abstain }
-  ])
-}
-
-function mechanismLabel(mechanism: DemoMechanism): string {
-  if (mechanism === 'support') {
-    return 'Apoyo'
-  }
-  if (mechanism === 'vote') {
-    return 'Votación'
-  }
-  return 'Encuesta'
-}
-
 function formatDate(date: Date): string {
   return date.toLocaleDateString('es-AR')
 }
@@ -578,27 +530,17 @@ function buildDescriptionMarkdown(
   ].join('\n')
 }
 
-function buildContextMarkdown(template: DemoConsultationTemplate): string {
-  const topicsSection = template.topics
-    .map((topic, index) => `| ${index + 1} | ${topic.title} | ${mechanismLabel(topic.mechanism)} |`)
-    .join('\n')
-
+function buildContextMarkdown(): string {
   return [
     '## Contexto y metodología',
     '',
-    'Para facilitar una participación informada, publicamos los ejes temáticos, los mecanismos de intervención y una guía breve de lectura.',
-    '',
-    '### Temas habilitados en esta consulta',
-    '',
-    '| # | Tema | Mecanismo |',
-    '|---|------|-----------|',
-    topicsSection,
+    'Para facilitar una participación informada, publicamos el contexto, los criterios de evaluación y una guía breve de lectura.',
     '',
     '### Cómo participar',
     '',
-    '- Leé cada tema y su pregunta guía.',
-    '- Elegí el mecanismo de participación correspondiente.',
-    '- Podés dejar comentarios para fundamentar tu postura.',
+    '- Leé la información de contexto y los criterios publicados.',
+    '- Compartí tu opinión cuando la consulta esté abierta.',
+    '- Podés consultar las actualizaciones técnicas y administrativas.',
     '',
     '### Transparencia',
     '',
@@ -606,151 +548,6 @@ function buildContextMarkdown(template: DemoConsultationTemplate): string {
     '',
     `Más información sobre participación ciudadana en [gobierno abierto](https://www.argentina.gob.ar/justicia/derechofacil/leysimple/gobierno-abierto).`
   ].join('\n')
-}
-
-async function ensureDemoCitizens(prisma: PrismaClient, now: Date): Promise<DemoUser[]> {
-  const passwordHash = await hashSeedPassword(DEMO_PASSWORD)
-  const citizens: DemoUser[] = []
-
-  for (let i = 1; i <= DEMO_CITIZEN_COUNT; i++) {
-    const email = `${DEMO_CITIZEN_EMAIL_PREFIX}${i}@consultas.local`
-    const firstName = faker.person.firstName()
-    const lastName = faker.person.lastName()
-    const displayName = `${firstName} ${lastName}`
-
-    const user = await prisma.user.upsert({
-      where: { email },
-      update: {
-        firstName,
-        lastName,
-        displayName,
-        status: UserStatus.active,
-        emailVerifiedAt: now,
-        passwordHash
-      },
-      create: {
-        email,
-        firstName,
-        lastName,
-        displayName,
-        status: UserStatus.active,
-        emailVerifiedAt: now,
-        passwordHash
-      },
-      select: { id: true }
-    })
-
-    citizens.push(user)
-  }
-
-  return citizens
-}
-
-interface CommentContainer {
-  consultationId: number | null
-  topicId: number | null
-}
-
-async function addReactions(
-  prisma: PrismaClient,
-  commentId: number,
-  citizens: DemoUser[]
-): Promise<void> {
-  const reactorCount = faker.number.int({ min: 0, max: 4 })
-  const reactors = faker.helpers.arrayElements(citizens, reactorCount)
-
-  for (const reactor of reactors) {
-    await prisma.commentReaction.create({
-      data: {
-        commentId,
-        userId: reactor.id,
-        reactionType: faker.helpers.arrayElement(REACTION_TYPES)
-      }
-    })
-  }
-}
-
-async function createCommentTree(
-  prisma: PrismaClient,
-  container: CommentContainer,
-  citizens: DemoUser[],
-  institutionUserId: number
-): Promise<void> {
-  const asInstitution = faker.datatype.boolean(0.15)
-  const author = asInstitution ? { id: institutionUserId } : faker.helpers.arrayElement(citizens)
-
-  const root = await prisma.comment.create({
-    data: {
-      consultationId: container.consultationId,
-      topicId: container.topicId,
-      authorUserId: author.id,
-      authorMode: asInstitution ? CommentAuthorMode.institution : CommentAuthorMode.citizen,
-      body: faker.lorem.paragraph()
-    },
-    select: { id: true }
-  })
-
-  await addReactions(prisma, root.id, citizens)
-
-  const replyCount = faker.number.int({ min: 0, max: 6 })
-  for (let r = 0; r < replyCount; r++) {
-    const replyAsInstitution = faker.datatype.boolean(0.1)
-    const replyAuthor = replyAsInstitution
-      ? { id: institutionUserId }
-      : faker.helpers.arrayElement(citizens)
-
-    const reply = await prisma.comment.create({
-      data: {
-        consultationId: container.consultationId,
-        topicId: container.topicId,
-        parentCommentId: root.id,
-        authorUserId: replyAuthor.id,
-        authorMode: replyAsInstitution ? CommentAuthorMode.institution : CommentAuthorMode.citizen,
-        body: faker.lorem.sentences(faker.number.int({ min: 1, max: 3 }))
-      },
-      select: { id: true }
-    })
-
-    await addReactions(prisma, reply.id, citizens)
-  }
-}
-
-interface CreatedTopic {
-  id: number
-  mechanism: DemoMechanism
-  surveyOptionIds: number[]
-}
-
-async function createParticipations(
-  prisma: PrismaClient,
-  topic: CreatedTopic,
-  citizens: DemoUser[]
-): Promise<void> {
-  const participantCount = faker.number.int({
-    min: Math.min(4, citizens.length),
-    max: Math.min(citizens.length, 12)
-  })
-  const participants = faker.helpers.arrayElements(citizens, participantCount)
-
-  for (const participant of participants) {
-    if (topic.mechanism === 'support') {
-      await prisma.supportParticipation.create({
-        data: { topicId: topic.id, userId: participant.id }
-      })
-    } else if (topic.mechanism === 'vote') {
-      await prisma.voteParticipation.create({
-        data: { topicId: topic.id, userId: participant.id, voteValue: randomVoteValue() }
-      })
-    } else if (topic.mechanism === 'survey' && topic.surveyOptionIds.length > 0) {
-      await prisma.surveyParticipation.create({
-        data: {
-          topicId: topic.id,
-          userId: participant.id,
-          surveyOptionId: faker.helpers.arrayElement(topic.surveyOptionIds)
-        }
-      })
-    }
-  }
 }
 
 async function createConsultationFromTemplate(
@@ -761,7 +558,6 @@ async function createConsultationFromTemplate(
   context: {
     collaboratorIds: number[]
     adminId: number
-    citizens: DemoUser[]
     sectionIdBySlug: Map<string, number>
   }
 ): Promise<void> {
@@ -792,7 +588,7 @@ async function createConsultationFromTemplate(
       slug: template.slug,
       title: template.title,
       summary: template.summary,
-      body: [buildDescriptionMarkdown(template, dates), buildContextMarkdown(template)].join('\n\n'),
+      body: [buildDescriptionMarkdown(template, dates), buildContextMarkdown()].join('\n\n'),
       consultationFormat:
         template.format === 'multiple' ? ConsultationFormat.multiple : ConsultationFormat.single,
       visibility: dates.visibility,
@@ -821,70 +617,7 @@ async function createConsultationFromTemplate(
     })
   }
 
-  const createdTopics: CreatedTopic[] = []
-
-  for (let t = 0; t < template.topics.length; t++) {
-    const topicTemplate = template.topics[t]!
-    const topic = await prisma.topic.create({
-      data: {
-        consultationId: consultation.id,
-        slug: topicTemplate.slug,
-        title: topicTemplate.title,
-        summary: faker.lorem.sentence(),
-        body: faker.lorem.paragraph(),
-        questionText: topicTemplate.questionText,
-        displayOrder: t,
-        participationStartsAt: dates.startsAt,
-        participationEndsAt: dates.endsAt,
-        visibility: Visibility.visible,
-        mechanismType: mechanismEnum(topicTemplate.mechanism),
-        publishResultsWhenParticipationEnds: lifecycle !== 'scheduled'
-      },
-      select: { id: true }
-    })
-
-    const surveyOptionIds: number[] = []
-    if (topicTemplate.mechanism === 'survey' && topicTemplate.surveyOptions) {
-      for (let o = 0; o < topicTemplate.surveyOptions.length; o++) {
-        const option = await prisma.surveyOption.create({
-          data: {
-            topicId: topic.id,
-            label: topicTemplate.surveyOptions[o]!,
-            displayOrder: o,
-            isActive: true
-          },
-          select: { id: true }
-        })
-        surveyOptionIds.push(option.id)
-      }
-    }
-
-    createdTopics.push({ id: topic.id, mechanism: topicTemplate.mechanism, surveyOptionIds })
-  }
-
-  // Participaciones sólo para consultas ya iniciadas (abiertas o cerradas).
-  if (lifecycle !== 'scheduled') {
-    for (const topic of createdTopics) {
-      await createParticipations(prisma, topic, context.citizens)
-    }
-  }
-
-  // Comentarios sólo para consultas iniciadas, para reflejar la conversación.
-  if (lifecycle !== 'scheduled') {
-    const commentCount = faker.number.int({ min: 7, max: 16 })
-    for (let c = 0; c < commentCount; c++) {
-      const atConsultationLevel = createdTopics.length === 0 || faker.datatype.boolean(0.4)
-      const container: CommentContainer = atConsultationLevel
-        ? { consultationId: consultation.id, topicId: null }
-        : { consultationId: null, topicId: faker.helpers.arrayElement(createdTopics).id }
-
-      await createCommentTree(prisma, container, context.citizens, creatorId)
-    }
-  }
-
-  console.log(
-    `  · ${template.slug} [${lifecycle}] — ${createdTopics.length} tema(s)`
-  )
+  console.log(`  · ${template.slug} [${lifecycle}] — sin temas ni comentarios`)
 }
 
 export async function seedConsultationsDemo(
@@ -935,14 +668,11 @@ export async function seedConsultationsDemo(
   })
   console.log(`Regenerando demo: ${deleted.count} consulta(s) previa(s) eliminada(s).`)
 
-  const citizens = await ensureDemoCitizens(prisma, now)
-
   const templates = CONSULTATION_TEMPLATES.slice(0, count)
   for (let i = 0; i < templates.length; i++) {
     await createConsultationFromTemplate(prisma, templates[i]!, i, now, {
       collaboratorIds,
       adminId: admin.id,
-      citizens,
       sectionIdBySlug
     })
   }

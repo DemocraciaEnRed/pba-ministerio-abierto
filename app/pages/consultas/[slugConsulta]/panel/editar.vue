@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ConsultationFormInitialValues, ConsultationFormPayload, ConsultationFormTopic } from '~/components/admin/ConsultationForm.vue'
+import type { ConsultationFormInitialValues, ConsultationFormPayload } from '~/components/admin/ConsultationForm.vue'
 
 definePageMeta({
   layout: 'consultas-control-panel',
@@ -14,30 +14,8 @@ const saving = ref(false)
 const { slug, data: consultation, status, error } = useConsultationAdmin()
 const listLink = useConsultationsListLink()
 
-interface AdminTopicWindow {
-  id: number
-  title: string
-  participationStartsAt: string | null
-  participationEndsAt: string | null
-}
-
 // `useRequestFetch` reenvía la cookie de sesión durante el SSR para que el
 // backend resuelva la vista admin del usuario logueado.
-const requestFetch = useRequestFetch()
-const { data: topics, refresh: refreshTopics } = await useAsyncData(
-  () => `admin-consultation-topics-${slug.value}`,
-  () => requestFetch<AdminTopicWindow[]>(`/api/consultations/${slug.value}/topics`),
-  { watch: [slug] }
-)
-
-const formTopics = computed<ConsultationFormTopic[]>(() =>
-  (topics.value ?? []).map(topic => ({
-    id: topic.id,
-    title: topic.title,
-    participationStartsAt: topic.participationStartsAt,
-    participationEndsAt: topic.participationEndsAt
-  }))
-)
 
 const initialValues = computed<ConsultationFormInitialValues | null>(() => {
   if (!consultation.value) return null
@@ -66,9 +44,6 @@ async function updateConsultation(payload: ConsultationFormPayload) {
       method: 'PUT',
       body: payload
     })
-    if (payload.adjustTopics) {
-      await refreshTopics()
-    }
     toast.add({
       title: 'Consulta actualizada',
       color: 'success'
@@ -121,7 +96,6 @@ async function updateConsultation(payload: ConsultationFormPayload) {
         v-else
         mode="edit"
         :initial-values="initialValues"
-        :topics="formTopics"
         :loading="saving"
         @submit="updateConsultation"
         @cancel="navigateTo(`/consultas/${slug}/panel`)"

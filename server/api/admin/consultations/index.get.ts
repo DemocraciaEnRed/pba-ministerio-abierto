@@ -52,17 +52,6 @@ export default defineEventHandler(async (event) => {
         },
         registrationForm: {
           select: { id: true }
-        },
-        topics: {
-          select: {
-            id: true,
-            slug: true,
-            title: true,
-            visibility: true,
-            participationStartsAt: true,
-            participationEndsAt: true
-          },
-          orderBy: [{ displayOrder: 'asc' }, { id: 'asc' }]
         }
       },
       orderBy: bucket.orderBy,

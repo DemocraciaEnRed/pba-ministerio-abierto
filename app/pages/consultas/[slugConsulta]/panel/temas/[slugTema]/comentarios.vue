@@ -1,7 +1,7 @@
 <script setup lang="ts">
 definePageMeta({
   layout: 'tema-consulta-control-panel',
-  middleware: 'consultation-manager'
+  middleware: ['consultation-manager', 'consultation-topics-disabled']
 })
 
 usePrivatePageSeo('Comentarios del tema')

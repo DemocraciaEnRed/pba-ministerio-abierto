@@ -20,6 +20,7 @@ Package manager is **pnpm** (`packageManager: pnpm@11.5.0`). Run `nvm use` befor
 - `pnpm db:seed` — seed base (users + consultation types + regions) + institution (`pnpm db:seed:base` / `:institution` for subsets)
 - `pnpm db:test` — test DB connectivity; `pnpm db:studio` — Prisma Studio
 - `pnpm test` — e2e backend tests (Vitest + `@nuxt/test-utils`) against the **test DB** `consultas_ciudadanas_test`. Prepare it once with `pnpm test:db:setup` (creates DB, grants, migrations, seed from `.env.test`). Tests live in `test/e2e/`.
+  - To run a single file, pass the path **without** a `--` separator: `pnpm test test/e2e/<archivo>.e2e.test.ts`. Writing `pnpm test -- <archivo>` makes pnpm forward a literal `--` to Vitest, which then ignores the path as a filter and reruns the **entire suite** (all 14+ files, ~15 min).
 
 First-time setup, dev users, email/storage behavior: see [README.md](README.md).
 

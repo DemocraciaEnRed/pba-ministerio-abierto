@@ -3,7 +3,7 @@ import type { RadioGroupItem } from '@nuxt/ui'
 
 definePageMeta({
   layout: 'tema-consulta-control-panel',
-  middleware: 'consultation-manager'
+  middleware: ['consultation-manager', 'consultation-topics-disabled']
 })
 
 usePrivatePageSeo('Método de participación')

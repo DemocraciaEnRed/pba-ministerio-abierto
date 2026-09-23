@@ -9,39 +9,10 @@ definePageMeta({
 
 usePrivatePageSeo('Panel de la consulta')
 
-type Visibility = 'hidden' | 'visible' | 'archived'
-type ParticipationState = 'scheduled' | 'open' | 'closed'
-type MechanismType = 'support' | 'vote' | 'survey'
-
-interface AdminTopic {
-  id: number
-  consultationId: number
-  slug: string
-  title: string
-  summary: string | null
-  displayOrder: number
-  visibility: Visibility
-  participationState: ParticipationState
-  mechanismType: MechanismType | null
-  participationOpen: boolean
-  participationStartsAt: string | null
-  participationEndsAt: string | null
-}
-
 const { slug, data: consultation } = useConsultationAdmin()
-
-// `useRequestFetch` reenvía la cookie de sesión durante el SSR para que el
-// backend resuelva la vista admin del usuario logueado.
 const requestFetch = useRequestFetch()
-const { data: topics } = await useAsyncData(
-  () => `admin-consultation-topics-${slug.value}`,
-  () => requestFetch<AdminTopic[]>(`/api/consultations/${slug.value}/topics`),
-  { watch: [slug] }
-)
 
-const topicList = computed(() => topics.value ?? [])
-const visibleCount = computed(() => topicList.value.filter(topic => topic.visibility === 'visible').length)
-const hiddenCount = computed(() => topicList.value.filter(topic => topic.visibility === 'hidden').length)
+type Visibility = 'hidden' | 'visible' | 'archived'
 
 // Estadísticas del formulario de inscripción (solo en tipos que lo admiten).
 const allowsRegistrationForm = computed(() => consultationTypeAllowsRegistrationForm(consultation.value?.section?.slug))
@@ -74,16 +45,6 @@ const accreditationStateLabels: Record<'disabled' | 'scheduled' | 'open' | 'clos
   scheduled: 'Programada',
   open: 'Abierta',
   closed: 'Cerrada'
-}
-
-function topicEstadoBadge(topic: AdminTopic) {
-  return topicStateBadge(topic.visibility, topic.participationState)
-}
-
-const mechanismLabels: Record<MechanismType, string> = {
-  support: 'Apoyo',
-  vote: 'Votación',
-  survey: 'Encuesta'
 }
 
 function formatDate(value: string | null | undefined): string {
@@ -199,14 +160,6 @@ const classificationDescription = computed(() => {
             />
 
             <AdminPanelStat
-              icon="i-lucide-list-tree"
-              label="Temas"
-              :value="topicList.length"
-              :hint="`${visibleCount} visibles · ${hiddenCount} ocultos`"
-              :to="`/consultas/${slug}/panel/temas`"
-            />
-
-            <AdminPanelStat
               icon="i-lucide-git-branch"
               label="Formato"
               :value="formatLabel"
@@ -270,67 +223,6 @@ const classificationDescription = computed(() => {
         </section>
 
         <AdminConsultationActivityStats :slug="slug" />
-
-        <section class="space-y-3">
-          <div class="flex items-center justify-between">
-            <h2 class="text-sm font-medium text-muted">
-              Accesos rápidos a temas
-            </h2>
-            <UButton
-              label="Ver todos"
-              icon="i-lucide-arrow-right"
-              trailing
-              color="neutral"
-              variant="ghost"
-              size="sm"
-              :to="`/consultas/${slug}/panel/temas`"
-            />
-          </div>
-
-          <div
-            v-if="topicList.length"
-            class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
-          >
-            <UPageCard
-              v-for="topic in topicList"
-              :key="topic.id"
-              :title="topic.title"
-              :description="topic.summary || 'Sin resumen.'"
-              :to="`/consultas/${slug}/panel/temas`"
-              spotlight
-            >
-              <template #footer>
-                <div class="flex flex-wrap items-center gap-2">
-                  <UBadge
-                    :label="topicEstadoBadge(topic).label"
-                    :color="topicEstadoBadge(topic).color"
-                    variant="subtle"
-                  />
-                  <UBadge
-                    :label="topic.mechanismType ? mechanismLabels[topic.mechanismType] : 'Sin método'"
-                    :color="topic.mechanismType ? 'neutral' : 'error'"
-                    variant="outline"
-                  />
-                </div>
-              </template>
-            </UPageCard>
-          </div>
-
-          <UPageCard
-            v-else
-            class="text-center"
-          >
-            <p class="text-sm text-muted">
-              Esta consulta todavía no tiene temas.
-            </p>
-            <UButton
-              label="Gestionar temas"
-              icon="i-lucide-plus"
-              class="mt-3"
-              :to="`/consultas/${slug}/panel/temas`"
-            />
-          </UPageCard>
-        </section>
       </div>
     </UPageBody>
   </UPage>

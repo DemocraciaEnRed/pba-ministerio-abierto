@@ -1,7 +1,6 @@
 import { UpdateConsultationSchema } from '#shared/schemas/consultation'
 import { serializeConsultation } from '~~/server/utils/serializers/consultation'
 import { resolveConsultationIdFromParam } from '~~/server/utils/consultations/slug'
-import { clampTopicWindowToConsultation } from '~~/server/utils/topics/participation-window'
 
 function getPrismaErrorCode(error: unknown): string | null {
   if (typeof error === 'object' && error !== null && 'code' in error && typeof error.code === 'string') {
@@ -47,36 +46,6 @@ export default defineEventHandler(async (event) => {
         updatedByUserId: ctx.user!.id
       }
     })
-
-    // Si se pidió, recortamos las fechas de los temas que quedaron fuera de la
-    // nueva ventana de la consulta (los que no definen cierre propio la heredan).
-    if (body.adjustTopics) {
-      const topics = await prisma.topic.findMany({
-        where: { consultationId },
-        select: { id: true, participationStartsAt: true, participationEndsAt: true }
-      })
-
-      const window = { startsAt: updated.startsAt, endsAt: updated.endsAt }
-      const updates = topics
-        .map((topic) => {
-          const clamped = clampTopicWindowToConsultation(topic, window)
-          return clamped ? { id: topic.id, ...clamped } : null
-        })
-        .filter((change): change is NonNullable<typeof change> => change !== null)
-
-      if (updates.length > 0) {
-        await prisma.$transaction(
-          updates.map(change => prisma.topic.update({
-            where: { id: change.id },
-            data: {
-              // El inicio es NOT NULL: solo lo tocamos si el clamp lo definió.
-              ...(change.participationStartsAt ? { participationStartsAt: change.participationStartsAt } : {}),
-              participationEndsAt: change.participationEndsAt
-            }
-          }))
-        )
-      }
-    }
 
     return serializeConsultation(updated, 'admin')
   } catch (error) {
