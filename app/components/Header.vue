@@ -133,9 +133,7 @@ const items = computed<NavigationMenuItem[]>(() => [
       },
       {
         label: 'Observatorio de Obras y Servicios Públicos',
-        to: 'https://observatorio.minfra.gba.gob.ar/home',
-        target: '_blank',
-        external: true,
+        to: '/observatorio-obras-servicios',
         icon: 'pba:observatorio',
         description: 'Accedé a información sobre este espacio institucional de la Obra Pública provincial.',
         active: route.path.startsWith('/observatorio')
@@ -214,15 +212,10 @@ const itemsMobile = computed<NavigationMenuItem[][]>(() => [
     },
     {
       label: 'Observatorio de Obras y Servicios Públicos',
-      disabled: true,
+      to: '/observatorio-obras-servicios',
       icon: 'pba:observatorio',
       description: 'Accedé a información sobre este espacio institucional de la Obra Pública provincial.',
-      active: isPathExclusivelyActive('/observatorio'),
-      badge: {
-        label: 'Próximamente',
-        color: 'primary',
-        variant: 'subtle'
-      }
+      active: isPathExclusivelyActive('/observatorio-obras-servicios')
     }
   ],
   [

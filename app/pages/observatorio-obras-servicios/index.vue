@@ -165,13 +165,10 @@ const themeUi: ThemeUI = {
     <UPageSection>
       <div class="max-w-3xl mx-auto space-y-6">
         <p class="leading-7 text-neutral-700 dark:text-neutral-300">
-          El <span class="font-bold">Observatorio de Obras y Servicios Públicos</span> es un espacio institucional de participación y control ciudadano donde universidades, sindicatos, cámaras empresariales, colegios profesionales y organizaciones de la sociedad civil trabajan junto al Ministerio para analizar, evaluar y mejorar las políticas de infraestructura y servicios públicos de la Provincia.
+          El <span class="font-bold">Observatorio de Obras y Servicios Públicos</span> es un espacio institucional de participación y control ciudadano donde <span class="font-bold">universidades, sindicatos, cámaras empresariales, colegios profesionales y organizaciones de la sociedad civil</span> trabajan junto al Ministerio para analizar, evaluar y mejorar las políticas de infraestructura y servicios públicos de la Provincia.
         </p>
         <p class="leading-7 text-neutral-700 dark:text-neutral-300">
           A través de un proceso permanente de diálogo y colaboración, las instituciones participantes aportan su conocimiento, experiencia y mirada crítica para fortalecer las capacidades estatales y mejorar las políticas públicas, con la convicción de que las transformaciones construidas con la sociedad son más legítimas, más pertinentes y más sostenibles en el tiempo.
-        </p>
-        <p class="leading-7 text-neutral-700 dark:text-neutral-300">
-          Estas instancias permiten identificar impactos sociales y ambientales de los proyectos no detectados originalmente, mejorar la calidad del diseño y la implementación, y contribuir a la generación de confianza y legitimidad en la comunidad.
         </p>
         <UAccordion
           v-model="openFaq"
