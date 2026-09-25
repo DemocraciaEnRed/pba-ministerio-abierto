@@ -4,7 +4,7 @@ import type { AdminGalleryImage } from '~/components/admin/GalleryImageFormModal
 
 definePageMeta({
   layout: 'tema-consulta-control-panel',
-  middleware: 'consultation-manager'
+  middleware: ['consultation-manager', 'consultation-topics-disabled']
 })
 
 usePrivatePageSeo('Galería del tema')

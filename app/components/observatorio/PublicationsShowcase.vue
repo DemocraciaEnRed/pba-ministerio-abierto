@@ -7,7 +7,7 @@ const { data: publications } = await useAsyncData('observatory-publications-show
   $fetch<PublicObservatoryPublicationDTO[]>('/api/observatory-publications')
 )
 
-const PER_PAGE = 3
+const PER_PAGE = 4
 const page = ref(1)
 
 const total = computed(() => publications.value?.length ?? 0)
@@ -22,23 +22,23 @@ const paginated = computed(() =>
     v-if="total"
     class="space-y-6"
   >
-    <ul class="space-y-4">
+    <ul class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
       <li
         v-for="publication in paginated"
         :key="publication.id"
       >
-        <article class="flex flex-col gap-4 rounded-xl border border-default p-4 sm:flex-row">
-          <div class="shrink-0">
+        <article class="flex flex-col h-full gap-4 rounded-xl border border-default p-4">
+          <div class="w-20 shrink-0 sm:w-1/2">
             <img
               v-if="publication.coverUrl"
               :src="publication.coverUrl"
               :alt="publication.title"
-              class="h-40 w-full rounded-lg object-cover sm:h-32 sm:w-24"
+              class="max-h-100 w-full rounded-lg object-contain border border-neutral-200"
               loading="lazy"
             >
             <div
               v-else
-              class="flex h-40 w-full items-center justify-center rounded-lg bg-elevated sm:h-32 sm:w-24"
+              class="flex h-32 w-full items-center justify-center rounded-lg bg-elevated"
             >
               <UIcon
                 name="i-lucide-file-text"
@@ -49,7 +49,7 @@ const paginated = computed(() =>
 
           <div class="flex flex-1 flex-col gap-2">
             <div class="flex items-start justify-between gap-3">
-              <h3 class="text-base font-semibold leading-tight text-highlighted">
+              <h3 class="text-base sm:text-lg font-semibold leading-tight text-highlighted">
                 {{ publication.title }}
               </h3>
               <UBadge

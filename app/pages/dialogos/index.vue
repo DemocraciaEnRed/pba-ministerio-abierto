@@ -44,7 +44,7 @@ const fotosDialogos = [
 
 const themeUi: ThemeUI = {
   pageHero: {
-    root: 'bg-[linear-gradient(351deg,rgba(0,154,174,0.75)_0%,rgba(186,24,94,0.75)_100%)]',
+    root: 'header-background-dialogos bg-primary',
     // Default container: flex flex-col lg:grid py-24 sm:py-32 lg:py-40 gap-16 sm:gap-y-24
     container: 'flex flex-col lg:flex lg:flex-row py-12 sm:py-16 md:py-16 lg:py-16 gap-6 sm:gap-y-6 md:gap-y-6 md:gap-12 justify-center items-center',
     // Default title: 'text-5xl sm:text-7xl text-pretty tracking-tight font-bold text-highlighted',
@@ -77,7 +77,7 @@ const themeUi: ThemeUI = {
       </template>
       <UIcon
         name="pba:dialogos"
-        class="size-40 shrink-0 text-white sm:size-40 md:size-52 lg:size-60"
+        class="size-30 shrink-0 text-white sm:size-35 md:size-40 lg:size-46"
       />
     </UPageHero>
     <UContainer>

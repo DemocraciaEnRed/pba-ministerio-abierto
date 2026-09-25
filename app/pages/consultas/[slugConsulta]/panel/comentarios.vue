@@ -13,7 +13,7 @@ const { slug, data: consultation } = useConsultationAdmin()
   <UPage>
     <UPageHeader
       title="Comentarios"
-      description="Moderá los comentarios de la consulta y de sus temas de participación."
+      description="Moderá los comentarios de la consulta."
     />
 
     <UPageBody>

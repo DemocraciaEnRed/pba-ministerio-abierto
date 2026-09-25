@@ -54,19 +54,6 @@ const sectionsAsPageCards: Array<PageCardProps> = CONSULTATION_TYPES.map(type =>
   class: type.enabled && type.landingRoute ? undefined : 'opacity-60 cursor-not-allowed pointer-events-none'
 }))
 
-/**
- * 2026-08-07: Temporarely change in sectionsAsPageCards that the 'observatorio-obras-servicios' sections will
- * take you to https://observatorio.minfra.gba.gob.ar/home so its not a dead link.
- */
-
-const observatorioCard = sectionsAsPageCards.find(card => card.icon === 'pba:observatorio')
-
-if (observatorioCard) {
-  observatorioCard.to = 'https://observatorio.minfra.gba.gob.ar/home'
-  observatorioCard.target = '_blank'
-  observatorioCard.class = undefined
-}
-
 const themeUi: ThemeUI = {
   pageSection: {
     container: 'gap-8 sm:gap-8 py-10 sm:py-12 lg:py-16'
@@ -120,7 +107,6 @@ const themeUi: ThemeUI = {
       />
     </section>
     <USeparator />
-
     <UPageSection
       id="origen"
       headline=""
@@ -130,16 +116,13 @@ const themeUi: ThemeUI = {
         <p class="text-center max-w-4xl mx-auto">
           <span class="font-bold text-highlighted">MINISTERIO ABIERTO</span> es una iniciativa del
           <br class="hidden md:block">
-          <span class="font-bold md:whitespace-nowrap text-highlighted">Ministerio de Infraestructura y Servicios Públicos (MISP)</span>
-          para impulsar la gestión abierta y participativa en la Provincia de Buenos Aires.
+          <span class="font-bold md:whitespace-nowrap text-highlighted">Ministerio de Infraestructura y Servicios Públicos</span>
+          es una iniciativa del Ministerio de Infraestructura y Servicios Públicos, en el marco de su Plan de Fortalecimiento Institucional, para promover la gestión abierta, transparente, cercana y participativa entre el Estado provincial, los municipios, las instituciones y la comunidad.
         </p>
       </template>
       <div class="space-y-6 text-center max-w-4xl mx-auto">
-        <p class=" ">
-          La plataforma reúne las distintas instancias de participación disponibles en el territorio. A su vez, facilita a las y los bonaerenses el acceso a la información pública sobre distintas obras, proyectos y servicios del MISP; canaliza los intercambios de los encuentros regionales que se están desarrollando y habilita un espacio de consultas en torno a distintas iniciativas en marcha.
-        </p>
         <p class="text-secondary text-lg md:text-2xl font-semibold mt-10">
-          Tu voz cuenta. El desarrollo de la Provincia se logra entre todos y todas.
+          Informarnos. Dialogar. Proponer. La infraestructura que transforma la Provincia se logra entre todos y todas.
         </p>
       </div>
       <div class="flex flex-wrap justify-center gap-3 mx-auto max-w-full mt-10">
@@ -162,7 +145,7 @@ const themeUi: ThemeUI = {
           <div class="flex-1 flex flex-col justify-evenly lg:min-h-80 items-center text-center">
             <UIcon
               :name="feature.icon"
-              class="size-20 lg:size-40 xl:size-45 text-primary"
+              class="size-22 lg:size-30 xl:size-38 text-primary my-2"
             />
             <UIcon
               v-show="feature.to"

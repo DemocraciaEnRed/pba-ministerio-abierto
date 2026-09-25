@@ -3,7 +3,7 @@ import type { MechanismType, ParticipationState, Visibility } from '~/types/cons
 
 definePageMeta({
   layout: 'consultas-control-panel',
-  middleware: 'consultation-manager'
+  middleware: ['consultation-manager', 'consultation-topics-disabled']
 })
 
 usePrivatePageSeo('Temas')

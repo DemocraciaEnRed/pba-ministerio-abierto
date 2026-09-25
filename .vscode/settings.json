@@ -9,4 +9,13 @@
   "tailwindCSS.classFunctions": ["defineAppConfig"],
   "editor.indentSize": 2,
   "editor.tabSize": 2,
+  "files.watcherExclude": {
+    "**/.git/objects/**": true,
+    "**/.git/subtree-cache/**": true,
+    "**/node_modules/*/**": true,
+    "**/.nuxt/**": true,
+    "**/.output/**": true,
+    "**/dist/**": true,
+    "**/prisma/generated/**": true
+  }
 }

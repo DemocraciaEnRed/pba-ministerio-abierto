@@ -133,9 +133,7 @@ const items = computed<NavigationMenuItem[]>(() => [
       },
       {
         label: 'Observatorio de Obras y Servicios Públicos',
-        to: 'https://observatorio.minfra.gba.gob.ar/home',
-        target: '_blank',
-        external: true,
+        to: '/observatorio-obras-servicios',
         icon: 'pba:observatorio',
         description: 'Accedé a información sobre este espacio institucional de la Obra Pública provincial.',
         active: route.path.startsWith('/observatorio')
@@ -147,6 +145,12 @@ const items = computed<NavigationMenuItem[]>(() => [
     icon: 'lucide:plus',
     active: route.path.startsWith('/acerca-de'),
     children: [
+      {
+        label: 'Acerca de',
+        to: '/acerca-de',
+        description: 'Conocé la iniciativa Ministerio Abierto y sus espacios de participación.',
+        active: isPathExclusivelyActive('/acerca-de')
+      },
       {
         label: 'Términos y condiciones',
         to: '/acerca-de/terminos-y-condiciones',
@@ -208,15 +212,24 @@ const itemsMobile = computed<NavigationMenuItem[][]>(() => [
     },
     {
       label: 'Observatorio de Obras y Servicios Públicos',
-      disabled: true,
+      to: '/observatorio-obras-servicios',
       icon: 'pba:observatorio',
       description: 'Accedé a información sobre este espacio institucional de la Obra Pública provincial.',
-      active: isPathExclusivelyActive('/observatorio'),
-      badge: {
-        label: 'Próximamente',
-        color: 'primary',
-        variant: 'subtle'
-      }
+      active: isPathExclusivelyActive('/observatorio-obras-servicios'),
+      children: [
+        {
+          label: 'Formulario de aportes',
+          icon: 'lucide:file-text',
+          to: '/observatorio-obras-servicios/formulario',
+          active: isPathExclusivelyActive('/observatorio-obras-servicios/formulario')
+        },
+        {
+          label: 'Preguntas frecuentes',
+          icon: 'lucide:help-circle',
+          to: '/observatorio-obras-servicios/preguntas-frecuentes',
+          active: isPathExclusivelyActive('/observatorio-obras-servicios/preguntas-frecuentes')
+        }
+      ]
     }
   ],
   [
@@ -225,6 +238,12 @@ const itemsMobile = computed<NavigationMenuItem[][]>(() => [
       icon: 'lucide:plus',
       type: 'label',
       ui: { label: 'font-medium text-primary text-base' }
+    },
+    {
+      label: 'Acerca de',
+      to: '/acerca-de',
+      description: 'Conocé la iniciativa Ministerio Abierto y sus espacios de participación.',
+      active: isPathExclusivelyActive('/acerca-de')
     },
     {
       label: 'Términos y condiciones',

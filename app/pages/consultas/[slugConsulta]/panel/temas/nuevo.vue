@@ -4,7 +4,7 @@ import type { AdminTopicSummary } from '~/composables/useTopicAdmin'
 
 definePageMeta({
   layout: 'consultas-control-panel',
-  middleware: 'consultation-manager'
+  middleware: ['consultation-manager', 'consultation-topics-disabled']
 })
 
 usePrivatePageSeo('Nuevo tema')

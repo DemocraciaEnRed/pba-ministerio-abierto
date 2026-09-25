@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import type { BadgeProps } from '@nuxt/ui'
+import type { BadgeProps, UserProps } from '@nuxt/ui'
+import { getConsultationType } from '#shared/data/consultation-types'
 import type { PublicConsultationListItem } from '~/types/consulta'
 
 const props = withDefaults(
@@ -24,11 +25,54 @@ const description = computed(() =>
   props.consultation.summary || props.consultation.body || 'Sin descripción breve.'
 )
 
-/** Etiqueta "N tema(s)"; se omite si no hay conteo o la consulta no tiene temas. */
-const topicsLabel = computed(() => {
-  const count = props.consultation.topicsCount
-  if (!count) return null
-  return `${count} ${count === 1 ? 'tema' : 'temas'}`
+// /** Etiqueta "N tema(s)"; se omite si no hay conteo o la consulta no tiene temas. */
+// const topicsLabel = computed(() => {
+//   const count = props.consultation.topicsCount
+//   if (!count) return null
+//   return `${count} ${count === 1 ? 'tema' : 'temas'}`
+// })
+
+const primaryCategory = computed(() =>
+  props.consultation.categories.find(category => category.isPrimary) ?? props.consultation.categories[0] ?? null
+)
+
+/** La categoría principal ya se muestra junto a la sección; el resto va como badge. */
+const otherCategories = computed(() =>
+  props.consultation.categories.filter(category => category.id !== primaryCategory.value?.id)
+)
+
+/** Sección (tipo de consulta) como "autor" de la card: icono del tipo + categoría principal. */
+const sectionAuthor = computed<UserProps | null>(() => {
+  const section = props.consultation.section
+  if (!section) return null
+  return {
+    name: section.name,
+    description: primaryCategory.value?.name,
+    to: `/${section.slug}`,
+    avatar: {
+      icon: getConsultationType(section.slug)?.icon ?? 'lucide:folder',
+      // El root del avatar tiene tamaño fijo (size-8 en md): se libera para que crezca con el icono
+      ui: { root: 'size-auto rounded-none bg-transparent', icon: 'size-10 text-primary' }
+    }
+  }
+})
+
+const authors = computed(() => (sectionAuthor.value ? [sectionAuthor.value] : undefined))
+
+/** Texto de fechas según el estado de participación. */
+const datesLabel = computed(() => {
+  const { participationState, startsAt, endsAt } = props.consultation
+  if (participationState === 'scheduled' && startsAt) {
+    return endsAt
+      ? `Participá desde ${formatDateShort(startsAt)} - ${formatDateShort(endsAt)}`
+      : `Participá a partir del ${formatDateShort(startsAt)}`
+  }
+  if (participationState === 'open' && endsAt) {
+    return `Participá hasta el ${formatDateShort(endsAt)}`
+  }
+  return endsAt
+    ? `${formatDateShort(startsAt)} – ${formatDateShort(endsAt)}`
+    : formatDateShort(startsAt)
 })
 
 // En horizontal el pie va en el slot `authors` (queda a la derecha, junto al
@@ -39,6 +83,7 @@ const footerSlot = computed(() => (props.orientation === 'horizontal' ? 'authors
 
 <template>
   <UBlogPost
+    :authors="authors"
     :title="consultation.title"
     :description="description"
     :badge="badge"
@@ -68,10 +113,10 @@ const footerSlot = computed(() => (props.orientation === 'horizontal' ? 'authors
           />
         </div>
 
-        <!-- Grupos de trabajo del Observatorio asignados a la consulta -->
+        <!-- El header de UBlogPost es pointer-events-none: se reactiva para que funcione el tooltip -->
         <div
           v-if="consultation.observatoryWorkGroups.length"
-          class="absolute top-2 right-2 z-10 flex flex-wrap justify-end gap-1"
+          class="pointer-events-auto absolute top-2 right-2 z-10 flex flex-wrap justify-end gap-1"
         >
           <UTooltip
             v-for="group in consultation.observatoryWorkGroups"
@@ -79,12 +124,12 @@ const footerSlot = computed(() => (props.orientation === 'horizontal' ? 'authors
             :text="group.name"
           >
             <div
-              class="flex size-7 items-center justify-center rounded-full shadow-sm"
+              class="flex size-9 items-center justify-center rounded-lg"
               :style="{ backgroundColor: group.color }"
             >
               <UIcon
                 :name="group.icon"
-                class="size-4"
+                class="size-7"
                 :style="{ color: group.iconColor }"
               />
             </div>
@@ -94,17 +139,23 @@ const footerSlot = computed(() => (props.orientation === 'horizontal' ? 'authors
     </template>
 
     <template #[footerSlot]>
+      <!-- En horizontal este slot reemplaza el render por defecto de `authors` -->
+      <UUser
+        v-if="orientation === 'horizontal' && sectionAuthor"
+        v-bind="sectionAuthor"
+        class="w-full"
+      />
       <USeparator class="mb-1" />
       <div
         class="flex flex-col gap-2"
         :class="orientation === 'horizontal' ? '' : 'px-6 py-2'"
       >
         <div
-          v-if="consultation.categories.length > 0 || consultation.tags.length > 0"
+          v-if="otherCategories.length > 0 || consultation.tags.length > 0"
           class="flex flex-wrap gap-1.5"
         >
           <UBadge
-            v-for="category in consultation.categories"
+            v-for="category in otherCategories"
             :key="`category-${category.id}`"
             :label="category.name"
             color="primary"
@@ -123,16 +174,6 @@ const footerSlot = computed(() => (props.orientation === 'horizontal' ? 'authors
 
         <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted">
           <span
-            v-if="consultation.section"
-            class="inline-flex items-center gap-1"
-          >
-            <UIcon
-              name="lucide:folder"
-              class="size-3.5"
-            />
-            {{ consultation.section.name }}
-          </span>
-          <span
             v-if="consultation.region"
             class="inline-flex items-center gap-1"
           >
@@ -142,7 +183,7 @@ const footerSlot = computed(() => (props.orientation === 'horizontal' ? 'authors
             />
             {{ consultation.region.name }}
           </span>
-          <span
+          <!-- <span
             v-if="topicsLabel"
             class="inline-flex items-center gap-1"
           >
@@ -151,14 +192,13 @@ const footerSlot = computed(() => (props.orientation === 'horizontal' ? 'authors
               class="size-3.5"
             />
             {{ topicsLabel }}
-          </span>
+          </span> -->
           <span class="inline-flex items-center gap-1">
             <UIcon
               name="lucide:calendar"
               class="size-3.5"
             />
-            {{ formatDateShort(consultation.startsAt) }}
-            <template v-if="consultation.endsAt"> – {{ formatDateShort(consultation.endsAt) }}</template>
+            {{ datesLabel }}
           </span>
         </div>
       </div>

@@ -3,7 +3,7 @@ import type { TopicFormInitialValues, TopicFormPayload } from '~/components/admi
 
 definePageMeta({
   layout: 'tema-consulta-control-panel',
-  middleware: 'consultation-manager'
+  middleware: ['consultation-manager', 'consultation-topics-disabled']
 })
 
 usePrivatePageSeo('Editar tema')

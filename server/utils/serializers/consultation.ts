@@ -45,7 +45,6 @@ type ConsultationEntity = {
   workGroupAssignments?: { workGroup: ObservatoryWorkGroupRelation }[]
   categoryAssignments?: { isPrimary: boolean, category: TaxonomyRelation }[]
   consultationTags?: { tag: TaxonomyRelation }[]
-  topics?: TopicSummaryRelation[]
   /** Presencia (no contenido) del formulario de inscripción; opcional, solo si el handler la incluye. */
   registrationForm?: { id: number } | null
   /** URL de la portada resuelta por el handler (role `cover`); opcional. */
@@ -54,15 +53,6 @@ type ConsultationEntity = {
   coverAltText?: string | null
   /** Cantidad de temas asociada por el handler; opcional. */
   topicsCount?: number | null
-}
-
-type TopicSummaryRelation = {
-  id: number
-  slug: string
-  title: string
-  visibility: Visibility
-  participationStartsAt: Date | null
-  participationEndsAt: Date | null
 }
 
 export interface ConsultationTaxonomyDTO {
@@ -111,30 +101,11 @@ export interface PublicConsultationDTO {
   topicsCount: number | null
 }
 
-/**
- * Resumen liviano de un tema para las vistas de agregación admin (listado de
- * consultas). Solo incluye lo necesario para un pantallazo: identidad, estado
- * de visibilidad y el estado temporal derivado de sus fechas de participación.
- */
-export interface ConsultationTopicSummaryDTO {
-  id: number
-  slug: string
-  title: string
-  visibility: Visibility
-  participationState: ParticipationState
-}
-
 export interface AdminConsultationDTO extends PublicConsultationDTO {
   createdByUserId: number | null
   updatedByUserId: number | null
   createdAt: string
   updatedAt: string
-  /**
-   * Temas embebidos. Solo se completa cuando el handler los incluye
-   * explícitamente (p. ej. el endpoint de listado admin); en el resto de las
-   * vistas admin permanece `undefined`.
-   */
-  topics?: ConsultationTopicSummaryDTO[]
   /**
    * Si la consulta ya tiene un formulario de inscripción cargado. Solo se
    * completa cuando el handler incluye la relación (p. ej. listado admin).
@@ -215,20 +186,6 @@ export function serializeConsultation(
     updatedAt: consultation.updatedAt.toISOString(),
     ...(consultation.registrationForm !== undefined
       ? { hasRegistrationForm: Boolean(consultation.registrationForm) }
-      : {}),
-    ...(consultation.topics
-      ? {
-          topics: consultation.topics.map(topic => ({
-            id: topic.id,
-            slug: topic.slug,
-            title: topic.title,
-            visibility: topic.visibility,
-            participationState: deriveParticipationState({
-              startsAt: topic.participationStartsAt,
-              endsAt: topic.participationEndsAt
-            })
-          }))
-        }
       : {})
   }
 }

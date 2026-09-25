@@ -4,7 +4,7 @@ import type { AdminAttachment } from '~/components/admin/AttachmentFormModal.vue
 
 definePageMeta({
   layout: 'tema-consulta-control-panel',
-  middleware: 'consultation-manager'
+  middleware: ['consultation-manager', 'consultation-topics-disabled']
 })
 
 usePrivatePageSeo('Archivos del tema')

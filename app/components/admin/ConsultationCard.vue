@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { consultationTypeAllowsRegistrationForm } from '#shared/data/consultation-types'
-import type { AdminConsultationListItem, ConsultationTopicSummary, ResultsVisibility } from '~/types/consulta'
+import type { AdminConsultationListItem, ResultsVisibility } from '~/types/consulta'
 
 const props = defineProps<{
   consultation: AdminConsultationListItem
@@ -38,19 +38,8 @@ const endLabel = computed(() =>
   props.consultation.endsAt ? formatDateShort(props.consultation.endsAt) : 'Abierta indefinidamente'
 )
 
-const topics = computed(() => props.consultation.topics ?? [])
-
 const panelTo = computed(() => `/consultas/${props.consultation.slug}/panel`)
 const editTo = computed(() => `${panelTo.value}/editar`)
-const topicsTo = computed(() => `${panelTo.value}/temas`)
-
-function topicPanelTo(topicSlug: string) {
-  return `${topicsTo.value}/${topicSlug}`
-}
-
-function topicBadge(topic: ConsultationTopicSummary) {
-  return topicStateBadge(topic.visibility, topic.participationState)
-}
 </script>
 
 <template>
@@ -219,90 +208,6 @@ function topicBadge(topic: ConsultationTopicSummary) {
             :style="{ color: group.iconColor }"
           >{{ group.name }}</span>
         </div>
-      </div>
-    </div>
-
-    <USeparator />
-
-    <!-- Temas de participación -->
-    <div class="p-1">
-      <UCollapsible v-if="topics.length">
-        <UButton
-          class="group"
-          color="neutral"
-          variant="ghost"
-          size="sm"
-          block
-          trailing-icon="i-lucide-chevron-down"
-          :ui="{
-            base: 'justify-between',
-            trailingIcon: 'group-data-[state=open]:rotate-180 transition-transform duration-200'
-          }"
-        >
-          <span class="inline-flex items-center gap-2">
-            <UIcon
-              name="i-lucide-list-checks"
-              class="size-4"
-            />
-            Temas de participación
-            <UBadge
-              :label="String(topics.length)"
-              color="neutral"
-              variant="subtle"
-              size="sm"
-            />
-          </span>
-        </UButton>
-
-        <template #content>
-          <ul
-            class="divide-y divide-default rounded-md border border-default mt-1"
-          >
-            <li
-              v-for="topic in topics"
-              :key="`topic-${topic.id}`"
-              class="flex items-center justify-between gap-3 px-3 py-2"
-            >
-              <div class="flex min-w-0 items-center gap-2">
-                <span class="truncate text-xs font-medium text-toned">{{ topic.title }}</span>
-                <UBadge
-                  :label="topicBadge(topic).label"
-                  :color="topicBadge(topic).color"
-                  :icon="topicBadge(topic).icon"
-                  variant="subtle"
-                  size="sm"
-                />
-              </div>
-              <UButton
-                label="Panel"
-                icon="i-lucide-arrow-right"
-                trailing
-                color="neutral"
-                variant="ghost"
-                size="xs"
-                :to="topicPanelTo(topic.slug)"
-              />
-            </li>
-          </ul>
-        </template>
-      </UCollapsible>
-
-      <!-- Estado vacío -->
-      <div
-        v-else
-        class="flex items-center justify-between gap-3 rounded-md border border-dashed border-default px-3 py-2"
-      >
-        <p class="text-xs text-muted">
-          Esta consulta todavía no tiene temas de participación.
-        </p>
-        <UButton
-          label="Gestionar temas"
-          icon="i-lucide-plus"
-          color="neutral"
-          variant="ghost"
-          size="xs"
-          :to="topicsTo"
-        />
       </div>
     </div>
   </div>
