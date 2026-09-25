@@ -77,7 +77,7 @@ const themeUi: ThemeUI = {
       </template>
       <UIcon
         name="pba:dialogos"
-        class="size-40 shrink-0 text-white sm:size-40 md:size-52 lg:size-60"
+        class="size-30 shrink-0 text-white sm:size-35 md:size-40 lg:size-46"
       />
     </UPageHero>
     <UContainer>

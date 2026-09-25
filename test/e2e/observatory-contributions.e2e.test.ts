@@ -570,5 +570,57 @@ describe('Server e2e: aportes del Observatorio', async () => {
       expect(res.headers.get('content-security-policy')).toContain('sandbox')
       expect(res.headers.get('x-content-type-options')).toBe('nosniff')
     })
+
+    describe('muestra aleatoria para el marquee', () => {
+      beforeAll(async () => {
+        const logoAssetId = await uploadLogo()
+        await prisma.observatoryInstitution.updateMany({
+          where: { id: { in: [institutionId, inactiveInstitutionId, institutionInInactiveCategoryId] } },
+          data: { logoAssetId }
+        })
+      })
+
+      afterAll(async () => {
+        await prisma.observatoryInstitution.updateMany({
+          where: { id: { in: [institutionId, inactiveInstitutionId, institutionInInactiveCategoryId] } },
+          data: { logoAssetId: null }
+        })
+      })
+
+      it('devuelve solo instituciones activas con logo, en vista pública y sin caché', async () => {
+        const res = await fetch(url('/api/observatory-institutions/showcase'), {
+          headers: { cookie: adminCookie }
+        })
+        expect(res.status).toBe(200)
+        expect(res.headers.get('cache-control')).toContain('no-store')
+
+        const items = (await res.json()) as InstitutionDTO[]
+        const ids = items.map(item => item.id)
+
+        expect(items.length).toBeLessThanOrEqual(20)
+        expect(items.every(item => item.logoUrl)).toBe(true)
+        expect(items.every(item => !('isActive' in item))).toBe(true)
+        expect(ids).not.toContain(inactiveInstitutionId)
+        expect(ids).not.toContain(institutionInInactiveCategoryId)
+
+        const candidates = await prisma.observatoryInstitution.count({
+          where: { isActive: true, logoAssetId: { not: null }, category: { isActive: true } }
+        })
+        if (candidates <= 20) {
+          expect(ids).toContain(institutionId)
+        }
+      })
+
+      it('respeta el límite pedido', async () => {
+        const res = await api<InstitutionDTO[]>('/api/observatory-institutions/showcase?limit=1')
+        expect(res.status).toBe(200)
+        expect(res.data).toHaveLength(1)
+      })
+
+      it('rechaza un límite mayor al máximo', async () => {
+        const res = await api('/api/observatory-institutions/showcase?limit=21')
+        expect(res.status).toBe(422)
+      })
+    })
   })
 })

@@ -215,7 +215,21 @@ const itemsMobile = computed<NavigationMenuItem[][]>(() => [
       to: '/observatorio-obras-servicios',
       icon: 'pba:observatorio',
       description: 'Accedé a información sobre este espacio institucional de la Obra Pública provincial.',
-      active: isPathExclusivelyActive('/observatorio-obras-servicios')
+      active: isPathExclusivelyActive('/observatorio-obras-servicios'),
+      children: [
+        {
+          label: 'Formulario de aportes',
+          icon: 'lucide:file-text',
+          to: '/observatorio-obras-servicios/formulario',
+          active: isPathExclusivelyActive('/observatorio-obras-servicios/formulario')
+        },
+        {
+          label: 'Preguntas frecuentes',
+          icon: 'lucide:help-circle',
+          to: '/observatorio-obras-servicios/preguntas-frecuentes',
+          active: isPathExclusivelyActive('/observatorio-obras-servicios/preguntas-frecuentes')
+        }
+      ]
     }
   ],
   [

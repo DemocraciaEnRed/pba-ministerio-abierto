@@ -1,27 +1,47 @@
 <script setup lang="ts">
+import type { ThemeUI } from '@nuxt/ui/runtime/types/theme.js'
+
 usePageSeo({
-  title: 'Preguntas frecuentes',
+  title: 'Preguntas frecuentes del Observatorio de Obras y Servicios Públicos',
   description: 'Resolvé tus dudas sobre el Observatorio de Obras y Servicios Públicos: su origen, funcionamiento, instituciones integrantes y resultados.',
   url: '/observatorio-obras-servicios/preguntas-frecuentes'
 })
+
+const themeUi: ThemeUI = {
+  pageHero: {
+    root: 'header-background-observatorio-obras-servicios bg-primary',
+    // Default container: flex flex-col lg:grid py-24 sm:py-32 lg:py-40 gap-16 sm:gap-y-24
+    container: 'flex flex-col lg:flex lg:flex-row py-12 sm:py-16 md:py-16 lg:py-16 gap-6 sm:gap-y-6 md:gap-y-6 md:gap-12 justify-center items-center',
+    // Default title: 'text-5xl sm:text-7xl text-pretty tracking-tight font-bold text-highlighted',
+    title: 'text-white text-shadow-lg text-4xl sm:text-5xl font-extrabold ',
+    // Default description: 'text-lg sm:text-xl/8 text-muted',
+    description: 'text-white text-shadow-lg',
+    wrapper: 'max-w-2xl text-center lg:text-left lg:ml-0 lg:mr-full'
+  },
+  pageHeader: {
+    root: 'text-center max-w-3xl mx-auto',
+    wrapper: 'flex flex-col lg:flex-row lg:items-center lg:justify-center gap-4'
+  }
+}
 </script>
 
 <template>
-  <div>
-    <UPageHero
-      title="Preguntas frecuentes"
-      description="Todo lo que necesitás saber sobre el Observatorio de Obras y Servicios Públicos."
-      :ui="{
-        root: 'bg-linear-to-b from-primary/20 dark:from-secondary/30',
-        title: 'text-primary dark:text-secondary',
-        description: 'text-neutral-700 dark:text-neutral-300',
-        container: 'sm:py-24 lg:py-16'
-      }"
-    />
+  <UTheme :ui="themeUi">
+    <UPageHero>
+      <img
+        src="https://democraciaenred.nyc3.digitaloceanspaces.com/projects/pba-ministerio-abierto/app/assets/observatorio-obras-servicios/logo-white.svg"
+        alt="Observatorio de Obras y Servicios Públicos Logo"
+        class="mx-auto lg:mx-0 lg:max-w-2xl max-w-xl"
+      >
+    </UPageHero>
     <ObservatorioSubNav />
     <USeparator />
     <UContainer>
       <UPage>
+        <UPageHeader
+          title="Preguntas frecuentes"
+          description="Todo lo que necesitás saber sobre el Observatorio de Obras y Servicios Públicos."
+        />
         <UPageBody>
           <div class="max-w-3xl mx-auto py-12 space-y-12">
             <section>
@@ -132,70 +152,11 @@ usePageSeo({
               <h2 class="text-2xl font-bold text-primary mb-4">
                 ¿Quiénes integran el Observatorio?
               </h2>
-              <p class="mb-4 leading-7 text-neutral-700 dark:text-neutral-300">
+              <p class="mb-6 leading-7 text-neutral-700 dark:text-neutral-300">
                 La lista de instituciones integrantes es dinámica y puede modificarse mensualmente con la
                 incorporación de nuevas instituciones.
               </p>
-              <p class="mb-4 leading-7 text-neutral-700 dark:text-neutral-300">
-                <strong class="font-bold text-primary">Universidades nacionales y provinciales:</strong>
-                Universidad Nacional Arturo Jauretche; Universidad Nacional de Avellaneda; Universidad Nacional
-                de Hurlingham; Universidad Nacional de José C. Paz; Universidad Nacional de La Matanza;
-                Universidad Nacional de La Plata; Universidad Nacional de Lanús; Universidad Nacional de Lomas
-                de Zamora; Universidad Nacional de Luján; Universidad Nacional de Mar del Plata; Universidad
-                Nacional de Moreno; Universidad Nacional de Quilmes; Universidad Nacional de San Antonio de
-                Areco; Universidad Nacional de San Martín; Universidad Nacional de Tres de Febrero; Universidad
-                Nacional del Delta; Universidad Nacional del Noroeste de la Provincia de Buenos Aires;
-                Universidad Nacional del Oeste; Universidad Nacional del Sur; Universidad Nacional Guillermo
-                Brown; Universidad Nacional Raúl Scalabrini Ortiz; Universidad Pedagógica Nacional; Universidad
-                Tecnológica Nacional; Universidad Provincial de Ezeiza; Universidad Provincial del Sudoeste.
-              </p>
-              <p class="mb-4 leading-7 text-neutral-700 dark:text-neutral-300">
-                <strong class="font-bold text-primary">Unidades académicas:</strong>
-                Facultad de Ciencias Sociales UBA; Observatorio de la Contratación Pública de la Universidad
-                Austral.
-              </p>
-              <p class="mb-4 leading-7 text-neutral-700 dark:text-neutral-300">
-                <strong class="font-bold text-primary">Organismos del sistema universitario:</strong>
-                Consejo Interuniversitario Nacional (CIN); Consejo Latinoamericano de Ciencias Sociales
-                (CLACSO); Facultad Latinoamericana de Ciencias Sociales (FLACSO).
-              </p>
-              <p class="mb-4 leading-7 text-neutral-700 dark:text-neutral-300">
-                <strong class="font-bold text-primary">Cámaras empresariales:</strong>
-                Cámara Argentina de Consultoras de Ingeniería (CADECI); Cámara Argentina de la Construcción de
-                la Provincia de Buenos Aires (CAMARCO PBA).
-              </p>
-              <p class="mb-4 leading-7 text-neutral-700 dark:text-neutral-300">
-                <strong class="font-bold text-primary">Colegios profesionales:</strong>
-                Colegio de Arquitectos de la Provincia de Buenos Aires; Colegio de Ingenieros de la Provincia
-                de Buenos Aires.
-              </p>
-              <p class="mb-4 leading-7 text-neutral-700 dark:text-neutral-300">
-                <strong class="font-bold text-primary">Sindicatos:</strong>
-                Fundación UOCRA.
-              </p>
-              <p class="mb-4 leading-7 text-neutral-700 dark:text-neutral-300">
-                <strong class="font-bold text-primary">Organizaciones de la sociedad civil:</strong>
-                Asociación Argentina de Estudios de Administración Pública (AAEAP); CIPPEC; Democracia en Red;
-                Equipo Latinoamericano de Justicia y Género (ELA); Fundación Poder Ciudadano; Fundación
-                Transparencia Activa; Fundar; Grow – Género y Trabajo; Ingeniería sin Fronteras.
-              </p>
-              <p class="leading-7 text-neutral-700 dark:text-neutral-300">
-                <strong class="font-bold text-primary">Instituciones invitadas en carácter de especialistas:</strong>
-                Asesoría General de Gobierno; Banco Interamericano de Desarrollo (BID); Bolsa de Cereales y
-                Productos de Bahía Blanca; Bolsa de Comercio de Rosario (BCP); CAF - Banco de desarrollo de
-                América Latina y El Caribe; Cámara de Apelación en lo Contencioso Administrativo de San
-                Nicolás, Zárate, Campana, Pergamino y Junín; Centro de Estudios Legales y Sociales (CELS);
-                Colectivo Feministas sin Fronteras; Confederación de Asociaciones Rurales de Buenos Aires y La
-                Pampa (CARBAP); Consejo Federal de Decanos de Ingeniería (CONFEDI); Consorcio de Gestión del
-                Puerto de Dock Sud (CGPDS); Contaduría General de la Provincia; Federación de Cooperativas de
-                la República Argentina (COOPERAR); Federación de Cooperativas de Trabajo, Consumo y Vivienda
-                (COOPERAR); Fondo de Garantías Buenos Aires (Fuerza Solidaria); Grow – Género y Trabajo;
-                Instituto Argentino de Normalización y Certificación (IRAM); Instituto de Investigaciones y
-                Políticas del Ambiente Construido (IIPAC); Instituto Tecnológico de Chascomús (INTECH);
-                Ministerio de Desarrollo de la Comunidad de la Provincia de Buenos Aires; Ministerio de Mujeres
-                y Diversidad de la Provincia de Buenos Aires; Municipalidad de Ayacucho; Observatorio de
-                Derecho al Cuidado de la Universidad Nacional del Centro.
-              </p>
+              <ObservatorioInstitutionsFullList />
             </section>
 
             <section>
@@ -249,5 +210,5 @@ usePageSeo({
         </UPageBody>
       </UPage>
     </UContainer>
-  </div>
+  </UTheme>
 </template>

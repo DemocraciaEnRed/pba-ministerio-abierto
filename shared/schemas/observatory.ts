@@ -83,6 +83,22 @@ export const PatchObservatoryInstitutionSchema = z
     'Debés enviar al menos un campo para actualizar'
   )
 
+// --- Muestra aleatoria de logos (marquee público) ---
+
+export const OBSERVATORY_SHOWCASE_MAX = 20
+export const OBSERVATORY_SHOWCASE_ROW_MAX = 10
+export const OBSERVATORY_SHOWCASE_SECOND_ROW_MIN = 14
+export const OBSERVATORY_SHOWCASE_ANIMATE_MIN = 4
+
+export const ObservatoryInstitutionsShowcaseQuerySchema = z.object({
+  limit: z.coerce
+    .number()
+    .int('La cantidad debe ser un entero')
+    .min(1, 'La cantidad mínima es 1')
+    .max(OBSERVATORY_SHOWCASE_MAX, `La cantidad máxima es ${OBSERVATORY_SHOWCASE_MAX}`)
+    .default(OBSERVATORY_SHOWCASE_MAX)
+})
+
 // --- Publicaciones (ABM de platform-admin, borrado real) ---
 
 const publicationTitleField = z
@@ -333,6 +349,7 @@ export type CreateObservatoryInstitutionCategoryInput = z.output<typeof CreateOb
 export type PatchObservatoryInstitutionCategoryInput = z.output<typeof PatchObservatoryInstitutionCategorySchema>
 export type CreateObservatoryInstitutionInput = z.output<typeof CreateObservatoryInstitutionSchema>
 export type PatchObservatoryInstitutionInput = z.output<typeof PatchObservatoryInstitutionSchema>
+export type ObservatoryInstitutionsShowcaseQueryInput = z.output<typeof ObservatoryInstitutionsShowcaseQuerySchema>
 export type CreateObservatoryPublicationInput = z.output<typeof CreateObservatoryPublicationSchema>
 export type PatchObservatoryPublicationInput = z.output<typeof PatchObservatoryPublicationSchema>
 export type CreateObservatoryVideoInput = z.output<typeof CreateObservatoryVideoSchema>

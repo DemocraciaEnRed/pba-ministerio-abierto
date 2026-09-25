@@ -123,19 +123,19 @@ const comoHacemosPageSectionUi: ThemeUI['pageSection'] = {
       <template #default>
         <div class="flex flex-col w-9/12 sm:w-7/12 md:w-6/12 xl:w-3/12 gap-4">
           <ULink
-            to="https://drive.google.com/file/d/1Rjpm0XVlGnGd05ZjOrb5FDbhrMNw6UPn/view"
+            to="https://democraciaenred.nyc3.digitaloceanspaces.com/projects/pba-ministerio-abierto/app/assets/pdf/misp-pei-plan-estrategico-de-infraestructura-2026.pdf"
             target="_blank"
             external
           >
             <img
-              src="https://democraciaenred.nyc3.digitaloceanspaces.com/projects/pba-ministerio-abierto/app/assets/encuentros-regionales/plan-estrategico-infraestructura-pba-cover.jpg"
+              src="https://democraciaenred.nyc3.digitaloceanspaces.com/projects/pba-ministerio-abierto/app/assets/pdf/misp-pei-plan-estrategico-de-infraestructura-2026.png"
               loading="lazy"
               class="h-auto rounded-lg shadow-lg border border-default hover:scale-103 transition-transform duration-300"
               alt="Plan Estratégico de Infraestructura de la Provincia de Buenos Aires"
             >
           </ULink>
           <UButton
-            to="https://drive.google.com/file/d/1Rjpm0XVlGnGd05ZjOrb5FDbhrMNw6UPn/view"
+            to="https://democraciaenred.nyc3.digitaloceanspaces.com/projects/pba-ministerio-abierto/app/assets/pdf/misp-pei-plan-estrategico-de-infraestructura-2026.pdf"
             target="_blank"
             color="secondary"
             icon="lucide:download"

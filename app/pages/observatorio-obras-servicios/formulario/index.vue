@@ -1,26 +1,47 @@
 <script setup lang="ts">
-import { getConsultationType } from '#shared/data/consultation-types'
-
-const consultationType = getConsultationType('observatorio-obras-servicios')
+import type { ThemeUI } from '@nuxt/ui/runtime/types/theme.js'
 
 usePageSeo({
   title: 'Formulario de aportes - Observatorio de Obras y Servicios Públicos',
   description: 'Presentá el aporte de tu institución a los ejes de trabajo del Observatorio de Obras y Servicios Públicos.',
   url: '/observatorio-obras-servicios/formulario'
 })
+
+const themeUi: ThemeUI = {
+  pageHero: {
+    root: 'header-background-observatorio-obras-servicios bg-primary',
+    // Default container: flex flex-col lg:grid py-24 sm:py-32 lg:py-40 gap-16 sm:gap-y-24
+    container: 'flex flex-col lg:flex lg:flex-row py-12 sm:py-16 md:py-16 lg:py-16 gap-6 sm:gap-y-6 md:gap-y-6 md:gap-12 justify-center items-center',
+    // Default title: 'text-5xl sm:text-7xl text-pretty tracking-tight font-bold text-highlighted',
+    title: 'text-white text-shadow-lg text-4xl sm:text-5xl font-extrabold ',
+    // Default description: 'text-lg sm:text-xl/8 text-muted',
+    description: 'text-white text-shadow-lg',
+    wrapper: 'max-w-2xl text-center lg:text-left lg:ml-0 lg:mr-full'
+  },
+  pageHeader: {
+    root: 'text-center',
+    wrapper: 'flex flex-col lg:flex-row lg:items-center lg:justify-center gap-4'
+  }
+}
 </script>
 
 <template>
-  <div>
-    <UPageHero
-      title="Formulario de aportes"
-      description="Sumá el conocimiento y la experiencia de tu institución"
-      :ui="{ root: 'bg-primary', title: 'text-white', description: 'text-white' }"
-    />
+  <UTheme :ui="themeUi">
+    <UPageHero>
+      <img
+        src="https://democraciaenred.nyc3.digitaloceanspaces.com/projects/pba-ministerio-abierto/app/assets/observatorio-obras-servicios/logo-white.svg"
+        alt="Observatorio de Obras y Servicios Públicos Logo"
+        class="mx-auto lg:mx-0 lg:max-w-2xl max-w-xl"
+      >
+    </UPageHero>
     <ObservatorioSubNav />
-
+    <USeparator />
     <UContainer class="max-w-5xl">
       <UPage>
+        <UPageHeader
+          title="Formulario de aportes"
+          description="Sumá el conocimiento y la experiencia de tu institución"
+        />
         <UPageBody>
           <div class="space-y-6 mx-auto">
             <p class="leading-7 text-neutral-700 dark:text-neutral-300">
@@ -41,5 +62,5 @@ usePageSeo({
         </UPageBody>
       </UPage>
     </UContainer>
-  </div>
+  </UTheme>
 </template>

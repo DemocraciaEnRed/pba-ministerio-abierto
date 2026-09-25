@@ -107,7 +107,6 @@ const themeUi: ThemeUI = {
       />
     </section>
     <USeparator />
-
     <UPageSection
       id="origen"
       headline=""
@@ -146,7 +145,7 @@ const themeUi: ThemeUI = {
           <div class="flex-1 flex flex-col justify-evenly lg:min-h-80 items-center text-center">
             <UIcon
               :name="feature.icon"
-              class="size-20 lg:size-40 xl:size-45 text-primary"
+              class="size-22 lg:size-30 xl:size-38 text-primary my-2"
             />
             <UIcon
               v-show="feature.to"
