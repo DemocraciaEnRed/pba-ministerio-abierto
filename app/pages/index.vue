@@ -116,8 +116,7 @@ const themeUi: ThemeUI = {
         <p class="text-center max-w-4xl mx-auto">
           <span class="font-bold text-highlighted">MINISTERIO ABIERTO</span> es una iniciativa del
           <br class="hidden md:block">
-          <span class="font-bold md:whitespace-nowrap text-highlighted">Ministerio de Infraestructura y Servicios Públicos</span>
-          es una iniciativa del Ministerio de Infraestructura y Servicios Públicos, en el marco de su Plan de Fortalecimiento Institucional, para promover la gestión abierta, transparente, cercana y participativa entre el Estado provincial, los municipios, las instituciones y la comunidad.
+          <span class="font-bold md:whitespace-nowrap text-highlighted">Ministerio de Infraestructura y Servicios Públicos</span>, en el marco de su Plan de Fortalecimiento Institucional, para promover la gestión abierta, transparente, cercana y participativa entre el Estado provincial, los municipios, las instituciones y la comunidad.
         </p>
       </template>
       <div class="space-y-6 text-center max-w-4xl mx-auto">
