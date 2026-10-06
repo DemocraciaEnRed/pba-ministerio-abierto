@@ -1,4 +1,5 @@
 import type { MaybeRefOrGetter } from 'vue'
+import { getRobotsPolicy } from '#shared/utils/seo'
 
 /** Nombre del sitio, usado en el título y como fallback de los OpenGraph. */
 export const SITE_NAME = 'Ministerio Abierto'
@@ -54,6 +55,7 @@ export interface PageSeoInput {
  * soportar páginas dinámicas cuyo contenido llega vía `useAsyncData`.
  */
 export function usePageSeo(input: MaybeRefOrGetter<PageSeoInput>) {
+  const config = useRuntimeConfig()
   const toAbsolute = useAbsoluteUrl()
   const route = useRoute()
   const get = (): PageSeoInput => toValue(input)
@@ -73,7 +75,7 @@ export function usePageSeo(input: MaybeRefOrGetter<PageSeoInput>) {
     twitterDescription: () => get().description || DEFAULT_SHARE_DESCRIPTION,
     twitterImage: () => toAbsolute(get().image || DEFAULT_OG_IMAGE),
     twitterImageAlt: () => get().imageAlt ?? undefined,
-    robots: () => (get().noindex ? 'noindex, nofollow' : undefined)
+    robots: () => getRobotsPolicy(config.public.siteIndexable, get().noindex)
   })
 }
 

@@ -15,6 +15,7 @@
     "icons:optimize:pba": "svgo --config=svgo.config.js --multipass --folder app/assets/icons/pba",
     "icons:optimize:der": "svgo --config=svgo.config.js --multipass --folder app/assets/icons/der",
     "verify": "pnpm typecheck && pnpm lint && pnpm build",
+    "seo:export": "tsx scripts/export-seo.ts",
     "verify:changed": "pnpm typecheck && pnpm lint:changed && pnpm build",
     "db:generate": "prisma generate",
     "db:migrate": "DATABASE_URL=${DATABASE_MIGRATION_URL:-$DATABASE_URL} prisma migrate dev",

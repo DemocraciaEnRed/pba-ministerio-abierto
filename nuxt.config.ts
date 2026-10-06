@@ -77,6 +77,8 @@ export default defineNuxtConfig({
       }
     },
     public: {
+      // Habilitar solo en producción con NUXT_PUBLIC_SITE_INDEXABLE=true.
+      siteIndexable: 'false',
       // URL base de la app, usada para construir links en emails.
       appUrl: 'http://localhost:3000'
     }
