@@ -270,7 +270,7 @@ const themeUi: ThemeUI = {
           Grupos de trabajo
         </h3>
         <p class="text-secondary text-lg md:text-xl font-semibold text-center">
-          Elegí el grupo de trabajo y conocélas reuniones programadas y realizadas.
+          Elegí el grupo de trabajo y conoce las reuniones programadas y realizadas.
         </p>
         <div class="flex flex-col items-center gap-4">
           <div
