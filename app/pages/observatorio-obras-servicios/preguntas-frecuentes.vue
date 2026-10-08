@@ -181,13 +181,20 @@ const themeUi: ThemeUI = {
                 Entre los principales resultados se encuentran:
               </p>
               <ul class="list-disc list-inside space-y-2 leading-7 text-neutral-700 dark:text-neutral-300">
-                <li>Plan Estratégico de Infraestructura.</li>
-                <li>Conectividad y logística.</li>
-                <li>Energía accesible y sostenible.</li>
-                <li>Gestión Integrada del Recurso Hídrico.</li>
-                <li>Infraestructura para los Sistemas de Ciudades.</li>
-                <li>Infraestructura del Cuidado.</li>
+                <li>
+                  Plan Estratégico de Infraestructura.
+                  <ul class="list-[circle] list-inside space-y-1 pl-6">
+                    <li>Conectividad y logística.</li>
+                    <li>Energía accesible y sostenible.</li>
+                    <li>Gestión Integrada del Recurso Hídrico.</li>
+                    <li>Infraestructura para los Sistemas de Ciudades.</li>
+                    <li>Infraestructura del Cuidado.</li>
+                  </ul>
+                </li>
+                <li>MapaInversiones PBA.</li>
                 <li>Plan de Integridad, Transparencia y Gobierno Abierto.</li>
+                <li>Ministerio Abierto</li>
+                <li>Mapa de Fortalecimiento Institucional</li>
                 <li>Programa de Infraestructura Sostenible y Resiliente.</li>
                 <li>Plan de Género y Diversidad 2024–2027.</li>
                 <li>Manual de Infraestructura con Perspectiva de Género y Diversidad.</li>
@@ -195,7 +202,6 @@ const themeUi: ThemeUI = {
                 <li>Contenidos Mínimos de los Planes de Gestión Ambiental y Social de las Obras del MISP.</li>
                 <li>Metodología de etiquetado de obras sostenibles y resilientes.</li>
                 <li>Plan de Innovación y Transformación Digital 2024–2027 del MISP.</li>
-                <li>MapaInversiones PBA.</li>
                 <li>Metodología BIM.</li>
                 <li>Laboratorio InfraInnova de IA.</li>
                 <li>Oficina Virtual.</li>

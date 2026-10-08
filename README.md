@@ -99,6 +99,58 @@ Si necesitas guardar todo dentro de una carpeta base del bucket, usa
 pnpm run verify
 ```
 
+### SEO e indexación por entorno
+
+Definí `NUXT_PUBLIC_SITE_INDEXABLE=false` en local y staging, y `true` **solo
+en producción**. Si no está definida, la indexación queda deshabilitada.
+Los valores admitidos son `true` y `false`; un valor inválido produce un error.
+La variable se lee en runtime: reiniciá el servidor y purgá cualquier caché
+HTML/CDN después de cambiarla. No uses `NODE_ENV` para distinguir staging:
+ambos entornos ejecutan builds de producción.
+
+Con la indexación deshabilitada, las páginas emiten la meta `robots` y el
+servidor agrega `X-Robots-Tag: noindex, nofollow` a las respuestas de Nitro.
+En producción, las páginas privadas y técnicas conservan su `noindex`.
+Los archivos servidos directamente por el proxy/CDN no pasan por Nitro:
+si también necesitás desindexarlos, configurá el encabezado en ese servicio.
+
+`robots.txt` permite el rastreo deliberadamente: Google necesita acceder a las
+URLs para leer `noindex`, especialmente si ya están indexadas. `Disallow: /`
+no garantiza la desindexación y puede impedir que Google vea esa directiva.
+Para una URL de staging ya indexada, desplegá el cambio y solicitá una retirada
+temporal en Search Console mientras se procesa el `noindex`.
+Esto no restringe el acceso: si staging no debe ser público, protegelo con
+autenticación en el proxy o proveedor de hosting.
+
+El inventario para revisión está en [seo-review.csv](seo-review.csv).
+Incluye todas las rutas, privadas identificadas y dinámicas como plantillas,
+con títulos completos y descripciones actuales. La columna de indexación
+representa producción con la variable en `true`, no staging.
+Completá las columnas de propuestas sin sobrescribir los valores actuales.
+No hay importación automática ni cambios de contenido al exportar.
+
+Para regenerarlo (sobrescribe las propuestas del CSV; guardá antes tu revisión):
+
+```bash
+pnpm seo:export
+```
+
+Pruebas de la política de indexación sin base de datos:
+
+```bash
+pnpm exec tsx --test test/unit/seo.test.ts
+```
+
+Para comprobar HTML SSR, encabezados y `robots.txt` con la variable en `false`,
+`true` y ausente, ejecutá después de `pnpm build`:
+
+```bash
+pnpm exec tsx --test test/integration/seo.test.ts
+```
+
+Estas pruebas levantan servidores locales en puertos libres y los cierran al
+terminar; no consultan la base de datos.
+
 ## Base de datos local (Docker Compose)
 
 El proyecto incluye un servicio base de MariaDB en [docker-compose.yml](docker-compose.yml).
@@ -320,4 +372,3 @@ pnpm test:watch  # modo watch
 ```
 
 Los archivos viven en `test/e2e/`. Cada corrida hace un build del server (tarda ~1 min la primera vez). Las pruebas siembran su propio dato de dominio (consultas, temas, comentarios) con slugs unicos y lo limpian al terminar.
-

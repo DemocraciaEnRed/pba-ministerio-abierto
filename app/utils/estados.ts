@@ -56,7 +56,7 @@ export const visibilityLabelsTema: Record<Visibility, string> = {
 export function participationStateBadge(state: ParticipationState): EstadoBadge {
   if (state === 'open') return { label: 'Participación abierta', color: 'success', icon: participationStateIcons.open }
   if (state === 'scheduled') return { label: 'Participación programada', color: 'primary', icon: participationStateIcons.scheduled }
-  return { label: 'Instancia participativa finalizada', color: 'warning', icon: participationStateIcons.closed }
+  return { label: 'Instancia participativa finalizada', color: 'neutral', icon: participationStateIcons.closed }
 }
 
 /**

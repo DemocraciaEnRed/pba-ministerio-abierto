@@ -172,23 +172,41 @@ const comoHacemosPageSectionUi: ThemeUI['pageSection'] = {
           <h3 class="text-xl sm:text-2xl lg:text-3xl font-bold text-primary">
             Ejes temáticos de las mesas participativas
           </h3>
-          <div class="grid grid-cols-1 sm:grid-cols-2 w-full gap-2">
+          <div class="grid grid-cols-1 lg:grid-cols-2 w-full gap-2">
             <UAlert
               v-for="eje in ejesTematicosDescripciones"
               :key="eje.title"
               :title="eje.title"
-              :description="eje.description"
               :icon="eje.icon"
               variant="subtle"
               color="neutral"
               orientation="horizontal"
               :ui="{
-                title: 'text-md sm:text-lg font-bold text-primary',
-                description: 'leading-7 text-base',
+                title: 'text-md sm:text-lg font-bold text-primary text-left',
                 icon: 'size-6 sm:size-7 text-primary pt-2',
                 root: 'items-start'
               }"
-            />
+            >
+              <template #actions>
+                <UPopover
+                  mode="hover"
+                  enable-touch
+                  arrow
+                >
+                  <UButton
+                    color="primary"
+                    variant="subtle"
+                    icon="lucide:info"
+                    :aria-label="`Ver descripción de ${eje.title}`"
+                  />
+                  <template #content>
+                    <div class="max-w-xs m-4 inline-flex text-center">
+                      {{ eje.description }}
+                    </div>
+                  </template>
+                </UPopover>
+              </template>
+            </UAlert>
           </div>
         </div>
       </template>

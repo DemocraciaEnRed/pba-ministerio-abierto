@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { es } from '@nuxt/ui/locale'
+import { getRobotsPolicy } from '#shared/utils/seo'
 
 const toAbsolute = useAbsoluteUrl()
+const config = useRuntimeConfig()
 
 useHead({
   // Sufijo global del título: cada página define solo su parte y aquí se agrega
@@ -26,7 +28,7 @@ useHead({
 // Meta por defecto para toda página que no defina la suya (fallback global).
 useSeoMeta({
   description: DEFAULT_SEO_DESCRIPTION,
-  robots: 'index, follow',
+  robots: () => getRobotsPolicy(config.public.siteIndexable),
   ogTitle: SITE_NAME,
   ogDescription: DEFAULT_SHARE_DESCRIPTION,
   ogType: 'website',

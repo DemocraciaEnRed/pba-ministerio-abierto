@@ -198,6 +198,12 @@
   background-position: center;
 }
 
+.banner-mapainversionespba-cover{
+  background-image: url('https://democraciaenred.nyc3.digitaloceanspaces.com/projects/pba-ministerio-abierto/app/assets/Banner_MapaInversiones-02.jpg');
+  background-size: cover;
+  background-position: center;
+}
+
 /* Prose overrides */
 .prose p img {
   @apply rounded-md max-h-100 mr-auto ;

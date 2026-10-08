@@ -100,7 +100,7 @@ const themeUi: ThemeUI = {
         description="Un espacio con propuestas de participación ciudadana sobre obras y servicios públicos en la Provincia de Buenos Aires."
         class="relative z-10"
         :ui="{
-          root: 'bg-linear-to-b from-pba-alt-300/25 to-white/15 dark:from-pba-alt-900/50 dark:to-black/10',
+          root: 'bg-linear-to-b from-pba-primary-300/25 to-white/15 dark:from-pba-alt-900/50 dark:to-black/10',
           description: 'text-neutral-100 dark:text-neutral-100 text-shadow-lg',
           title: 'text-pba-300 text-shadow-lg'
         }"
@@ -168,6 +168,57 @@ const themeUi: ThemeUI = {
           </div>
         </UPageCard>
       </div>
+    </UPageSection>
+    <UPageSection>
+      <a
+        href="https://mapainversionespba.minfra.gba.gob.ar/"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="MapaInversiones PBA: Obras Públicas en la Provincia de Buenos Aires (se abre en una pestaña nueva)"
+        class="group relative block overflow-hidden rounded-lg text-white shadow-lg transition-shadow duration-300 hover:shadow-2xl focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
+      >
+        <div
+          class="absolute inset-0 banner-mapainversionespba-cover transition-transform duration-700 ease-out group-hover:scale-105"
+          aria-hidden="true"
+        />
+        <div
+          class="absolute inset-0 bg-linear-to-t from-black/70 via-black/30 to-black/10"
+          aria-hidden="true"
+        />
+        <UIcon
+          name="lucide:arrow-up-right"
+          class="absolute top-4 right-4 hidden size-6 opacity-80 transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 sm:block"
+          aria-hidden="true"
+        />
+        <div class="relative flex flex-col gap-8 p-6 sm:p-10 lg:p-14">
+          <img
+            src="https://democraciaenred.nyc3.digitaloceanspaces.com/projects/pba-ministerio-abierto/app/assets/mapainversionespba-white.svg"
+            alt="MapaInversiones PBA - Ministerio de Infraestructura y Servicios Públicos - Gobierno de la Provincia de Buenos Aires"
+            width="837"
+            height="143"
+            loading="lazy"
+            class="h-auto w-full max-w-md lg:max-w-2xl"
+          >
+          <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+            <div class="max-w-2xl">
+              <h2 class="text-2xl md:text-3xl font-bold leading-tight">
+                Obras Públicas en la Provincia de Buenos Aires
+              </h2>
+              <p class="mt-2 text-base md:text-lg text-white/90">
+                Te brindamos información para que puedas conocer y controlar la ejecución de la Obra Pública.
+              </p>
+            </div>
+            <span class="inline-flex shrink-0 items-center gap-2 self-start rounded-full bg-white px-5 py-2.5 font-semibold text-primary transition-colors duration-300 group-hover:bg-white/90 lg:self-auto">
+              Explorá el mapa
+              <UIcon
+                name="lucide:external-link"
+                class="size-4"
+                aria-hidden="true"
+              />
+            </span>
+          </div>
+        </div>
+      </a>
     </UPageSection>
   </UTheme>
 </template>
