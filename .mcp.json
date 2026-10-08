@@ -1,0 +1,25 @@
+{
+	"mcpServers": {
+		"nuxt": {
+			"type": "http",
+			"url": "https://nuxt.com/mcp",
+			"tools": [
+				"*"
+			]
+		},
+		"nuxt-ui": {
+			"type": "http",
+			"url": "https://ui.nuxt.com/mcp",
+			"tools": [
+				"*"
+			]
+		},
+		"vue": {
+			"type": "http",
+			"url": "https://mcp.vue-mcp.org/mcp",
+			"tools": [
+				"*"
+			]
+		}
+	}
+}
