@@ -106,7 +106,7 @@ const themeUi: ThemeUI = {
           A través de un proceso permanente de diálogo y colaboración, las instituciones participantes aportan su conocimiento, experiencia y mirada crítica para fortalecer las capacidades estatales y mejorar las políticas públicas, con la convicción de que las transformaciones construidas con la sociedad son más legítimas, más pertinentes y más sostenibles en el tiempo.
         </p>
         <p class="leading-7 font-semibold text-primary">
-          ¿Sos parte de alguna de las instituciones participantes o querés sumarte al diálogo ciudadano sobre infraestructura y servicios públicos en la Provincia?
+          ¿Sos parte de alguna de las instituciones participantes?
         </p>
         <div class="flex flex-col md:flex-row gap-6 justify-center">
           <UPageCard
@@ -143,7 +143,7 @@ const themeUi: ThemeUI = {
             title="Participá de las reuniones"
             highlight
             highlight-color="primary"
-            description="Podes anotarte y participar en las reuniones del Observatorio"
+            description="Podés anotarte y participar en las reuniones del Observatorio"
             spotlight
             spotlight-color="primary"
             variant="subtle"
@@ -203,13 +203,7 @@ const themeUi: ThemeUI = {
             ¿Cómo trabajamos en el Observatorio?
           </h3>
           <p class="leading-7 text-neutral-700 dark:text-neutral-300">
-            Poniendo en común el <ULink
-              to="https://drive.google.com/file/d/1rXpM5bpyaziTMs-crAH8fg9f9fN3ELo8/view?usp=sharing"
-              class="font-semibold text-primary underline hover:text-primary-dark"
-            >Plan de Fortalecimiento Institucional 2024-2027</ULink> y el <ULink
-              to="https://drive.google.com/file/d/1Rjpm0XVlGnGd05ZjOrb5FDbhrMNw6UPn/view?usp=sharing"
-              class="font-bold text-primary underline hover:text-primary-dark"
-            >Plan Estratégico de Infraestructura 2024-2027</ULink>, la agenda del Observatorio se organiza en siete grupos de trabajo temáticos, donde instituciones y especialistas analizan las iniciativas prioritarias del Ministerio, intercambian experiencias y proponen mejoras concretas. Además, se realizan reuniones plenarias al inicio y al cierre de cada año.
+            Poniendo en común el <span class="font-bold text-highlighted">Plan de Fortalecimiento Institucional 2024-2027</span> y el <span class="font-bold text-highlighted">Plan Estratégico de Infraestructura 2024-2027</span>, la agenda del Observatorio se organiza en siete grupos de trabajo temáticos, donde instituciones y especialistas analizan las iniciativas prioritarias del Ministerio, intercambian experiencias y proponen mejoras concretas. Además, se realizan reuniones plenarias al inicio y al cierre de cada año.
           </p>
         </div>
         <div class="flex w-full sm:w-4/5 lg:w-3/5 mx-auto gap-6 justify-center">
@@ -336,7 +330,7 @@ const themeUi: ThemeUI = {
       tabindex="-1"
       class="scroll-mt-[calc(var(--ui-header-height)+1rem)]"
       title="Reuniones"
-      description="Reuniones, encuentros y consultas realizadas en el marco del Observatorio."
+      description="Conocé las reuniones del Observatorio e inscribite a las próximas."
     >
       <ObservatorioConsultasCardLists v-model:work-group="selectedWorkGroup" />
     </UPageSection>
@@ -361,8 +355,8 @@ const themeUi: ThemeUI = {
       id="publicaciones"
       tabindex="-1"
       class="scroll-mt-[calc(var(--ui-header-height)+1rem)]"
-      title="Publicaciones"
-      description="Documentos, estudios e informes producidos en el marco del Observatorio, disponibles para su descarga."
+      title="Resultados"
+      description="Materiales, herramientas e iniciativas construidos con aportes del Observatorio."
     >
       <ObservatorioPublicationsShowcase />
     </UPageSection>
