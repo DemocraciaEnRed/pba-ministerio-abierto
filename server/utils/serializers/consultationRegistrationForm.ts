@@ -27,6 +27,8 @@ export interface PublicConsultationRegistrationFormDTO {
   title: string
   body: string | null
   kind: RegistrationFormKind
+  /** URL pública canónica de la consulta; `null` si el handler no la provee. */
+  consultationPath: string | null
   eventAt: string
   opensAt: string
   closesAt: string
@@ -47,6 +49,7 @@ export interface AdminConsultationRegistrationFormDTO extends PublicConsultation
 
 export interface SerializeRegistrationFormContext {
   kind: RegistrationFormKind
+  consultationPath?: string | null
   registrationsCount?: number
   accreditation?: AdminAccreditationDTO | null
   now?: Date
@@ -78,6 +81,7 @@ export function serializeConsultationRegistrationForm(
     title: form.title,
     body: form.body,
     kind: context.kind,
+    consultationPath: context.consultationPath ?? null,
     eventAt: form.eventAt.toISOString(),
     opensAt: form.opensAt.toISOString(),
     closesAt: form.closesAt.toISOString(),

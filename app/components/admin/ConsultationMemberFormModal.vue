@@ -35,7 +35,7 @@ interface EligibleUser {
 
 const props = defineProps<{
   open: boolean
-  consultationSlug: string
+  consultationId: string
 }>()
 
 const emit = defineEmits<{
@@ -82,7 +82,7 @@ async function loadEligible() {
   eligibleLoading.value = true
   try {
     eligibleUsers.value = await $fetch<EligibleUser[]>(
-      `/api/consultations/${props.consultationSlug}/members/eligible`
+      `/api/consultations/${props.consultationId}/members/eligible`
     )
   } catch (error) {
     toast.add({
@@ -111,7 +111,7 @@ watch(() => props.open, (open) => {
 async function onSubmit(event: FormSubmitEvent<AssignConsultationMemberInput>) {
   saving.value = true
   try {
-    await $fetch(`/api/consultations/${props.consultationSlug}/members`, {
+    await $fetch(`/api/consultations/${props.consultationId}/members`, {
       method: 'POST',
       body: event.data
     })

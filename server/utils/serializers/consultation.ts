@@ -5,6 +5,7 @@ import type {
 } from '../../../prisma/generated/enums'
 import type { ParticipationState } from '../participation-state'
 import { deriveParticipationState } from '../participation-state'
+import { consultationPublicPath } from '#shared/utils/consultation-url'
 
 export type ConsultationView = 'public' | 'admin'
 
@@ -75,6 +76,11 @@ export interface ConsultationWorkGroupDTO extends ConsultationTaxonomyDTO {
 export interface PublicConsultationDTO {
   id: number
   slug: string
+  /**
+   * URL pública canónica (`/{seccion}/{id}/{nombre}`). Si el handler no cargó
+   * la sección, cae en el enlace corto `/consultas/{id}`, que redirige.
+   */
+  publicPath: string
   title: string
   summary: string | null
   body: string | null
@@ -122,6 +128,7 @@ export function serializeConsultation(
   const base: PublicConsultationDTO = {
     id: consultation.id,
     slug: consultation.slug,
+    publicPath: consultationPublicPath(consultation),
     title: consultation.title,
     summary: consultation.summary,
     body: consultation.body,

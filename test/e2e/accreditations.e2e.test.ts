@@ -37,6 +37,8 @@ describe('Server e2e: acreditaciones', async () => {
   const runId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
   const hearingSlug = `acreditacion-e2e-audiencia-${runId}`
   const publicSlug = `acreditacion-e2e-consulta-${runId}`
+  let hearingId: number
+  let publicConsultationId: number
 
   const createdConsultationIds: number[] = []
 
@@ -96,8 +98,8 @@ describe('Server e2e: acreditaciones', async () => {
     adminCookie = await login(ADMIN_EMAIL, DEV_PASSWORD)
     citizenCookie = await login(CITIZEN_EMAIL, DEV_PASSWORD)
 
-    await createConsultation(hearingSlug, 'audiencias-publicas')
-    await createConsultation(publicSlug, 'consultas-publicas')
+    hearingId = await createConsultation(hearingSlug, 'audiencias-publicas')
+    publicConsultationId = await createConsultation(publicSlug, 'consultas-publicas')
   })
 
   afterAll(async () => {
@@ -111,7 +113,7 @@ describe('Server e2e: acreditaciones', async () => {
 
   describe('Configuración desde el formulario', () => {
     it('rechaza habilitar sin fechas de acreditación (422)', async () => {
-      const res = await api(`/api/consultations/${hearingSlug}/registration-form`, {
+      const res = await api(`/api/consultations/${hearingId}/registration-form`, {
         method: 'POST',
         cookie: adminCookie,
         body: formBody({ accreditationOpensAt: null, accreditationClosesAt: null })
@@ -121,7 +123,7 @@ describe('Server e2e: acreditaciones', async () => {
 
     it('rechaza una ventana de acreditación invertida (422)', async () => {
       const now = Date.now()
-      const res = await api(`/api/consultations/${hearingSlug}/registration-form`, {
+      const res = await api(`/api/consultations/${hearingId}/registration-form`, {
         method: 'POST',
         cookie: adminCookie,
         body: formBody({
@@ -133,7 +135,7 @@ describe('Server e2e: acreditaciones', async () => {
     })
 
     it('crea el formulario con acreditación habilitada y token público', async () => {
-      const res = await api<FormDTO>(`/api/consultations/${hearingSlug}/registration-form`, {
+      const res = await api<FormDTO>(`/api/consultations/${hearingId}/registration-form`, {
         method: 'POST',
         cookie: adminCookie,
         body: formBody()
@@ -229,7 +231,7 @@ describe('Server e2e: acreditaciones', async () => {
   describe('Administración de ingresos', () => {
     it('lista los ingresos para quien administra', async () => {
       const res = await api<{ pagination: { total: number } }>(
-        `/api/consultations/${hearingSlug}/accreditation/entries`,
+        `/api/consultations/${hearingId}/accreditation/entries`,
         { cookie: adminCookie }
       )
       expect(res.status).toBe(200)
@@ -237,13 +239,13 @@ describe('Server e2e: acreditaciones', async () => {
     })
 
     it('rechaza el listado a la ciudadanía (403)', async () => {
-      const res = await api(`/api/consultations/${hearingSlug}/accreditation/entries`, { cookie: citizenCookie })
+      const res = await api(`/api/consultations/${hearingId}/accreditation/entries`, { cookie: citizenCookie })
       expect(res.status).toBe(403)
     })
 
     it('exporta los ingresos a CSV para quien administra', async () => {
       const res = await api<string>(
-        `/api/consultations/${hearingSlug}/accreditation/entries/export`,
+        `/api/consultations/${hearingId}/accreditation/entries/export`,
         { cookie: adminCookie }
       )
       expect(res.status).toBe(200)
@@ -252,13 +254,13 @@ describe('Server e2e: acreditaciones', async () => {
     })
 
     it('rechaza la exportación a la ciudadanía (403)', async () => {
-      const res = await api(`/api/consultations/${hearingSlug}/accreditation/entries/export`, { cookie: citizenCookie })
+      const res = await api(`/api/consultations/${hearingId}/accreditation/entries/export`, { cookie: citizenCookie })
       expect(res.status).toBe(403)
     })
 
     it('permite el alta manual (201)', async () => {
       const res = await api<{ id: number }>(
-        `/api/consultations/${hearingSlug}/accreditation/entries`,
+        `/api/consultations/${hearingId}/accreditation/entries`,
         { method: 'POST', cookie: adminCookie, body: { dni: '99887766', firstName: 'Manual' } }
       )
       expect(res.status).toBe(201)
@@ -274,7 +276,7 @@ describe('Server e2e: acreditaciones', async () => {
   describe('Ventana e histórico', () => {
     it('bloquea el ingreso público fuera de la ventana (422)', async () => {
       const now = Date.now()
-      const patched = await api(`/api/consultations/${hearingSlug}/registration-form`, {
+      const patched = await api(`/api/consultations/${hearingId}/registration-form`, {
         method: 'PATCH',
         cookie: adminCookie,
         body: formBody({
@@ -288,7 +290,7 @@ describe('Server e2e: acreditaciones', async () => {
       expect(res.status).toBe(422)
 
       // Reabrimos para el resto de la suite.
-      await api(`/api/consultations/${hearingSlug}/registration-form`, {
+      await api(`/api/consultations/${hearingId}/registration-form`, {
         method: 'PATCH',
         cookie: adminCookie,
         body: formBody()
@@ -296,7 +298,7 @@ describe('Server e2e: acreditaciones', async () => {
     })
 
     it('conserva la acreditación como histórica al deshabilitar con ingresos', async () => {
-      const patched = await api<FormDTO>(`/api/consultations/${hearingSlug}/registration-form`, {
+      const patched = await api<FormDTO>(`/api/consultations/${hearingId}/registration-form`, {
         method: 'PATCH',
         cookie: adminCookie,
         body: formBody({ accreditationEnabled: false })
@@ -311,7 +313,7 @@ describe('Server e2e: acreditaciones', async () => {
     })
 
     it('reutiliza el mismo token y el historial al reactivar', async () => {
-      const patched = await api<FormDTO>(`/api/consultations/${hearingSlug}/registration-form`, {
+      const patched = await api<FormDTO>(`/api/consultations/${hearingId}/registration-form`, {
         method: 'PATCH',
         cookie: adminCookie,
         body: formBody()
@@ -322,7 +324,7 @@ describe('Server e2e: acreditaciones', async () => {
     })
 
     it('elimina la acreditación al deshabilitar sin ingresos', async () => {
-      const created = await api<FormDTO>(`/api/consultations/${publicSlug}/registration-form`, {
+      const created = await api<FormDTO>(`/api/consultations/${publicConsultationId}/registration-form`, {
         method: 'POST',
         cookie: adminCookie,
         body: formBody({ title: 'Consulta con acreditación e2e' })
@@ -330,7 +332,7 @@ describe('Server e2e: acreditaciones', async () => {
       expect(created.status).toBe(201)
       expect(created.data.accreditation).not.toBeNull()
 
-      const disabled = await api<FormDTO>(`/api/consultations/${publicSlug}/registration-form`, {
+      const disabled = await api<FormDTO>(`/api/consultations/${publicConsultationId}/registration-form`, {
         method: 'PATCH',
         cookie: adminCookie,
         body: formBody({ title: 'Consulta con acreditación e2e', accreditationEnabled: false })

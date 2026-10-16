@@ -2,7 +2,7 @@
 import type { NavigationMenuItem } from '@nuxt/ui'
 
 const route = useRoute()
-const { slug, data: consultation } = useConsultationAdmin()
+const { consultationId, data: consultation } = useConsultationAdmin()
 
 type MechanismType = 'support' | 'vote' | 'survey'
 type Visibility = 'hidden' | 'visible' | 'archived'
@@ -24,13 +24,15 @@ const slugTema = computed(() => String(route.params.slugTema))
 // backend resuelva la vista admin del usuario logueado.
 const requestFetch = useRequestFetch()
 const { data: topic } = await useAsyncData(
-  () => `admin-topic-${slug.value}-${slugTema.value}`,
-  () => requestFetch<AdminTopicSummary>(`/api/consultations/${slug.value}/topics/${slugTema.value}`),
-  { watch: [slug, slugTema] }
+  () => `admin-topic-${consultationId.value}-${slugTema.value}`,
+  () => requestFetch<AdminTopicSummary>(`/api/consultations/${consultationId.value}/topics/${slugTema.value}`),
+  { watch: [consultationId, slugTema] }
 )
 
-const basePath = computed(() => `/consultas/${slug.value}/panel/temas/${slugTema.value}`)
-const publicView = computed(() => `/consultas/${slug.value}/temas/${slugTema.value}`)
+const basePath = computed(() => consultationPanelPath(consultationId.value, `temas/${slugTema.value}`))
+const publicView = computed(() => consultation.value
+  ? `${consultation.value.publicPath}/temas/${slugTema.value}`
+  : consultationPermalinkPath(consultationId.value, `temas/${slugTema.value}`))
 const estadoBadge = computed(() =>
   topic.value
     ? topicStateBadge(topic.value.visibility, topic.value.participationState)
@@ -48,7 +50,7 @@ const itemsNavigationMenu = computed<NavigationMenuItem[][]>(() => [
     {
       label: 'Volver a temas',
       icon: 'i-lucide-arrow-left',
-      to: `/consultas/${slug.value}/panel/temas`
+      to: consultationPanelPath(consultationId.value, 'temas')
     },
     {
       label: 'Ver tema',
@@ -134,7 +136,7 @@ const itemsNavigationMenu = computed<NavigationMenuItem[][]>(() => [
                   Consulta
                 </p>
                 <p class="font-semibold leading-tight">
-                  {{ consultation?.title || slug }}
+                  {{ consultation?.title || consultationId }}
                 </p>
 
                 <p class="pt-1 text-xs font-medium uppercase text-muted">

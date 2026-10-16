@@ -1,3 +1,5 @@
+import { consultationPublicPath } from '#shared/utils/consultation-url'
+
 export default defineEventHandler(async (event) => {
   const slug = getRouterParam(event, 'slug')
 
@@ -31,8 +33,11 @@ export default defineEventHandler(async (event) => {
       ...visibilityWhere
     },
     orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
-    select: { slug: true }
+    select: { id: true, slug: true, section: { select: { slug: true } } }
   })
 
-  return { slug: consultation?.slug ?? null }
+  return {
+    slug: consultation?.slug ?? null,
+    publicPath: consultation ? consultationPublicPath(consultation) : null
+  }
 })

@@ -10,7 +10,7 @@ interface SurveyOption {
 }
 
 const props = defineProps<{
-  consultationSlug: string
+  consultationId: string
   topicSlug: string
   locked: boolean
 }>()
@@ -19,13 +19,13 @@ const emit = defineEmits<{ changed: [] }>()
 
 const toast = useToast()
 
-const basePath = computed(() => `/api/consultations/${props.consultationSlug}/topics/${props.topicSlug}/survey-options`)
+const basePath = computed(() => `/api/consultations/${props.consultationId}/topics/${props.topicSlug}/survey-options`)
 
 // `useRequestFetch` reenvía la cookie de sesión durante el SSR para que el
 // backend resuelva la vista admin del usuario logueado.
 const requestFetch = useRequestFetch()
 const { data: options, status, refresh } = useAsyncData(
-  () => `topic-survey-options-${props.consultationSlug}-${props.topicSlug}`,
+  () => `topic-survey-options-${props.consultationId}-${props.topicSlug}`,
   () => requestFetch<SurveyOption[]>(basePath.value),
   { watch: [() => props.topicSlug] }
 )

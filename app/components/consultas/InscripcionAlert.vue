@@ -6,7 +6,9 @@ defineOptions({ name: 'ConsultasInscripcionAlert' })
 
 const props = defineProps<{
   form: PublicConsultationRegistrationFormDTO
-  consultationSlug: string
+  consultationId: string
+  /** URL pública canónica de la consulta (base de los enlaces de inscripción). */
+  publicPath: string
   participationState: string
 }>()
 
@@ -52,7 +54,7 @@ const color = computed(() => {
 const actions = computed(() => props.form.registrationState === 'open'
   ? [{
       label: 'Inscribirme',
-      to: `/consultas/${props.consultationSlug}/inscripcion`,
+      to: `${props.publicPath}/inscripcion`,
       variant: 'solid' as const,
       color: 'primary' as const,
       size: undefined,

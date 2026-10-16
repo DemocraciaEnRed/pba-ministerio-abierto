@@ -18,7 +18,7 @@ const badge = computed<BadgeProps>(() => {
 })
 
 /** Destino público de la consulta. */
-const to = computed(() => `/consultas/${props.consultation.slug}`)
+const to = computed(() => props.consultation.publicPath)
 
 /** Descripción breve con fallback. */
 const description = computed(() =>

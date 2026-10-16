@@ -219,10 +219,9 @@ describe('Server e2e: routing anidado + comentarios (fase 6)', async () => {
       expect(Array.isArray(res.data)).toBe(true)
     })
 
-    it('resuelve la consulta por slug', async () => {
-      const res = await api<{ id: number }>(`/api/consultations/${openConsultationSlug}`)
-      expect(res.status).toBe(200)
-      expect(res.data.id).toBe(openConsultationId)
+    it('no resuelve la consulta por slug: la API acepta solo id (404)', async () => {
+      const res = await api(`/api/consultations/${openConsultationSlug}`)
+      expect(res.status).toBe(404)
     })
 
     it('resuelve la consulta por id numérico', async () => {

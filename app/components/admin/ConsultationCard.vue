@@ -38,7 +38,7 @@ const endLabel = computed(() =>
   props.consultation.endsAt ? formatDateShort(props.consultation.endsAt) : 'Abierta indefinidamente'
 )
 
-const panelTo = computed(() => `/consultas/${props.consultation.slug}/panel`)
+const panelTo = computed(() => consultationPanelPath(props.consultation.id))
 const editTo = computed(() => `${panelTo.value}/editar`)
 </script>
 

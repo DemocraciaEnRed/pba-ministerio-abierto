@@ -6,11 +6,13 @@ export type ConsultationFormat = 'single' | 'multiple'
 export type ResultsVisibility = 'hidden' | 'participants_only' | 'public'
 
 /**
- * Detalle público de una consulta, tal como lo devuelve `GET /api/consultations/:slug`.
+ * Detalle público de una consulta, tal como lo devuelve `GET /api/consultations//:id`.
  */
 export interface ConsultationDetail {
   id: number
   slug: string
+  /** URL pública canónica (`/{seccion}/{id}/{nombre}`). */
+  publicPath: string
   title: string
   summary: string | null
   body: string | null
@@ -46,7 +48,7 @@ export type ConsultaHeroMetadata = PageCardProps
 export type MechanismType = 'support' | 'vote' | 'survey'
 
 /**
- * Tema de una consulta, tal como lo devuelve `GET /api/consultations/:slug/topics` (vista pública).
+ * Tema de una consulta, tal como lo devuelve `GET /api/consultations//:id/topics` (vista pública).
  */
 export interface ConsultationTopic {
   id: number
@@ -74,7 +76,7 @@ export interface ConsultationTopic {
 
 /**
  * Enlace relacionado de un tema, tal como lo devuelve
- * `GET /api/consultations/:slug/topics/:temaSlug/links` (vista pública).
+ * `GET /api/consultations//:id/topics/:temaSlug/links` (vista pública).
  */
 export interface TopicLink {
   id: number
@@ -85,7 +87,7 @@ export interface TopicLink {
 
 /**
  * Adjunto de un tema, tal como lo devuelve
- * `GET /api/consultations/:slug/topics/:temaSlug/attachments`.
+ * `GET /api/consultations//:id/topics/:temaSlug/attachments`.
  */
 export interface TopicAttachment {
   id: number
@@ -100,7 +102,7 @@ export interface TopicAttachment {
 
 /**
  * Imagen de galería (vista pública) de una consulta o tema, tal como la
- * devuelven `GET /api/consultations/:slug/gallery` y el endpoint análogo de
+ * devuelven `GET /api/consultations//:id/gallery` y el endpoint análogo de
  * temas.
  */
 export interface GalleryImage {
@@ -114,11 +116,14 @@ export interface GalleryImage {
 
 /**
  * Resumen liviano de la consulta padre embebido en el detalle de un tema
- * (`GET /api/consultations/:slug/topics/:temaSlug/detail`). Solo lo que el hero
+ * (`GET /api/consultations//:id/topics/:temaSlug/detail`). Solo lo que el hero
  * y el breadcrumb necesitan.
  */
 export interface TopicParentConsultation {
+  id: number
   slug: string
+  /** URL pública canónica de la consulta. */
+  publicPath: string
   title: string
   visibility: Visibility
   startsAt: string | null
@@ -166,6 +171,8 @@ export interface ConsultationWorkGroup extends ConsultationTaxonomy {
 export interface PublicConsultationListItem {
   id: number
   slug: string
+  /** URL pública canónica (`/{seccion}/{id}/{nombre}`). */
+  publicPath: string
   title: string
   summary: string | null
   body: string | null
@@ -197,6 +204,8 @@ export interface PublicConsultationListItem {
 export interface AdminConsultationListItem {
   id: number
   slug: string
+  /** URL pública canónica (`/{seccion}/{id}/{nombre}`). */
+  publicPath: string
   title: string
   summary: string | null
   body: string | null
@@ -239,7 +248,7 @@ export interface CommentReactionsSummary {
 
 /**
  * Comentario en su vista pública, tal como lo devolverá el endpoint de
- * comentarios (`GET /api/consultations/:slug/comments`). El listado de primer
+ * comentarios (`GET /api/consultations//:id/comments`). El listado de primer
  * nivel trae `replyCount`; las respuestas se cargan bajo demanda y paginadas
  * desde `GET /api/comments/:id/replies`.
  */

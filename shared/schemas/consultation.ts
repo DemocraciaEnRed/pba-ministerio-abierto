@@ -7,6 +7,19 @@ const slugField = z
   .max(120, 'El slug no puede superar los 120 caracteres')
   .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'El slug solo puede tener minúsculas, números y guiones')
 
+// Nombre legible de la URL pública (`/{seccion}/{id}/{nombre}`). No identifica
+// la consulta (puede repetirse) y es opcional: si falta, el servidor lo genera
+// desde el título al crear y lo conserva al editar.
+const addressNameField = z.preprocess(
+  value => (value === null || (typeof value === 'string' && value.trim() === '') ? undefined : value),
+  z
+    .string()
+    .trim()
+    .max(120, 'La dirección no puede superar los 120 caracteres')
+    .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'La dirección solo puede tener minúsculas, números y guiones')
+    .optional()
+)
+
 const titleField = z
   .string()
   .trim()
@@ -73,7 +86,7 @@ export const ConsultationsQuerySchema = z.object({
 })
 
 export const CreateConsultationSchema = z.object({
-  slug: slugField,
+  slug: addressNameField,
   title: titleField,
   // El tipo de consulta se define solo en el alta: determina qué estructura habilita.
   sectionId: z
@@ -91,7 +104,7 @@ export const CreateConsultationSchema = z.object({
 })
 
 export const UpdateConsultationSchema = z.object({
-  slug: slugField,
+  slug: addressNameField,
   title: titleField,
   summary: textAreaField,
   body: textAreaField,

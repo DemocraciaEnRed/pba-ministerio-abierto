@@ -77,6 +77,12 @@ export function usePageSeo(input: MaybeRefOrGetter<PageSeoInput>) {
     twitterImageAlt: () => get().imageAlt ?? undefined,
     robots: () => getRobotsPolicy(config.public.siteIndexable, get().noindex)
   })
+
+  // Evita que buscadores indexen variantes de una misma página (p. ej. una
+  // consulta con un nombre desactualizado en la dirección).
+  useHead({
+    link: () => [{ rel: 'canonical', href: toAbsolute(get().url ?? route.path) }]
+  })
 }
 
 /**

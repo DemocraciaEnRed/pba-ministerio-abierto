@@ -6,7 +6,9 @@ defineOptions({ name: 'ConsultasInscripcionCta' })
 
 const props = defineProps<{
   form: PublicConsultationRegistrationFormDTO
-  consultationSlug: string
+  consultationId: string
+  /** URL pública canónica de la consulta (base de los enlaces de inscripción). */
+  publicPath: string
 }>()
 
 const eventNoun = computed(() => registrationEventNoun(props.form.kind))
@@ -24,7 +26,7 @@ function pad(value: number): string {
       icon="i-lucide-clipboard-check"
       size="xl"
       class="custom-animation-pulse"
-      :to="`/consultas/${consultationSlug}/inscripcion`"
+      :to="`${publicPath}/inscripcion`"
     />
 
     <template v-else-if="form.registrationState === 'scheduled'">

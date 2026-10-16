@@ -3,11 +3,12 @@ import type { NavigationMenuItem } from '@nuxt/ui'
 import { consultationTypeAllowsRegistrationForm } from '#shared/data/consultation-types'
 
 const route = useRoute()
-const { slug, data: consultation } = useConsultationAdmin()
+const { consultationId, data: consultation } = useConsultationAdmin()
 const listLink = useConsultationsListLink()
 
-const basePath = computed(() => `/consultas/${slug.value}/panel`)
-const publicView = computed(() => `/consultas/${slug.value}`)
+const basePath = computed(() => consultationPanelPath(consultationId.value))
+// Sin la consulta cargada usamos el enlace corto, que redirige a la URL canónica.
+const publicView = computed(() => consultation.value?.publicPath ?? consultationPermalinkPath(consultationId.value))
 
 const estadoBadge = computed(() =>
   consultation.value
@@ -152,7 +153,7 @@ const itemsNavigationMenu = computed<NavigationMenuItem[][]>(() => {
                   </div>
                 </div>
                 <p class="font-semibold leading-tight text-sm">
-                  {{ consultation?.title || slug }}
+                  {{ consultation?.title || consultationId }}
                 </p>
               </div>
               <USeparator class="my-2" />

@@ -16,7 +16,9 @@ defineOptions({ name: 'ConsultasInscripcionForm' })
 
 const props = defineProps<{
   form: PublicConsultationRegistrationFormDTO
-  consultationSlug: string
+  consultationId: string
+  /** URL pública canónica de la consulta (base de los enlaces de inscripción). */
+  publicPath: string
 }>()
 
 type Schema = CreateConsultationRegistrationInput
@@ -172,12 +174,12 @@ async function handleSubmit(event: FormSubmitEvent<Schema>) {
       formData.append('file', selectedFile.value)
     }
 
-    await $fetch(`/api/consultations/${props.consultationSlug}/registrations`, {
+    await $fetch(`/api/consultations/${props.consultationId}/registrations`, {
       method: 'POST',
       body: formData
     })
 
-    await navigateTo(`/consultas/${props.consultationSlug}/inscripcion/exito`)
+    await navigateTo(`${props.publicPath}/inscripcion/exito`)
   } catch (error) {
     const e = error as { data?: { message?: string }, message?: string }
     toast.add({

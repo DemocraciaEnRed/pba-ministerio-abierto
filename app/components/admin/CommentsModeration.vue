@@ -53,7 +53,7 @@ interface ModerationResponse {
 
 const props = defineProps<{
   /** Slug (o id) de la consulta a la que pertenece la bandeja. */
-  consultationSlug: string
+  consultationId: string
   /** Slug (o id) del tema. Si se pasa, la bandeja se acota a ese tema. */
   topicSlug?: string
 }>()
@@ -66,8 +66,8 @@ const showContainer = computed(() => !props.topicSlug)
 
 const endpoint = computed(() =>
   props.topicSlug
-    ? `/api/consultations/${props.consultationSlug}/topics/${props.topicSlug}/comments`
-    : `/api/consultations/${props.consultationSlug}/comments`
+    ? `/api/consultations/${props.consultationId}/topics/${props.topicSlug}/comments`
+    : `/api/consultations/${props.consultationId}/comments`
 )
 
 type StatusFilter = 'all' | ModerationStatus
@@ -89,7 +89,7 @@ const statusOptions = [
 // backend resuelva la vista admin (estado de moderación) del usuario logueado.
 const requestFetch = useRequestFetch()
 const { data, status, refresh } = await useAsyncData(
-  () => `admin-comments-${props.consultationSlug}-${props.topicSlug ?? 'all'}`,
+  () => `admin-comments-${props.consultationId}-${props.topicSlug ?? 'all'}`,
   () => requestFetch<ModerationResponse>(endpoint.value, {
     query: {
       page: filters.page,
@@ -99,7 +99,7 @@ const { data, status, refresh } = await useAsyncData(
   }),
   {
     watch: [
-      () => props.consultationSlug,
+      () => props.consultationId,
       () => props.topicSlug,
       () => filters.moderationStatus,
       () => filters.page
@@ -154,12 +154,12 @@ function authorInitials(comment: AdminComment): string {
  * nulo, así que se cae al `topicSlug` que recibe el componente por prop.
  */
 function publicUrl(comment: AdminComment): string {
-  const base = `/consultas/${props.consultationSlug}`
+  // El enlace corto redirige a la URL canónica de la consulta.
   if (comment.containerType === 'topic') {
     const topicSlug = comment.topicSlug ?? props.topicSlug
-    return `${base}/temas/${topicSlug}`
+    return consultationPermalinkPath(props.consultationId, `temas/${topicSlug}`)
   }
-  return base
+  return consultationPermalinkPath(props.consultationId)
 }
 
 // --- Acciones de moderación con confirmación ---
