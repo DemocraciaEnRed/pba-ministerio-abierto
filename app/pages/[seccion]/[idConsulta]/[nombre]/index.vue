@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { PageHeroProps, NavigationMenuItem, PageAnchor } from '@nuxt/ui'
+import { getConsultationType } from '#shared/data/consultation-types'
 import type { ConsultaHeroMetadata, ConsultationDetail, ConsultationTopic, GalleryImage } from '~/types/consulta'
 import type { PublicConsultationRegistrationFormDTO } from '~~/server/utils/serializers/consultationRegistrationForm'
 
@@ -337,7 +338,7 @@ const consultationPageAnchors: ComputedRef<InteractivePageAnchor[]> = computed((
             No encontramos la consulta.
           </p>
           <UButton
-            to="/consultas"
+            :to="getConsultationType(String(route.params.seccion))?.landingRoute ?? '/#explorador'"
             label="Volver al listado"
             color="neutral"
             variant="ghost"

@@ -65,11 +65,48 @@ const idListField = z
 
 const commentsEnabledField = z.boolean().default(true)
 
+const participationStateField = z.enum(['scheduled', 'open', 'closed'], {
+  message: 'El estado debe ser programada, abierta o finalizada'
+})
+
+// Lista de estados temporales en CSV (`open,scheduled`) o repetida en la query.
+// Se conserva el orden recibido sin duplicados: define el orden de los grupos.
+const participationStateListField = z.preprocess(
+  (value) => {
+    if (value === undefined || value === null || value === '') return undefined
+    const raw = Array.isArray(value) ? value : [value]
+    const states = raw
+      .flatMap(item => String(item).split(','))
+      .map(item => item.trim())
+      .filter(item => item.length > 0)
+    return states.length > 0 ? [...new Set(states)] : undefined
+  },
+  z.array(participationStateField).optional()
+)
+
+const queryDateField = z
+  .string()
+  .trim()
+  .datetime('La fecha debe estar en formato ISO válido')
+  .transform(value => new Date(value))
+  .optional()
+
+/** Ventana máxima para `activeFrom`/`activeTo` (agenda), en días. */
+export const CONSULTATIONS_ACTIVE_WINDOW_MAX_DAYS = 92
+
 export const ConsultationsQuerySchema = z.object({
   q: z.string().trim().max(120, 'El texto de búsqueda no puede superar los 120 caracteres').optional(),
   visibility: z.enum(['hidden', 'visible', 'archived']).optional(),
   state: z.enum(['scheduled', 'open', 'closed', 'archived']).optional(),
+  states: participationStateListField,
+  activeFrom: queryDateField,
+  activeTo: queryDateField,
   featured: z
+    .enum(['true', 'false'])
+    .transform(value => value === 'true')
+    .optional(),
+  /** Solo instancias con la inscripción presencial abierta ahora. */
+  registrationOpen: z
     .enum(['true', 'false'])
     .transform(value => value === 'true')
     .optional(),
@@ -83,6 +120,43 @@ export const ConsultationsQuerySchema = z.object({
   tagIds: idListField,
   page: z.coerce.number().int('La página debe ser un entero').min(1, 'La página mínima es 1').default(1),
   perPage: z.coerce.number().int('La cantidad debe ser un entero').min(1, 'La cantidad mínima es 1').max(100, 'La cantidad máxima es 100').default(20)
+}).superRefine((query, ctx) => {
+  if (query.state && query.states) {
+    ctx.addIssue({
+      code: 'custom',
+      path: ['states'],
+      message: 'Usá "state" o "states", no ambos a la vez'
+    })
+  }
+
+  if (Boolean(query.activeFrom) !== Boolean(query.activeTo)) {
+    ctx.addIssue({
+      code: 'custom',
+      path: [query.activeFrom ? 'activeTo' : 'activeFrom'],
+      message: 'Indicá las dos fechas del rango (desde y hasta)'
+    })
+    return
+  }
+
+  if (query.activeFrom && query.activeTo) {
+    if (query.activeFrom > query.activeTo) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['activeTo'],
+        message: 'La fecha "hasta" debe ser posterior a la fecha "desde"'
+      })
+      return
+    }
+
+    const maxMs = CONSULTATIONS_ACTIVE_WINDOW_MAX_DAYS * 24 * 60 * 60 * 1000
+    if (query.activeTo.getTime() - query.activeFrom.getTime() > maxMs) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['activeTo'],
+        message: `El rango de fechas no puede superar los ${CONSULTATIONS_ACTIVE_WINDOW_MAX_DAYS} días`
+      })
+    }
+  }
 })
 
 export const CreateConsultationSchema = z.object({

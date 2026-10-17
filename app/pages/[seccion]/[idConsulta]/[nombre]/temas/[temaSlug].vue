@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { BreadcrumbItem, NavigationMenuItem, PageHeroProps } from '@nuxt/ui'
+import { getConsultationType } from '#shared/data/consultation-types'
 import type {
   ConsultaHeroMetadata,
   ConsultationTopic,
@@ -115,8 +116,11 @@ const cover = computed(() => ({
 }))
 
 const breadcrumb = computed<BreadcrumbItem[]>(() => {
+  const sectionType = getConsultationType(String(route.params.seccion))
   const items: BreadcrumbItem[] = [
-    { label: 'Consultas', icon: 'i-lucide-folders', to: '/consultas' }
+    sectionType?.landingRoute
+      ? { label: sectionType.label, icon: sectionType.icon, to: sectionType.landingRoute }
+      : { label: 'Inicio', icon: 'i-lucide-house', to: '/' }
   ]
 
   if (consultation.value) {

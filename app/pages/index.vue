@@ -169,6 +169,19 @@ const themeUi: ThemeUI = {
         </UPageCard>
       </div>
     </UPageSection>
+    <ClientOnly>
+      <HomeDestacadas />
+      <HomeAgenda />
+      <USeparator />
+      <HomeExplorador />
+      <template #fallback>
+        <UContainer class="space-y-8 py-10 sm:py-12 lg:py-16">
+          <USkeleton class="mx-auto h-10 w-64" />
+          <USkeleton class="h-80 w-full rounded-lg" />
+        </UContainer>
+      </template>
+    </ClientOnly>
+    <USeparator />
     <UPageSection>
       <a
         href="https://mapainversionespba.minfra.gba.gob.ar/"

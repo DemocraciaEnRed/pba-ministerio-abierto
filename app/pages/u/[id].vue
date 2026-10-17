@@ -62,7 +62,7 @@ const hasNoAboutData = computed(() => (!user.value?.profession && !user.value?.o
           >
             <template #actions>
               <UButton
-                to="/consultas"
+                to="/#explorador"
                 label="Ir a consultas"
                 icon="lucide:list"
                 color="neutral"

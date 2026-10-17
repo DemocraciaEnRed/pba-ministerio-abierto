@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import type { TabsItem } from '@nuxt/ui'
 import type { PublicConsultationListItem } from '~/types/consulta'
 
 type StatusFilter = 'all' | 'scheduled' | 'open' | 'closed'
@@ -22,45 +21,7 @@ const OBSERVATORY_SECTION_SLUG = 'observatorio-obras-servicios'
 
 const selectedStatusFilter = ref<StatusFilter>('all')
 const selectedWorkGroupFilter = defineModel<string>('workGroup', { default: 'all' })
-const horizontalTabs = ref(false)
-
-onMounted(() => {
-  const mediaQuery = window.matchMedia('(min-width: 768px)')
-  const updateOrientation = () => {
-    horizontalTabs.value = mediaQuery.matches
-  }
-
-  updateOrientation()
-  mediaQuery.addEventListener('change', updateOrientation)
-  onBeforeUnmount(() => mediaQuery.removeEventListener('change', updateOrientation))
-})
-
-const consultasStatuses = ref<TabsItem[]>([
-  {
-    label: 'Todos',
-    value: 'all',
-    icon: 'lucide:list',
-    badge: undefined
-  },
-  {
-    label: 'Participación abierta',
-    value: 'open',
-    icon: 'lucide:circle-play',
-    badge: undefined
-  },
-  {
-    label: 'Participación programada',
-    value: 'scheduled',
-    icon: 'lucide:calendar-days',
-    badge: undefined
-  },
-  {
-    label: 'Instancia participativa finalizada',
-    value: 'closed',
-    icon: 'lucide:lock',
-    badge: undefined
-  }
-])
+const horizontalTabs = useIsMdUp()
 
 const { data: workGroupsData, status: workGroupsStatus } = await useAsyncData(
   'observatorio-consultas-work-groups',
@@ -124,29 +85,7 @@ watch([selectedStatusFilter, selectedWorkGroupFilter], () => {
 <template>
   <div class="min-w-0 max-w-full space-y-8">
     <div class="space-y-4">
-      <div
-        role="group"
-        aria-label="Estado de participación"
-        class="min-w-0 space-y-3"
-      >
-        <USeparator
-          label="Filtrar por estado de la participación"
-          position="start"
-        />
-        <UTabs
-          v-model="selectedStatusFilter"
-          :content="false"
-          :items="consultasStatuses"
-          :orientation="horizontalTabs ? 'horizontal' : 'vertical'"
-          color="neutral"
-          :ui="{
-            list: 'w-full',
-            trigger: 'min-h-10 justify-start md:justify-center',
-            label: 'whitespace-normal text-left md:text-center wrap-break-word'
-          }"
-          class="w-full"
-        />
-      </div>
+      <ConsultasEstadoTabs v-model="selectedStatusFilter" />
       <div
         role="group"
         aria-label="Grupos de trabajo"
@@ -163,31 +102,6 @@ watch([selectedStatusFilter, selectedWorkGroupFilter], () => {
           <span class="sr-only">Cargando grupos de trabajo...</span>
           <USkeleton class="h-34 w-full" />
         </div>
-        <!-- <div
-          v-else
-          class="grid grid-cols-1 gap-1 sm:gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 p-1 bg-"
-        >
-          <UButton
-            v-for="group in workGroupItems"
-            :key="group.value"
-            :icon="group.icon"
-            :label="group.label"
-            color="neutral"
-            variant="outline"
-            :aria-pressed="selectedWorkGroupFilter === group.value"
-            :style="{
-              '--work-group-color': group.color,
-              'color': selectedWorkGroupFilter === group.value ? '#ffffff' : group.color,
-              'backgroundColor': selectedWorkGroupFilter === group.value ? group.color : undefined
-            }"
-            :ui="{
-              leadingIcon: 'size-6 sm:size-8',
-              label: 'whitespace-normal wrap-break-word'
-            }"
-            class="min-h-10 w-full gap-2 px-3 py-2 text-left ring-(--work-group-color) hover:bg-(--work-group-color)/10 focus-visible:outline-(--work-group-color)"
-            @click="selectedWorkGroupFilter = group.value"
-          />
-        </div> -->
         <UTabs
           v-else
           v-model="selectedWorkGroupFilter"

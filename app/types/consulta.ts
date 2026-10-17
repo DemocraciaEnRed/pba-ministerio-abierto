@@ -166,7 +166,7 @@ export interface ConsultationWorkGroup extends ConsultationTaxonomy {
 
 /**
  * Item del listado público de consultas (`GET /api/consultations`, vista
- * pública). Es lo que consume la card de consulta en `/consultas` y la HOME.
+ * pública). Es lo que consume la card de consulta en los listados de sección y la HOME.
  */
 export interface PublicConsultationListItem {
   id: number
@@ -195,6 +195,21 @@ export interface PublicConsultationListItem {
   coverAltText: string | null
   /** Cantidad de temas visibles; `null` cuando el endpoint no la calcula. */
   topicsCount: number | null
+  /** Inscripción presencial; `null` si la instancia no tiene formulario. */
+  registration: ConsultationRegistrationSummary | null
+}
+
+/** Resumen del formulario de inscripción presencial de una instancia. */
+export interface ConsultationRegistrationSummary {
+  /** Página pública de inscripción. */
+  path: string
+  state: 'scheduled' | 'open' | 'closed'
+  /** Fecha y hora del encuentro presencial. */
+  eventAt: string
+  opensAt: string
+  closesAt: string
+  venueName: string
+  venueCity: string
 }
 
 /**

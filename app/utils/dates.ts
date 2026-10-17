@@ -48,3 +48,12 @@ export function fromNow(value: string | null | undefined): string {
   if (!value) return 'Sin definir'
   return dayjs(value).fromNow()
 }
+
+/**
+ * Día y hora compactos, p. ej. "jue 29 oct, 18:00". Se usa para la fecha del
+ * encuentro presencial en cards y agenda.
+ */
+export function formatEventDateTime(value: string | null | undefined): string {
+  if (!value) return 'Sin definir'
+  return dayjs(value).format('ddd D MMM, HH:mm').replaceAll('.', '')
+}

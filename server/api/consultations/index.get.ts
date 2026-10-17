@@ -22,13 +22,12 @@ export default defineEventHandler(async (event) => {
 
   const userId = ctx.user?.id ?? null
 
-  const where = ctx.isPlatformAdmin
-    ? {
-        ...whereByFilters
-      }
+  // La autorización va como cláusula aparte dentro de `AND` para no pisar los
+  // `OR` de los filtros (búsqueda, ventana activa, varios estados).
+  const authWhere = ctx.isPlatformAdmin
+    ? {}
     : userId
       ? {
-          ...whereByFilters,
           OR: [
             {
               visibility: { not: 'hidden' as const }
@@ -41,9 +40,10 @@ export default defineEventHandler(async (event) => {
           ]
         }
       : {
-          ...whereByFilters,
           visibility: { not: 'hidden' as const }
         }
+
+  const where = { AND: [whereByFilters, authWhere] }
 
   const bucketCounts = await Promise.all(orderBuckets.map(bucket =>
     prisma.consultation.count({ where: { AND: [where, bucket.where] } })
@@ -68,6 +68,10 @@ export default defineEventHandler(async (event) => {
         },
         consultationTags: {
           include: { tag: true }
+        },
+        // Resumen de la inscripción presencial para cards y agenda.
+        registrationForm: {
+          select: { id: true, eventAt: true, opensAt: true, closesAt: true, venueName: true, venueCity: true }
         },
         // Cantidad de temas visibles (no ocultos) para la métrica "N temas" de la card.
         _count: {
