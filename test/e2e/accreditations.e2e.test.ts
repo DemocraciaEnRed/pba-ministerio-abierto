@@ -3,6 +3,7 @@ import { setup } from '@nuxt/test-utils/e2e'
 import { fileURLToPath } from 'node:url'
 import { createTestPrisma, type TestPrisma } from './db'
 import { api, login } from './http'
+import { runExport } from './exports'
 
 const ADMIN_EMAIL = 'admin@consultas.local'
 const CITIZEN_EMAIL = 'ciudadania@consultas.local'
@@ -244,17 +245,21 @@ describe('Server e2e: acreditaciones', async () => {
     })
 
     it('exporta los ingresos a CSV para quien administra', async () => {
-      const res = await api<string>(
-        `/api/consultations/${hearingId}/accreditation/entries/export`,
-        { cookie: adminCookie }
+      const { parts } = await runExport(
+        { kind: 'consultation_accreditations', consultationId: hearingId },
+        adminCookie
       )
-      expect(res.status).toBe(200)
-      expect(res.data).toContain('DNI')
-      expect(res.data).toContain('40111222')
+      const csv = parts.map(part => part.csv).join('')
+      expect(csv).toContain('DNI')
+      expect(csv).toContain('40111222')
     })
 
     it('rechaza la exportación a la ciudadanía (403)', async () => {
-      const res = await api(`/api/consultations/${hearingId}/accreditation/entries/export`, { cookie: citizenCookie })
+      const res = await api('/api/exports', {
+        method: 'POST',
+        cookie: citizenCookie,
+        body: { kind: 'consultation_accreditations', consultationId: hearingId }
+      })
       expect(res.status).toBe(403)
     })
 

@@ -56,6 +56,10 @@ export default defineNuxtConfig({
       password: '',
       from: 'Consultas Ciudadanas <no-reply@example.com>'
     },
+    exports: {
+      // Filas máximas por archivo CSV de una exportación (NUXT_EXPORTS_ROWS_PER_FILE).
+      rowsPerFile: 10000
+    },
     storage: {
       // 'local' | 's3'
       driver: 'local',

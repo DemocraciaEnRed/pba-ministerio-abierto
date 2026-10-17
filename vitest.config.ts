@@ -6,6 +6,9 @@ import { config as loadEnv } from 'dotenv'
 // sobrescribiendo cualquier variable heredada del shell.
 loadEnv({ path: '.env.test', override: true })
 
+// Pocas filas por archivo de exportación para ejercitar la división en partes.
+process.env.NUXT_EXPORTS_ROWS_PER_FILE = '3'
+
 export default defineConfig({
   test: {
     include: ['test/e2e/**/*.{test,spec}.ts'],

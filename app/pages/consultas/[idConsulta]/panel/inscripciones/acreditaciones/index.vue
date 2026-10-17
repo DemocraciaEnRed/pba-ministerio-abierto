@@ -65,6 +65,8 @@ const STATE_BADGE: Record<AccreditationState, { label: string, color: ButtonProp
   closed: { label: 'Cerrada', color: 'neutral' }
 }
 
+const { requesting, requestExport } = useDataExport()
+
 const headerButtons = computed<ButtonProps[]>(() => {
   const buttons: ButtonProps[] = [
     { label: 'Volver a inscripciones', icon: 'lucide:arrow-left', color: 'neutral', variant: 'ghost', to: backLink.value }
@@ -72,7 +74,7 @@ const headerButtons = computed<ButtonProps[]>(() => {
   if (accreditation.value) {
     buttons.push(
       { label: 'Copiar link', icon: 'lucide:link', color: 'neutral', variant: 'subtle', onClick: copyAccreditationLink },
-      { label: 'Exportar CSV', icon: 'lucide:file-text', color: 'neutral', variant: 'subtle', to: `/api/consultations/${consultationId.value}/accreditation/entries/export`, external: true },
+      { label: 'Exportar CSV', icon: 'lucide:file-down', color: 'neutral', variant: 'subtle', loading: requesting.value, onClick: () => requestExport({ kind: 'consultation_accreditations', consultationId: Number(consultationId.value) }) },
       { label: 'Ver QR', icon: 'lucide:qr-code', color: 'primary', variant: 'solid', to: qrLink.value, target: '_blank' }
     )
   }
@@ -379,6 +381,11 @@ function personName(entry: AdminAccreditationEntryDTO): string {
             />
           </div>
         </div>
+
+        <ExportsRecentExports
+          kind="consultation_accreditations"
+          :consultation-id="consultationId"
+        />
       </template>
     </UPageBody>
 

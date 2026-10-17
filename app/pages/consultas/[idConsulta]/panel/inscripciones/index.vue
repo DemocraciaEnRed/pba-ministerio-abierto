@@ -143,6 +143,8 @@ async function confirmRemove() {
   }
 }
 
+const { requesting, requestExport } = useDataExport()
+
 const headerButtons = computed<ButtonProps[]>(() => {
   if (!form.value) {
     return [
@@ -164,11 +166,11 @@ const headerButtons = computed<ButtonProps[]>(() => {
     },
     {
       label: 'Exportar CSV',
-      icon: 'lucide:file-text',
+      icon: 'lucide:file-down',
       color: 'neutral',
       variant: 'subtle',
-      to: `/api/consultations/${consultationId.value}/registrations/export`,
-      external: true
+      loading: requesting.value,
+      onClick: () => requestExport({ kind: 'consultation_registrations', consultationId: Number(consultationId.value) })
     },
     {
       label: 'Acreditaciones',
@@ -351,6 +353,11 @@ function prevPage() {
             />
           </div>
         </div>
+
+        <ExportsRecentExports
+          kind="consultation_registrations"
+          :consultation-id="consultationId"
+        />
       </template>
     </UPageBody>
 

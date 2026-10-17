@@ -163,6 +163,25 @@ function menuItems(entry: AdminCommentLogEntry): DropdownMenuItem[] {
   ]
 }
 
+// --- Exportación CSV con los filtros aplicados ---
+
+const { requesting, requestExport } = useDataExport()
+
+function exportCsv(): void {
+  void requestExport({
+    kind: 'platform_comments',
+    filters: {
+      q: searchInput.value.trim() || undefined,
+      consultationId: filters.consultationId ?? undefined,
+      moderationStatus: filters.moderationStatus === 'all' ? undefined : filters.moderationStatus,
+      from: filters.from || undefined,
+      to: filters.to || undefined
+    }
+  }, {
+    detail: 'Incluye los comentarios y respuestas que coinciden con los filtros, en cualquier estado, con la consulta, el tema y el correo de cada autor/a. De los comentarios borrados no se exporta el texto.'
+  })
+}
+
 const headerLinks = computed<ButtonProps[]>(() => [
   {
     label: 'Actualizar',
@@ -171,6 +190,14 @@ const headerLinks = computed<ButtonProps[]>(() => [
     variant: 'subtle',
     loading: status.value === 'pending',
     onClick: () => refresh()
+  },
+  {
+    label: 'Exportar CSV',
+    icon: 'lucide:file-down',
+    color: 'neutral',
+    variant: 'subtle',
+    loading: requesting.value,
+    onClick: exportCsv
   }
 ])
 
@@ -353,6 +380,8 @@ function openThread(entry: AdminCommentLogEntry): void {
             :total="pagination.total"
           />
         </div>
+
+        <ExportsRecentExports kind="platform_comments" />
       </div>
     </UPageBody>
 

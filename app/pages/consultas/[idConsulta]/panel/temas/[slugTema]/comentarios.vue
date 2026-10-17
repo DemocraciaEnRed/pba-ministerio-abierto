@@ -11,7 +11,9 @@ usePrivatePageSeo('Comentarios del tema')
 const { consultationId, topicSlug, data: topic } = useTopicAdmin()
 interface ModerationActions {
   refresh: () => Promise<void>
+  exportCsv: () => void
   status: string
+  requesting: boolean
 }
 
 const moderation = useTemplateRef<ModerationActions>('moderation')
@@ -24,6 +26,14 @@ const headerLinks = computed<ButtonProps[]>(() => [
     variant: 'subtle',
     loading: moderation.value?.status === 'pending',
     onClick: () => moderation.value?.refresh()
+  },
+  {
+    label: 'Exportar CSV',
+    icon: 'lucide:file-down',
+    color: 'neutral',
+    variant: 'subtle',
+    loading: moderation.value?.requesting,
+    onClick: () => moderation.value?.exportCsv()
   }
 ])
 </script>

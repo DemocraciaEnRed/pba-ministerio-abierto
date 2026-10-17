@@ -55,14 +55,16 @@ function openDetail(contribution: AdminObservatoryContributionDTO) {
   detailOpen.value = true
 }
 
+const { requesting, requestExport } = useDataExport()
+
 const headerButtons = computed<ButtonProps[]>(() => [
   {
     label: 'Descargar CSV',
-    icon: 'lucide:file-text',
+    icon: 'lucide:file-down',
     color: 'neutral',
     variant: 'subtle',
-    to: '/api/observatory-contributions/export',
-    external: true
+    loading: requesting.value,
+    onClick: () => requestExport({ kind: 'observatory_contributions' })
   },
   {
     label: 'Actualizar',
@@ -189,6 +191,8 @@ const headerButtons = computed<ButtonProps[]>(() => [
           />
         </div>
       </div>
+
+      <ExportsRecentExports kind="observatory_contributions" />
     </UPageBody>
 
     <ObservatorioContributionSlideover

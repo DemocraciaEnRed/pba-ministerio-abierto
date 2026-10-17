@@ -3,6 +3,7 @@ import { setup, url } from '@nuxt/test-utils/e2e'
 import { fileURLToPath } from 'node:url'
 import { createTestPrisma, type TestPrisma } from './db'
 import { api, login } from './http'
+import { runExport } from './exports'
 
 const ADMIN_EMAIL = 'admin@consultas.local'
 const CITIZEN_EMAIL = 'ciudadania@consultas.local'
@@ -346,21 +347,18 @@ describe('Server e2e: aportes del Observatorio', async () => {
     })
 
     it('exporta un CSV con BOM UTF-8 para platform-admin', async () => {
-      const res = await fetch(url('/api/observatory-contributions/export'), {
-        headers: { cookie: adminCookie }
-      })
+      const { parts } = await runExport({ kind: 'observatory_contributions' }, adminCookie)
 
-      expect(res.status).toBe(200)
-      expect(res.headers.get('content-type')).toContain('text/csv')
-
-      const buffer = Buffer.from(await res.arrayBuffer())
-      expect(buffer.subarray(0, 3)).toEqual(Buffer.from([0xEF, 0xBB, 0xBF]))
-      expect(buffer.toString('utf8')).toContain('Institución')
+      expect(parts.length).toBeGreaterThan(0)
+      expect(parts[0]!.bytes.subarray(0, 3)).toEqual(Buffer.from([0xEF, 0xBB, 0xBF]))
+      expect(parts[0]!.csv).toContain('Institución')
     })
 
     it('no permite exportar sin rol de plataforma', async () => {
-      const res = await fetch(url('/api/observatory-contributions/export'), {
-        headers: { cookie: citizenCookie }
+      const res = await api('/api/exports', {
+        method: 'POST',
+        cookie: citizenCookie,
+        body: { kind: 'observatory_contributions' }
       })
       expect(res.status).toBe(403)
     })

@@ -53,14 +53,16 @@ function openDetail(submission: AdminRegionalMeetingSubmissionDTO) {
   detailOpen.value = true
 }
 
+const { requesting, requestExport } = useDataExport()
+
 const headerButtons = computed<ButtonProps[]>(() => [
   {
     label: 'Descargar CSV',
-    icon: 'lucide:file-text',
+    icon: 'lucide:file-down',
     color: 'neutral',
     variant: 'subtle',
-    to: '/api/regional-meetings/submissions/export',
-    external: true
+    loading: requesting.value,
+    onClick: () => requestExport({ kind: 'regional_meeting_submissions' })
   },
   {
     label: 'Actualizar',
@@ -184,6 +186,8 @@ const headerButtons = computed<ButtonProps[]>(() => [
           />
         </div>
       </div>
+
+      <ExportsRecentExports kind="regional_meeting_submissions" />
     </UPageBody>
 
     <EncuentrosRegionalesSubmissionSlideover

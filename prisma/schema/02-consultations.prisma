@@ -58,6 +58,7 @@ model Consultation {
   relatedLinks ConsultationRelatedLink[]
   registrationForm ConsultationRegistrationForm?
   legacySlugs ConsultationLegacySlug[]
+  dataExports DataExport[]
 
   @@index([visibility])
   @@index([featured])

@@ -96,6 +96,12 @@ const itemsNavigationMenu = computed<NavigationMenuItem[][]>(() => [
       to: '/admin/usuarios',
       icon: 'i-lucide-users',
       active: route.path.startsWith('/admin/usuarios')
+    },
+    {
+      label: 'Exportaciones',
+      to: '/admin/exportaciones',
+      icon: 'i-lucide-file-down',
+      active: route.path.startsWith('/admin/exportaciones')
     }
   ]
 ])

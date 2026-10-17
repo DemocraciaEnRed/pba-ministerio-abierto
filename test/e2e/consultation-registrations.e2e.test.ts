@@ -3,6 +3,7 @@ import { setup, url } from '@nuxt/test-utils/e2e'
 import { fileURLToPath } from 'node:url'
 import { createTestPrisma, type TestPrisma } from './db'
 import { api, login } from './http'
+import { csvDataLines, runExport } from './exports'
 
 const ADMIN_EMAIL = 'admin@consultas.local'
 const CITIZEN_EMAIL = 'ciudadania@consultas.local'
@@ -338,25 +339,29 @@ describe('Server e2e: formulario de inscripción', async () => {
     })
 
     it('exporta el CSV con encabezados y BOM', async () => {
-      const res = await fetch(url(`/api/consultations/${hearingId}/registrations/export`), {
-        headers: { cookie: adminCookie }
-      })
+      const { parts } = await runExport(
+        { kind: 'consultation_registrations', consultationId: hearingId },
+        adminCookie
+      )
 
-      expect(res.status).toBe(200)
-      expect(res.headers.get('content-disposition')).toContain(`inscripciones-${hearingSlug}`)
+      expect(parts).toHaveLength(1)
+      const [part] = parts
+      expect(part!.contentDisposition).toContain(`inscripciones-${hearingSlug}`)
 
       // `res.text()` descarta el BOM, así que lo verificamos sobre los bytes.
-      const bytes = Buffer.from(await res.arrayBuffer())
-      expect(bytes.subarray(0, 3)).toEqual(Buffer.from([0xEF, 0xBB, 0xBF]))
+      expect(part!.bytes.subarray(0, 3)).toEqual(Buffer.from([0xEF, 0xBB, 0xBF]))
 
-      const csv = bytes.toString('utf8')
-      expect(csv).toContain('"DNI"')
-      expect(csv).toContain('"Forma de participación"')
-      expect(csv.trim().split('\n')).toHaveLength(3)
+      expect(part!.csv).toContain('"DNI"')
+      expect(part!.csv).toContain('"Forma de participación"')
+      expect(csvDataLines(part!.csv)).toHaveLength(2)
     })
 
     it('rechaza la exportación a la ciudadanía (403)', async () => {
-      const res = await api(`/api/consultations/${hearingId}/registrations/export`, { cookie: citizenCookie })
+      const res = await api('/api/exports', {
+        method: 'POST',
+        cookie: citizenCookie,
+        body: { kind: 'consultation_registrations', consultationId: hearingId }
+      })
       expect(res.status).toBe(403)
     })
   })

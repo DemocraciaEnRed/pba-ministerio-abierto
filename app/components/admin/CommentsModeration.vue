@@ -93,11 +93,13 @@ function clearFilters(): void {
 // `useRequestFetch` reenvía la cookie de sesión durante el SSR para que el
 // backend resuelva la vista admin (estado de moderación) del usuario logueado.
 const requestFetch = useRequestFetch()
-// Las acciones de recarga se muestran en el encabezado de la página.
+// Las acciones de recarga y exportación se muestran en el encabezado de la página.
 // Se exponen antes del `await` (requisito de Vue) con getters que leen el estado ya inicializado.
 defineExpose({
   refresh: () => refresh(),
-  get status() { return status.value }
+  exportCsv: () => exportCsv(),
+  get status() { return status.value },
+  get requesting() { return requesting.value }
 })
 
 const { data, status, refresh } = await useAsyncData(
@@ -209,6 +211,28 @@ function openThread(comment: AdminComment): void {
 // --- Acciones de moderación sobre la raíz del hilo ---
 
 const { confirmOpen, processing, confirmConfig, actionsFor, confirm } = useCommentModeration(() => refresh())
+
+// --- Exportación CSV con los filtros aplicados ---
+
+const { requesting, requestExport } = useDataExport()
+
+function exportCsv(): void {
+  void requestExport({
+    kind: 'consultation_comments',
+    consultationId: Number(props.consultationId),
+    filters: {
+      topic: props.topicSlug,
+      q: searchInput.value.trim() || undefined,
+      moderationStatus: filters.moderationStatus === 'all' ? undefined : filters.moderationStatus,
+      from: filters.from || undefined,
+      to: filters.to || undefined,
+      unanswered: filters.unanswered,
+      withAttachment: filters.withAttachment
+    }
+  }, {
+    detail: 'Incluye los hilos completos que coinciden con los filtros (el comentario principal y todas sus respuestas, en cualquier estado), con el correo de cada autor/a. De los comentarios borrados no se exporta el texto.'
+  })
+}
 
 function excerptOf(comment: AdminComment): string {
   if (comment.moderationStatus === 'deleted') return 'Comentario borrado.'
@@ -423,6 +447,11 @@ function menuItems(comment: AdminComment): DropdownMenuItem[][] {
         :total="pagination.total"
       />
     </div>
+
+    <ExportsRecentExports
+      kind="consultation_comments"
+      :consultation-id="consultationId"
+    />
 
     <AdminCommentThreadSlideover
       v-model:open="threadOpen"
