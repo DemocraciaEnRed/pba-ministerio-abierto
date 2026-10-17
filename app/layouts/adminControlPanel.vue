@@ -24,6 +24,12 @@ const itemsNavigationMenu = computed<NavigationMenuItem[][]>(() => [
       active: route.path.startsWith('/admin/consultas')
     },
     {
+      label: 'Comentarios',
+      to: '/admin/comentarios',
+      icon: 'i-lucide-messages-square',
+      active: route.path.startsWith('/admin/comentarios')
+    },
+    {
       label: 'Encuentros Regionales',
       to: '/encuentros-regionales/panel',
       icon: 'i-lucide-map-pinned',

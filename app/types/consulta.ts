@@ -325,3 +325,78 @@ export interface CommentMetrics {
   allTimeTotal: number
   lastCommentAt: string | null
 }
+
+/** Estado de moderación de un comentario en la vista admin. */
+export type CommentModerationStatus = 'visible' | 'hidden' | 'deleted'
+
+/** Respuestas de un hilo agrupadas por estado de moderación. */
+export interface CommentReplyCounts {
+  total: number
+  visible: number
+  hidden: number
+  deleted: number
+}
+
+/**
+ * Comentario en su vista admin (bandeja de moderación, detalle y respuestas con
+ * `view=moderation`). `replyCounts` solo viene en la bandeja por hilos.
+ */
+export interface AdminComment {
+  id: number
+  containerType: 'consultation' | 'topic'
+  consultationId: number | null
+  topicId: number | null
+  parentCommentId: number | null
+  body: string
+  authorMode: CommentAuthorMode
+  authorLabel: string | null
+  authorEmail: string
+  authorAvatarUrl: string | null
+  authorUserId: number
+  moderationStatus: CommentModerationStatus
+  deletedAt: string | null
+  topicTitle: string | null
+  topicSlug: string | null
+  attachment: {
+    filename: string
+    mimeType: string | null
+    sizeBytes: number | null
+    downloadUrl: string
+  } | null
+  reactions: CommentReactionsSummary
+  replyCounts?: CommentReplyCounts
+  createdAt: string
+  updatedAt: string
+}
+
+/** Respuesta paginada de la bandeja de moderación o del hilo en modo moderación. */
+export interface AdminCommentsResponse {
+  items: AdminComment[]
+  pagination: PaginationMeta
+}
+
+/** Orden de la bandeja de moderación. */
+export type CommentModerationOrder = 'recent' | 'oldest' | 'mostReplied'
+
+/** Entrada del registro de comentarios de la plataforma (`GET /api/admin/comments`). */
+export interface AdminCommentLogEntry {
+  id: number
+  rootCommentId: number
+  isReply: boolean
+  excerpt: string
+  authorUserId: number
+  authorLabel: string | null
+  authorEmail: string
+  authorAvatarUrl: string | null
+  authorMode: CommentAuthorMode
+  moderationStatus: CommentModerationStatus
+  hasAttachment: boolean
+  consultation: { id: number, slug: string, title: string }
+  topic: { id: number, slug: string, title: string } | null
+  createdAt: string
+}
+
+export interface AdminCommentLogResponse {
+  items: AdminCommentLogEntry[]
+  pagination: PaginationMeta
+}

@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import type { ButtonProps } from '@nuxt/ui'
+
 definePageMeta({
   layout: 'consultas-control-panel',
   middleware: 'consultation-manager'
@@ -7,6 +9,23 @@ definePageMeta({
 usePrivatePageSeo('Comentarios')
 
 const { consultationId, data: consultation } = useConsultationAdmin()
+interface ModerationActions {
+  refresh: () => Promise<void>
+  status: string
+}
+
+const moderation = useTemplateRef<ModerationActions>('moderation')
+
+const headerLinks = computed<ButtonProps[]>(() => [
+  {
+    label: 'Actualizar',
+    icon: 'lucide:refresh-cw',
+    color: 'neutral',
+    variant: 'subtle',
+    loading: moderation.value?.status === 'pending',
+    onClick: () => moderation.value?.refresh()
+  }
+])
 </script>
 
 <template>
@@ -14,6 +33,7 @@ const { consultationId, data: consultation } = useConsultationAdmin()
     <UPageHeader
       title="Comentarios"
       description="Moderá los comentarios de la consulta."
+      :links="headerLinks"
     />
 
     <UPageBody>
@@ -26,7 +46,10 @@ const { consultationId, data: consultation } = useConsultationAdmin()
         description="No se muestra en la página pública y no se puede comentar ni reaccionar. Podés volver a mostrarla desde la configuración de la consulta."
         class="mb-4"
       />
-      <AdminCommentsModeration :consultation-id="consultationId" />
+      <AdminCommentsModeration
+        ref="moderation"
+        :consultation-id="consultationId"
+      />
     </UPageBody>
   </UPage>
 </template>

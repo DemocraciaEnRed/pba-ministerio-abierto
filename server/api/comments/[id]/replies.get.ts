@@ -10,10 +10,12 @@ import { serializeComment } from '~~/server/utils/serializers/comment'
 /**
  * Lista paginada de respuestas visibles de un comentario de primer nivel.
  * Las respuestas se cargan bajo demanda (5 por página, botón "cargar más")
- * para no anidar todo el hilo en el listado principal.
+ * para no anidar todo el hilo en el listado principal. Con `view=moderation`,
+ * un administrador recibe todas las respuestas (cualquier estado) en vista admin.
  */
 export default defineEventHandler(async (event) => {
   const commentId = parsePositiveIntParam(event, 'id', 'comentario')
+  const query = await parseQuery(event, RepliesQuerySchema)
   const ctx = await getAuthContext(event)
 
   const parent = await prisma.comment.findUnique({
@@ -59,16 +61,23 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 404, message: 'Comentario no encontrado' })
   }
 
-  if (parent.topic) {
-    assertCommentsVisible(parent.topic, 'topic')
-  } else {
-    assertCommentsVisible(parent.consultation!, 'consultation')
+  // `view=moderation` solo se respeta para administradores: incluye respuestas
+  // ocultas y borradas y funciona aunque la sección de comentarios esté oculta.
+  const moderationView = isAdmin && query.view === 'moderation'
+
+  if (!moderationView) {
+    if (parent.topic) {
+      assertCommentsVisible(parent.topic, 'topic')
+    } else {
+      assertCommentsVisible(parent.consultation!, 'consultation')
+    }
   }
 
-  const query = await parseQuery(event, RepliesQuerySchema)
   const skip = (query.page - 1) * query.perPage
 
-  const where = { parentCommentId: commentId, moderationStatus: 'visible' as const }
+  const where = moderationView
+    ? { parentCommentId: commentId }
+    : { parentCommentId: commentId, moderationStatus: 'visible' as const }
 
   const [replies, total] = await Promise.all([
     prisma.comment.findMany({
@@ -85,12 +94,15 @@ export default defineEventHandler(async (event) => {
   const institutionName = await getInstitutionName()
   const avatarUrls = await resolveCommentAvatarUrls(replies)
 
+  const context = { currentUserId, institutionName }
+
   return {
-    items: replies.map(reply => serializeComment(
-      { ...reply, authorAvatarUrl: avatarUrls.get(reply.id) ?? null },
-      'public',
-      { currentUserId, institutionName }
-    )),
+    items: replies.map((reply) => {
+      const withAvatar = { ...reply, authorAvatarUrl: avatarUrls.get(reply.id) ?? null }
+      return moderationView
+        ? serializeComment(withAvatar, 'admin', context)
+        : serializeComment(withAvatar, 'public', context)
+    }),
     pagination: {
       page: query.page,
       perPage: query.perPage,

@@ -260,6 +260,11 @@ const classificationDescription = computed(() => {
         </section>
 
         <AdminConsultationActivityStats :consultation-id="consultationId" />
+
+        <AdminConsultationRecentComments
+          :consultation-id="consultationId"
+          :consultation-title="consultation?.title"
+        />
       </div>
     </UPageBody>
   </UPage>

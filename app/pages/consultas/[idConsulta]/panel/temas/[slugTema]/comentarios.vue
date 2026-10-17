@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import type { ButtonProps } from '@nuxt/ui'
+
 definePageMeta({
   layout: 'tema-consulta-control-panel',
   middleware: ['consultation-manager', 'consultation-topics-disabled']
@@ -7,6 +9,23 @@ definePageMeta({
 usePrivatePageSeo('Comentarios del tema')
 
 const { consultationId, topicSlug, data: topic } = useTopicAdmin()
+interface ModerationActions {
+  refresh: () => Promise<void>
+  status: string
+}
+
+const moderation = useTemplateRef<ModerationActions>('moderation')
+
+const headerLinks = computed<ButtonProps[]>(() => [
+  {
+    label: 'Actualizar',
+    icon: 'lucide:refresh-cw',
+    color: 'neutral',
+    variant: 'subtle',
+    loading: moderation.value?.status === 'pending',
+    onClick: () => moderation.value?.refresh()
+  }
+])
 </script>
 
 <template>
@@ -14,6 +33,7 @@ const { consultationId, topicSlug, data: topic } = useTopicAdmin()
     <UPageHeader
       title="Comentarios"
       description="Moderá los comentarios de este tema de participación."
+      :links="headerLinks"
     />
 
     <UPageBody>
@@ -27,6 +47,7 @@ const { consultationId, topicSlug, data: topic } = useTopicAdmin()
         class="mb-4"
       />
       <AdminCommentsModeration
+        ref="moderation"
         :consultation-id="consultationId"
         :topic-slug="topicSlug"
       />

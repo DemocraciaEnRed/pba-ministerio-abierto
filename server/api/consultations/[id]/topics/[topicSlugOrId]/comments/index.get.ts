@@ -7,6 +7,12 @@ import {
   getInstitutionName,
   resolveCommentAvatarUrls
 } from '~~/server/utils/comments'
+import {
+  buildModerationOrderBy,
+  buildModerationWhere,
+  countRepliesByStatus,
+  EMPTY_REPLY_COUNTS
+} from '~~/server/utils/comments/moderation-query'
 import { serializeComment } from '~~/server/utils/serializers/comment'
 import { resolveConsultationIdFromParam } from '~~/server/utils/consultations/resolve'
 
@@ -44,34 +50,37 @@ export default defineEventHandler(async (event) => {
   // que por defecto reciben la bandeja de moderación en esta misma URL.
   const { view } = await parseQuery(event, CommentsThreadQuerySchema)
 
-  // Bandeja de moderación del tema: todos los comentarios del tema (incluidas
-  // respuestas), con filtro por estado y paginación.
+  // Bandeja de moderación del tema: todos los comentarios del tema (o solo los
+  // hilos con `level=top`), con filtros de contenido, estado y paginación.
   if (isAdmin && view !== 'thread') {
     const query = await parseQuery(event, TopicCommentsModerationQuerySchema)
 
-    const where = {
-      topicId: topic.id,
-      ...(query.moderationStatus ? { moderationStatus: query.moderationStatus } : {})
-    }
-
+    const where = buildModerationWhere({ topicId: topic.id }, query)
     const skip = (query.page - 1) * query.perPage
 
     const [comments, total] = await Promise.all([
       prisma.comment.findMany({
         where,
         include: commentWithRelationsInclude,
-        orderBy: { createdAt: 'desc' },
+        orderBy: buildModerationOrderBy(query.order),
         skip,
         take: query.perPage
       }),
       prisma.comment.count({ where })
     ])
 
+    const replyCounts = query.level === 'top'
+      ? await countRepliesByStatus(comments.map(comment => comment.id))
+      : null
     const avatarUrls = await resolveCommentAvatarUrls(comments)
 
     return {
       items: comments.map(comment => serializeComment(
-        { ...comment, authorAvatarUrl: avatarUrls.get(comment.id) ?? null },
+        {
+          ...comment,
+          authorAvatarUrl: avatarUrls.get(comment.id) ?? null,
+          ...(replyCounts ? { replyCounts: replyCounts.get(comment.id) ?? EMPTY_REPLY_COUNTS } : {})
+        },
         'admin',
         { currentUserId, institutionName }
       )),
