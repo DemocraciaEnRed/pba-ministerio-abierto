@@ -105,7 +105,7 @@ const themeUi: ThemeUI = {
       >
         <template #title>
           <img
-            src="https://democraciaenred.nyc3.digitaloceanspaces.com/projects/pba-ministerio-abierto/app/assets/logo/logo.svg"
+            src="https://democraciaenred.nyc3.digitaloceanspaces.com/projects/pba-ministerio-abierto/app/assets/logo/logo-text-white.svg"
             alt="Ministerio Abierto"
             width="365"
             height="123"
