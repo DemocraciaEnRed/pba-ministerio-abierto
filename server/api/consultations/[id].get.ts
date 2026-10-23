@@ -16,6 +16,7 @@ export default defineEventHandler(async (event) => {
     {
       section: true,
       region: true,
+      regionalMeeting: true,
       workGroupAssignments: {
         include: { workGroup: true },
         orderBy: { workGroup: { displayOrder: 'asc' } }

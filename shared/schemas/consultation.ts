@@ -1,4 +1,5 @@
 import * as z from 'zod'
+import { RegionalMeetingAgendaSchema } from '#shared/schemas/regional-meetings'
 
 const slugField = z
   .string()
@@ -64,6 +65,16 @@ const idListField = z
   )
 
 const commentsEnabledField = z.boolean().default(true)
+
+// Solo aplican a los tipos que habilitan región (Encuentros Regionales); el
+// handler decide si son obligatorios según el tipo de la consulta.
+const regionIdField = z
+  .int('La región debe ser un ID válido')
+  .positive('Elegí una región')
+  .nullable()
+  .optional()
+
+const regionalMeetingField = RegionalMeetingAgendaSchema.nullable().optional()
 
 const participationStateField = z.enum(['scheduled', 'open', 'closed'], {
   message: 'El estado debe ser programada, abierta o finalizada'
@@ -174,7 +185,9 @@ export const CreateConsultationSchema = z.object({
   closedMessage: textAreaField,
   commentsEnabled: commentsEnabledField,
   commentsGuidance: textAreaField.default(null),
-  resultsVisibility: z.enum(['hidden', 'participants_only', 'public']).default('public')
+  resultsVisibility: z.enum(['hidden', 'participants_only', 'public']).default('public'),
+  regionId: regionIdField,
+  regionalMeeting: regionalMeetingField
 })
 
 export const UpdateConsultationSchema = z.object({
@@ -188,7 +201,9 @@ export const UpdateConsultationSchema = z.object({
   closedMessage: textAreaField,
   commentsEnabled: commentsEnabledField,
   commentsGuidance: textAreaField.default(null),
-  resultsVisibility: z.enum(['hidden', 'participants_only', 'public'])
+  resultsVisibility: z.enum(['hidden', 'participants_only', 'public']),
+  regionId: regionIdField,
+  regionalMeeting: regionalMeetingField
 })
 
 export const SetConsultationVisibilitySchema = z.object({
@@ -228,10 +243,6 @@ export const SetConsultationSectionSchema = z.object({
   sectionId: z.int().positive('La sección debe ser un ID válido').nullable()
 })
 
-export const SetConsultationRegionSchema = z.object({
-  regionId: z.int().positive('La región debe ser un ID válido').nullable()
-})
-
 export const SetConsultationWorkGroupsSchema = z.object({
   observatoryWorkGroupIds: z
     .array(z.int().positive('El grupo de trabajo debe ser un ID válido'))
@@ -258,6 +269,5 @@ export type UpdateConsultationFeaturedInput = z.output<typeof UpdateConsultation
 export type SetConsultationCategoriesInput = z.output<typeof SetConsultationCategoriesSchema>
 export type SetConsultationTagsInput = z.output<typeof SetConsultationTagsSchema>
 export type SetConsultationSectionInput = z.output<typeof SetConsultationSectionSchema>
-export type SetConsultationRegionInput = z.output<typeof SetConsultationRegionSchema>
 export type SetConsultationWorkGroupsInput = z.output<typeof SetConsultationWorkGroupsSchema>
 export type AssignConsultationMemberInput = z.output<typeof AssignConsultationMemberSchema>

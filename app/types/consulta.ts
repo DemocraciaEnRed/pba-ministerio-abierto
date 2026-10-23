@@ -36,6 +36,8 @@ export interface ConsultationDetail {
   /** Portada de la consulta para el hero; `null` cuando no hay imagen cargada. */
   coverUrl: string | null
   coverAltText: string | null
+  /** Encuentro presencial (Encuentros Regionales); `null` si no tiene. */
+  regionalMeeting: RegionalMeetingSummary | null
   /** Indica si el usuario actual puede gestionar la consulta (admin o gestor). */
   canManage?: boolean
 }
@@ -198,6 +200,22 @@ export interface PublicConsultationListItem {
   topicsCount: number | null
   /** Inscripción presencial; `null` si la instancia no tiene formulario. */
   registration: ConsultationRegistrationSummary | null
+  /** Encuentro presencial (Encuentros Regionales); `null` si no tiene. */
+  regionalMeeting?: RegionalMeetingSummary | null
+}
+
+/**
+ * Datos del encuentro presencial de una consulta de Encuentros Regionales. En
+ * la vista pública `registrationUrl` solo viene con la inscripción abierta.
+ */
+export interface RegionalMeetingSummary {
+  location: string
+  heldAt: string
+  year: number
+  registrationUrl: string | null
+  registrationOpensAt: string | null
+  registrationClosesAt: string | null
+  registrationState: 'scheduled' | 'open' | 'closed' | null
 }
 
 /** Resumen del formulario de inscripción presencial de una instancia. */

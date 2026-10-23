@@ -46,12 +46,6 @@ const itemsNavigationMenu = computed<NavigationMenuItem[][]>(() => [
       active: route.path.startsWith('/encuentros-regionales/panel/regiones')
     },
     {
-      label: 'Agenda',
-      to: '/encuentros-regionales/panel/agenda',
-      icon: 'i-lucide-calendar-days',
-      active: route.path.startsWith('/encuentros-regionales/panel/agenda')
-    },
-    {
       label: 'Testimonios',
       to: '/encuentros-regionales/panel/testimonios',
       icon: 'i-lucide-quote',

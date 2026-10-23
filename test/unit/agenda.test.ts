@@ -8,7 +8,8 @@ import {
   formatAgendaRelativeDay,
   formatAgendaTime,
   getAgendaWindow,
-  groupMilestonesByDay
+  groupMilestonesByDay,
+  resolveAgendaEncounter
 } from '../../app/utils/agenda'
 
 // Viernes 16 de octubre de 2026, 15:00 (hora local).
@@ -99,6 +100,61 @@ test('suma hitos de inscripción y encuentro presencial', () => {
 
 test('cuenta las inscripciones abiertas', () => {
   assert.equal(computeAgendaStats(withRegistration, now, to).registrationOpen, 1)
+})
+
+const withRegionalMeeting = [
+  {
+    id: 'encuentro-con-inscripcion',
+    startsAt: null,
+    endsAt: null,
+    regionalMeeting: {
+      location: 'Junín',
+      heldAt: at(30, 9, 10),
+      registrationUrl: 'https://forms.gle/ejemplo',
+      registrationOpensAt: at(10),
+      registrationClosesAt: at(27)
+    }
+  },
+  {
+    id: 'encuentro-sin-inscripcion',
+    startsAt: null,
+    endsAt: null,
+    regionalMeeting: {
+      location: 'Tandil',
+      heldAt: at(2, 10, 10),
+      registrationUrl: null,
+      registrationOpensAt: null,
+      registrationClosesAt: null
+    }
+  }
+]
+
+test('suma hitos de los Encuentros Regionales', () => {
+  const milestones = buildAgendaMilestones(withRegionalMeeting, from, to)
+  assert.deepEqual(
+    milestones.map(m => `${m.item.id}:${m.kind}:${m.dayKey}`),
+    [
+      'encuentro-con-inscripcion:registration_closes:2026-10-27',
+      'encuentro-con-inscripcion:event:2026-10-30',
+      'encuentro-sin-inscripcion:event:2026-11-02'
+    ]
+  )
+})
+
+test('resuelve el encuentro con inscripción externa', () => {
+  assert.deepEqual(resolveAgendaEncounter(withRegionalMeeting[0]!), {
+    eventAt: at(30, 9, 10),
+    opensAt: at(10),
+    closesAt: at(27),
+    venue: 'Junín',
+    path: 'https://forms.gle/ejemplo',
+    external: true
+  })
+  assert.equal(resolveAgendaEncounter(items[0]!), null)
+})
+
+test('cuenta las inscripciones externas abiertas', () => {
+  assert.equal(computeAgendaStats(withRegionalMeeting, now, to).registrationOpen, 1)
 })
 
 test('formatea días relativos y fechas', () => {

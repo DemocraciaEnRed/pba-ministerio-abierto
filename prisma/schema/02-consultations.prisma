@@ -57,6 +57,7 @@ model Consultation {
   comments Comment[]
   relatedLinks ConsultationRelatedLink[]
   registrationForm ConsultationRegistrationForm?
+  regionalMeeting  RegionalMeetingAgendaItem?
   legacySlugs ConsultationLegacySlug[]
   dataExports DataExport[]
 

@@ -34,7 +34,17 @@ const initialValues = computed<ConsultationFormInitialValues | null>(() => {
     closedMessage: consultation.value.closedMessage,
     commentsEnabled: consultation.value.commentsEnabled,
     commentsGuidance: consultation.value.commentsGuidance,
-    resultsVisibility: consultation.value.resultsVisibility
+    resultsVisibility: consultation.value.resultsVisibility,
+    regionId: consultation.value.region?.id ?? null,
+    regionalMeeting: consultation.value.regionalMeeting
+      ? {
+          location: consultation.value.regionalMeeting.location,
+          heldAt: consultation.value.regionalMeeting.heldAt,
+          registrationUrl: consultation.value.regionalMeeting.registrationUrl,
+          registrationOpensAt: consultation.value.regionalMeeting.registrationOpensAt,
+          registrationClosesAt: consultation.value.regionalMeeting.registrationClosesAt
+        }
+      : null
   }
 })
 

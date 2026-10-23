@@ -12,7 +12,8 @@ import {
   formatAgendaRelativeDay,
   formatAgendaTime,
   getAgendaWindow,
-  groupMilestonesByDay
+  groupMilestonesByDay,
+  resolveAgendaEncounter
 } from '~/utils/agenda'
 import { getConsultationType } from '#shared/data/consultation-types'
 
@@ -152,20 +153,22 @@ const milestoneBadge: Record<AgendaMilestoneKind, BadgeProps> = {
 
 type Milestone = (typeof milestones.value)[number]
 
-/** Los hitos de inscripción llevan a la página de inscripción; el resto, a la instancia. */
-function milestoneLink(milestone: Milestone) {
-  const registration = milestone.item.registration
-  if (registration && (milestone.kind === 'registration_opens' || milestone.kind === 'registration_closes')) {
-    return registration.path
+/**
+ * Los hitos de inscripción llevan a la inscripción (propia o externa, si hay
+ * enlace disponible); el resto, a la instancia.
+ */
+function milestoneLink(milestone: Milestone): { to: string, external: boolean } {
+  const encounter = resolveAgendaEncounter(milestone.item)
+  if (encounter?.path && (milestone.kind === 'registration_opens' || milestone.kind === 'registration_closes')) {
+    return { to: encounter.path, external: encounter.external }
   }
-  return milestone.item.publicPath
+  return { to: milestone.item.publicPath, external: false }
 }
 
 function eventDetails(milestone: Milestone) {
-  const registration = milestone.item.registration
-  if (milestone.kind !== 'event' || !registration) return null
-  const venue = [registration.venueName, registration.venueCity].filter(Boolean).join(', ')
-  return `${formatAgendaTime(milestone.date)} h${venue ? ` · ${venue}` : ''}`
+  const encounter = resolveAgendaEncounter(milestone.item)
+  if (milestone.kind !== 'event' || !encounter) return null
+  return `${formatAgendaTime(milestone.date)} h${encounter.venue ? ` · ${encounter.venue}` : ''}`
 }
 
 function capitalize(value: string) {
@@ -322,7 +325,9 @@ function dayParts(date: Date) {
                   class="py-2 first:pt-0 last:pb-0"
                 >
                   <NuxtLink
-                    :to="milestoneLink(milestone)"
+                    :to="milestoneLink(milestone).to"
+                    :external="milestoneLink(milestone).external"
+                    :target="milestoneLink(milestone).external ? '_blank' : undefined"
                     class="group flex items-start gap-3 rounded-md"
                   >
                     <div class="min-w-0 flex-1">

@@ -1,3 +1,5 @@
+import type { RegionalMeetingSummary } from '~/types/consulta'
+
 export interface AdminConsultationSummary {
   id: number
   slug: string
@@ -25,6 +27,8 @@ export interface AdminConsultationSummary {
   /** Portada de la consulta; `null` cuando no hay imagen cargada. */
   coverUrl: string | null
   coverAltText: string | null
+  /** Encuentro presencial (Encuentros Regionales); `null` si no tiene. */
+  regionalMeeting: RegionalMeetingSummary | null
   createdAt?: string
   updatedAt?: string
   /** Indica si el usuario actual puede gestionar esta consulta (admin o gestor). */

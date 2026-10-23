@@ -12,7 +12,60 @@ export interface AgendaSource {
     eventAt: string
     opensAt: string
     closesAt: string
+    path?: string
+    venueName?: string
+    venueCity?: string
   } | null
+  /**
+   * Encuentro presencial de Encuentros Regionales (inscripción en un formulario
+   * externo). La ventana de inscripción es opcional.
+   */
+  regionalMeeting?: {
+    location: string
+    heldAt: string
+    registrationUrl: string | null
+    registrationOpensAt: string | null
+    registrationClosesAt: string | null
+  } | null
+}
+
+/**
+ * Encuentro presencial de una instancia, unificando el formulario de
+ * inscripción propio y los datos de Encuentros Regionales.
+ */
+export interface AgendaEncounter {
+  eventAt: string
+  opensAt: string | null
+  closesAt: string | null
+  venue: string
+  /** Destino de la inscripción; `null` si no hay enlace disponible. */
+  path: string | null
+  /** `true` si `path` es un formulario externo. */
+  external: boolean
+}
+
+export function resolveAgendaEncounter(item: AgendaSource): AgendaEncounter | null {
+  if (item.registration) {
+    return {
+      eventAt: item.registration.eventAt,
+      opensAt: item.registration.opensAt,
+      closesAt: item.registration.closesAt,
+      venue: [item.registration.venueName, item.registration.venueCity].filter(Boolean).join(', '),
+      path: item.registration.path ?? null,
+      external: false
+    }
+  }
+  if (item.regionalMeeting) {
+    return {
+      eventAt: item.regionalMeeting.heldAt,
+      opensAt: item.regionalMeeting.registrationOpensAt,
+      closesAt: item.regionalMeeting.registrationClosesAt,
+      venue: item.regionalMeeting.location,
+      path: item.regionalMeeting.registrationUrl,
+      external: true
+    }
+  }
+  return null
 }
 
 /**
@@ -64,8 +117,9 @@ export function agendaDayKey(date: Date | string): string {
 
 /**
  * Hitos que caen dentro de `[from, to]`, ordenados por fecha. Cada instancia
- * aporta apertura/cierre de la participación y, si tiene formulario de
- * inscripción, apertura/cierre de la inscripción y el encuentro presencial.
+ * aporta apertura/cierre de la participación y, si tiene encuentro presencial
+ * (formulario de inscripción o Encuentro Regional), el encuentro y la
+ * apertura/cierre de la inscripción.
  */
 export function buildAgendaMilestones<T extends AgendaSource>(
   items: readonly T[],
@@ -87,10 +141,11 @@ export function buildAgendaMilestones<T extends AgendaSource>(
   for (const item of items) {
     push(item, 'opens', item.startsAt)
     push(item, 'closes', item.endsAt)
-    if (item.registration) {
-      push(item, 'registration_opens', item.registration.opensAt)
-      push(item, 'registration_closes', item.registration.closesAt)
-      push(item, 'event', item.registration.eventAt)
+    const encounter = resolveAgendaEncounter(item)
+    if (encounter) {
+      push(item, 'registration_opens', encounter.opensAt)
+      push(item, 'registration_closes', encounter.closesAt)
+      push(item, 'event', encounter.eventAt)
     }
   }
 
@@ -127,9 +182,10 @@ export function computeAgendaStats<T extends AgendaSource>(
   const stats: AgendaStats = { openNow: 0, opensSoon: 0, closesThisWeek: 0, registrationOpen: 0 }
 
   for (const item of items) {
-    if (item.registration
-      && new Date(item.registration.opensAt).getTime() <= nowMs
-      && new Date(item.registration.closesAt).getTime() >= nowMs) {
+    const encounter = resolveAgendaEncounter(item)
+    if (encounter?.opensAt && encounter.closesAt
+      && new Date(encounter.opensAt).getTime() <= nowMs
+      && new Date(encounter.closesAt).getTime() >= nowMs) {
       stats.registrationOpen++
     }
 

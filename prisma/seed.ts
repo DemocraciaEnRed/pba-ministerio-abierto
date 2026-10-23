@@ -98,7 +98,7 @@ function parseSeedArgs(): ParsedSeedArgs {
   const rawProfile = values.profile?.trim()
 
   if (!rawProfile) {
-    return { profiles: ['base', 'institution', 'regional-meetings', 'regional-meetings-metrics'], options }
+    return { profiles: ['base', 'institution', 'regional-meetings-metrics'], options }
   }
 
   const requested = rawProfile

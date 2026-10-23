@@ -8,6 +8,8 @@ import { deriveParticipationState } from '../participation-state'
 import { consultationPublicPath } from '#shared/utils/consultation-url'
 import type { RegistrationState } from './consultationRegistrationForm'
 import { resolveRegistrationState } from './consultationRegistrationForm'
+import type { PublicRegionalMeetingDTO, RegionalMeetingEntity } from './regionalMeetingAgendaItem'
+import { serializeRegionalMeeting } from './regionalMeetingAgendaItem'
 
 export type ConsultationView = 'public' | 'admin'
 
@@ -53,6 +55,8 @@ type ConsultationEntity = {
    * solo `id` indica presencia; con fechas y sede se arma el resumen público.
    */
   registrationForm?: ({ id: number } & Partial<RegistrationSummaryEntity>) | null
+  /** Encuentro presencial (Encuentros Regionales); opcional, solo si el handler lo incluye. */
+  regionalMeeting?: RegionalMeetingEntity | null
   /** URL de la portada resuelta por el handler (role `cover`); opcional. */
   coverUrl?: string | null
   /** Texto alternativo de la portada; opcional. */
@@ -139,6 +143,11 @@ export interface PublicConsultationDTO {
    * sus fechas.
    */
   registration: ConsultationRegistrationSummaryDTO | null
+  /**
+   * Encuentro presencial de Encuentros Regionales (lugar, fecha e inscripción
+   * externa); `null` si no tiene o el handler no lo cargó.
+   */
+  regionalMeeting: PublicRegionalMeetingDTO | null
 }
 
 export interface AdminConsultationDTO extends PublicConsultationDTO {
@@ -214,7 +223,10 @@ export function serializeConsultation(
     coverUrl: consultation.coverUrl ?? null,
     coverAltText: consultation.coverAltText ?? null,
     topicsCount: consultation.topicsCount ?? null,
-    registration: serializeRegistrationSummary(consultation.registrationForm, publicPath)
+    registration: serializeRegistrationSummary(consultation.registrationForm, publicPath),
+    regionalMeeting: consultation.regionalMeeting
+      ? serializeRegionalMeeting(consultation.regionalMeeting, view === 'admin' ? 'admin' : 'public')
+      : null
   }
 
   if (view === 'public') {

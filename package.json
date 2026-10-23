@@ -29,7 +29,7 @@
     "db:seed:metricas": "prisma db seed -- --profile regional-meetings-metrics",
     "db:seed:testimonials": "prisma db seed -- --profile regional-meetings-testimonials",
     "db:seed:demo": "prisma db seed -- --profile demo",
-    "db:seed:all": "prisma db seed -- --profile base,institution,regions,regional-meetings,regional-meetings-metrics,regional-meetings-testimonials,demo",
+    "db:seed:all": "prisma db seed -- --profile base,institution,regions,regional-meetings-metrics,regional-meetings-testimonials,demo,regional-meetings",
     "db:studio": "prisma studio",
     "db:test": "tsx scripts/test-database.ts",
     "test": "vitest run",

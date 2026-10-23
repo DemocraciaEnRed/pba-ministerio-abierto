@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { isKnownConsultationTypeSlug } from '#shared/data/consultation-types'
+import { consultationTypeAllowsRegion, isKnownConsultationTypeSlug } from '#shared/data/consultation-types'
+import type { RegionalMeetingFormValues } from '~/components/admin/RegionalMeetingFields.vue'
 import { CreateConsultationSchema, UpdateConsultationSchema } from '#shared/schemas/consultation'
 import { slugifyConsultationName } from '#shared/utils/consultation-url'
 
@@ -22,6 +23,14 @@ export interface ConsultationFormInitialValues {
   commentsEnabled: boolean
   commentsGuidance: string | null
   resultsVisibility: ResultsVisibility
+  regionId?: number | null
+  regionalMeeting?: {
+    location: string
+    heldAt: string
+    registrationUrl: string | null
+    registrationOpensAt: string | null
+    registrationClosesAt: string | null
+  } | null
 }
 
 export interface ConsultationFormPayload {
@@ -38,6 +47,15 @@ export interface ConsultationFormPayload {
   commentsEnabled: boolean
   commentsGuidance: string | null
   resultsVisibility: ResultsVisibility
+  /** Solo para los tipos que admiten región (Encuentros Regionales). */
+  regionId?: number | null
+  regionalMeeting?: {
+    location: string
+    heldAt: string | null
+    registrationUrl: string | null
+    registrationOpensAt: string | null
+    registrationClosesAt: string | null
+  } | null
 }
 
 const props = withDefaults(defineProps<{
@@ -69,8 +87,17 @@ const form = reactive({
   resultsVisibility: 'public' as ResultsVisibility
 })
 
-type FieldName = keyof ConsultationFormPayload
-const errors = reactive<Partial<Record<FieldName, string>>>({})
+const regionId = ref<number | undefined>(undefined)
+const regionalMeeting = ref<RegionalMeetingFormValues>({
+  location: '',
+  heldAt: null,
+  registrationUrl: '',
+  registrationOpensAt: null,
+  registrationClosesAt: null
+})
+
+// Claves de error: nombre del campo o ruta anidada (p. ej. `regionalMeeting.heldAt`).
+const errors = reactive<Partial<Record<string, string>>>({})
 
 // La dirección web se genera desde el título (alta) o se conserva (edición),
 // salvo que quien administra elija personalizarla.
@@ -116,6 +143,14 @@ function hydrate(values: ConsultationFormInitialValues | null) {
   form.commentsEnabled = values?.commentsEnabled ?? true
   form.commentsGuidance = values?.commentsGuidance ?? ''
   form.resultsVisibility = 'public'
+  regionId.value = values?.regionId ?? undefined
+  regionalMeeting.value = {
+    location: values?.regionalMeeting?.location ?? '',
+    heldAt: values?.regionalMeeting?.heldAt ?? null,
+    registrationUrl: values?.regionalMeeting?.registrationUrl ?? '',
+    registrationOpensAt: values?.regionalMeeting?.registrationOpensAt ?? null,
+    registrationClosesAt: values?.regionalMeeting?.registrationClosesAt ?? null
+  }
   customizeAddress.value = false
 }
 
@@ -140,6 +175,8 @@ const selectedSectionSlug = computed(() => {
   if (props.mode === 'edit') return props.initialValues?.sectionSlug ?? null
   return sections.value?.find(section => section.id === form.sectionId)?.slug ?? null
 })
+
+const allowsRegion = computed(() => consultationTypeAllowsRegion(selectedSectionSlug.value))
 
 // Vista previa de la dirección pública. En el alta el número todavía no existe.
 const addressPreview = computed(() => {
@@ -185,12 +222,24 @@ function buildPayload(): ConsultationFormPayload {
     closedMessage: (form.closedMessage ?? '').trim() || null,
     commentsEnabled: form.commentsEnabled,
     commentsGuidance: (form.commentsGuidance ?? '').trim() || null,
-    resultsVisibility: form.resultsVisibility
+    resultsVisibility: form.resultsVisibility,
+    ...(allowsRegion.value
+      ? {
+          regionId: regionId.value ?? null,
+          regionalMeeting: {
+            location: regionalMeeting.value.location.trim(),
+            heldAt: regionalMeeting.value.heldAt,
+            registrationUrl: regionalMeeting.value.registrationUrl.trim() || null,
+            registrationOpensAt: regionalMeeting.value.registrationOpensAt,
+            registrationClosesAt: regionalMeeting.value.registrationClosesAt
+          }
+        }
+      : {})
   }
 }
 
 function clearErrors() {
-  for (const key of Object.keys(errors) as FieldName[]) {
+  for (const key of Object.keys(errors)) {
     errors[key] = undefined
   }
 }
@@ -199,15 +248,23 @@ function validate(payload: ConsultationFormPayload): boolean {
   clearErrors()
   const schema = props.mode === 'create' ? CreateConsultationSchema : UpdateConsultationSchema
   const result = schema.safeParse(payload)
-  if (result.success) return true
+  let valid = result.success
 
-  for (const issue of result.error.issues) {
-    const field = issue.path[0] as FieldName | undefined
-    if (field && !errors[field]) {
-      errors[field] = issue.message
+  if (!result.success) {
+    for (const issue of result.error.issues) {
+      const field = issue.path.join('.')
+      if (field && !errors[field]) {
+        errors[field] = issue.message
+      }
     }
   }
-  return false
+
+  // El schema los deja opcionales; para Encuentros Regionales son obligatorios.
+  if (allowsRegion.value && !payload.regionId) {
+    errors.regionId = 'Elegí una región'
+    valid = false
+  }
+  return valid
 }
 
 function onSubmit() {
@@ -333,6 +390,14 @@ const titleMax = 180
           class="w-full"
         />
       </UFormField>
+
+      <AdminRegionalMeetingFields
+        v-if="allowsRegion"
+        v-model:region-id="regionId"
+        v-model:meeting="regionalMeeting"
+        :consultation-id="initialValues?.id ?? null"
+        :errors="errors"
+      />
 
       <UFormField
         label="Resumen"

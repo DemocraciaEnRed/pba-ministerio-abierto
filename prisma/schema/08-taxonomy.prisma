@@ -28,7 +28,6 @@ model Region {
   updatedAt DateTime @updatedAt
 
   consultations     Consultation[]
-  agendaItem        RegionalMeetingAgendaItem?
   testimonialGroups RegionalMeetingTestimonialGroup[]
 }
 

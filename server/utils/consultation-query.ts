@@ -162,17 +162,39 @@ export function consultationActiveWindowWhere(from: Date, to: Date) {
             ]
           }
         }
+      },
+      {
+        regionalMeeting: {
+          is: {
+            OR: [
+              { registrationOpensAt: { lte: to }, registrationClosesAt: { gte: from } },
+              { heldAt: { gte: from, lte: to } }
+            ]
+          }
+        }
       }
     ]
   } satisfies ConsultationWhereInput
 }
 
-/** Instancias cuya ventana de inscripción presencial está abierta en `now`. */
+/**
+ * Instancias cuya ventana de inscripción presencial está abierta en `now`
+ * (formulario propio o inscripción externa de un Encuentro Regional).
+ */
 export function consultationRegistrationOpenWhere(now: Date) {
   return {
-    registrationForm: {
-      is: { opensAt: { lte: now }, closesAt: { gte: now } }
-    }
+    OR: [
+      { registrationForm: { is: { opensAt: { lte: now }, closesAt: { gte: now } } } },
+      {
+        regionalMeeting: {
+          is: {
+            registrationUrl: { not: null },
+            registrationOpensAt: { lte: now },
+            registrationClosesAt: { gte: now }
+          }
+        }
+      }
+    ]
   } satisfies ConsultationWhereInput
 }
 
