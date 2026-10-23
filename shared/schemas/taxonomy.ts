@@ -71,6 +71,10 @@ export const CategoriesQuerySchema = z.object({
   sectionSlug: slugField.optional()
 })
 
+export const TagsQuerySchema = z.object({
+  sectionSlug: slugField.optional()
+})
+
 export const CreateTagSchema = z.object({
   slug: slugField,
   name: nameField,
@@ -92,5 +96,6 @@ export type CreateCategoryInput = z.output<typeof CreateCategorySchema>
 export type UpdateCategoryInput = z.output<typeof UpdateCategorySchema>
 export type PatchCategoryInput = z.output<typeof PatchCategorySchema>
 export type CategoriesQueryInput = z.output<typeof CategoriesQuerySchema>
+export type TagsQueryInput = z.output<typeof TagsQuerySchema>
 export type CreateTagInput = z.output<typeof CreateTagSchema>
 export type UpdateTagInput = z.output<typeof UpdateTagSchema>

@@ -179,8 +179,6 @@ const themeUi: ThemeUI = {
       </div>
     </UPageSection>
     <ClientOnly>
-      <HomeDestacadas />
-      <HomeAgenda />
       <USeparator />
       <HomeExplorador />
       <template #fallback>

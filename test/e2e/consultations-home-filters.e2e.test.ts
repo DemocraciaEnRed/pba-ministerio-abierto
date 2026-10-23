@@ -32,6 +32,11 @@ describe('Server e2e: filtros del listado para la home', async () => {
 
   let prisma: TestPrisma
   let collaboratorCookie: string
+  let adminCookie: string
+  let sectionId: number
+  let categoryId: number
+  const createdSectionIds: number[] = []
+  const tags: Record<string, number> = {}
 
   const runId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
   const titlePrefix = `Home e2e ${runId}`
@@ -50,7 +55,10 @@ describe('Server e2e: filtros del listado para la home', async () => {
     // Participación lejana (fuera de la ventana) pero inscripción abierta ahora.
     registrationOpen: `${slugPrefix}-inscripcion-abierta`,
     // Inscripción ya cerrada y encuentro fuera de la ventana.
-    registrationClosed: `${slugPrefix}-inscripcion-cerrada`
+    registrationClosed: `${slugPrefix}-inscripcion-cerrada`,
+    archived: `${slugPrefix}-archivada`,
+    otherSection: `${slugPrefix}-otra-seccion`,
+    extra: `${slugPrefix}-extra`
   }
 
   beforeAll(async () => {
@@ -59,6 +67,23 @@ describe('Server e2e: filtros del listado para la home', async () => {
       where: { email: ADMIN_EMAIL },
       select: { id: true }
     })
+    for (const suffix of ['principal', 'otra', 'vacia']) {
+      const section = await prisma.section.create({
+        data: { slug: `${slugPrefix}-${suffix}`, name: `Home ${suffix} ${runId}` }
+      })
+      createdSectionIds.push(section.id)
+    }
+    sectionId = createdSectionIds[0]!
+    const category = await prisma.category.create({
+      data: { sectionId, slug: `${slugPrefix}-categoria`, name: `Categoría ${runId}` }
+    })
+    categoryId = category.id
+    for (const suffix of ['compartida', 'abierta', 'cerrada', 'archivada', 'oculta', 'otra', 'inactiva', 'sin-uso', 'solo-tema']) {
+      const tag = await prisma.tag.create({
+        data: { slug: `${slugPrefix}-${suffix}`, name: `Etiqueta ${suffix} ${runId}`, isActive: suffix !== 'inactiva' }
+      })
+      tags[suffix] = tag.id
+    }
 
     const baseData = {
       summary: null,
@@ -76,11 +101,15 @@ describe('Server e2e: filtros del listado para la home', async () => {
       { slug: slugs.closedFeatured, visibility: 'visible', featured: true, startsAt: now - 10 * day, endsAt: now - 2 * day },
       { slug: slugs.hiddenFeatured, visibility: 'hidden', featured: true, startsAt: now - day, endsAt: now + 5 * day },
       { slug: slugs.registrationOpen, visibility: 'visible', featured: false, startsAt: now + 50 * day, endsAt: now + 60 * day },
-      { slug: slugs.registrationClosed, visibility: 'visible', featured: false, startsAt: now - 90 * day, endsAt: now - 40 * day }
+      { slug: slugs.registrationClosed, visibility: 'visible', featured: false, startsAt: now - 90 * day, endsAt: now - 40 * day },
+      { slug: slugs.archived, visibility: 'archived', featured: false, startsAt: now - 90 * day, endsAt: now - 40 * day },
+      { slug: slugs.otherSection, visibility: 'visible', featured: false, startsAt: now - day, endsAt: null },
+      { slug: slugs.extra, visibility: 'visible', featured: false, startsAt: now - day, endsAt: null }
     ] as const
 
     const created = await Promise.all(rows.map(row => prisma.consultation.create({ data: {
       ...baseData,
+      sectionId: row.slug === slugs.otherSection ? createdSectionIds[1]! : sectionId,
       slug: row.slug,
       title: `${titlePrefix} ${row.slug}`,
       visibility: row.visibility,
@@ -92,6 +121,31 @@ describe('Server e2e: filtros del listado para la home', async () => {
     createdConsultationIds.push(...created.map(consultation => consultation.id))
 
     const bySlug = new Map(created.map(consultation => [consultation.slug, consultation.id]))
+    const assignments = [
+      [slugs.openFeatured, 'compartida'], [slugs.openFeatured, 'abierta'],
+      [slugs.openFeatured, 'inactiva'], [slugs.scheduledFeatured, 'compartida'],
+      [slugs.closedFeatured, 'cerrada'], [slugs.archived, 'archivada'],
+      [slugs.hiddenFeatured, 'oculta'], [slugs.otherSection, 'otra'],
+      [slugs.otherSection, 'compartida']
+    ] as const
+    await prisma.consultationTag.createMany({
+      data: assignments.map(([slug, tag]) => ({ consultationId: bySlug.get(slug)!, tagId: tags[tag]! }))
+    })
+    await prisma.consultationCategoryAssignment.createMany({
+      data: [slugs.openFeatured, slugs.scheduledFeatured, slugs.closedFeatured].map(slug => ({
+        consultationId: bySlug.get(slug)!,
+        categoryId
+      }))
+    })
+    await prisma.topic.create({
+      data: {
+        consultationId: bySlug.get(slugs.openFeatured)!,
+        slug: `${slugPrefix}-tema`,
+        title: 'Tema de prueba',
+        participationStartsAt: new Date(now - day),
+        topicTags: { create: { tagId: tags['solo-tema']! } }
+      }
+    })
     const venue = { venueName: 'Teatro Municipal', venueAddress: 'Calle 1 123', venueCity: 'La Plata', venueProvince: 'Buenos Aires' }
     await prisma.consultationRegistrationForm.createMany({ data: [
       {
@@ -112,11 +166,15 @@ describe('Server e2e: filtros del listado para la home', async () => {
       }
     ] })
     collaboratorCookie = await login(COLLABORATOR_EMAIL, DEV_PASSWORD)
+    adminCookie = await login(ADMIN_EMAIL, DEV_PASSWORD)
   })
 
   afterAll(async () => {
     if (!prisma) return
     await prisma.consultation.deleteMany({ where: { id: { in: createdConsultationIds } } })
+    await prisma.tag.deleteMany({ where: { id: { in: Object.values(tags) } } })
+    if (categoryId) await prisma.category.deleteMany({ where: { id: categoryId } })
+    await prisma.section.deleteMany({ where: { id: { in: createdSectionIds } } })
     await prisma.$disconnect()
   })
 
@@ -144,7 +202,8 @@ describe('Server e2e: filtros del listado para la home', async () => {
       slugs.scheduledFeatured,
       slugs.openIndefinite,
       // Entra por la inscripción, aunque la participación quede fuera de la ventana.
-      slugs.registrationOpen
+      slugs.registrationOpen,
+      slugs.otherSection, slugs.extra
     ]))
   })
 
@@ -194,5 +253,51 @@ describe('Server e2e: filtros del listado para la home', async () => {
     ])
 
     expect([both.status, halfRange.status, inverted.status, tooWide.status]).toEqual([422, 422, 422, 422])
+  })
+
+  it('ofrece solo etiquetas activas de consultas públicas de la sección, también para administradores', async () => {
+    for (const cookie of [undefined, adminCookie]) {
+      const response = await api<Array<{ id: number }>>(`/api/tags?sectionSlug=${slugPrefix}-principal`, { cookie })
+      expect(response.status).toBe(200)
+      expect(response.data.map(tag => tag.id).sort()).toEqual([
+        tags.compartida, tags.abierta, tags.cerrada, tags.archivada
+      ].sort())
+    }
+    const other = await api<Array<{ id: number }>>(`/api/tags?sectionSlug=${slugPrefix}-otra`)
+    expect(other.data.map(tag => tag.id).sort()).toEqual([tags.compartida, tags.otra].sort())
+    const empty = await api(`/api/tags?sectionSlug=${slugPrefix}-vacia`)
+    expect(empty.status).toBe(200)
+    expect(empty.data).toEqual([])
+    expect((await api('/api/tags?sectionSlug=No%20válido')).status).toBe(422)
+  })
+
+  it('conserva el catálogo general sin sección y sus vistas por rol', async () => {
+    const publicTags = await api<Array<{ id: number, isActive?: boolean }>>('/api/tags')
+    const adminTags = await api<Array<{ id: number, isActive: boolean }>>('/api/tags', { cookie: adminCookie })
+    expect(publicTags.status).toBe(200)
+    expect(adminTags.status).toBe(200)
+    expect(publicTags.data.some(tag => tag.id === tags['sin-uso'])).toBe(true)
+    expect(publicTags.data.some(tag => tag.id === tags.inactiva)).toBe(false)
+    expect(publicTags.data.find(tag => tag.id === tags.abierta)).not.toHaveProperty('isActive')
+    expect(adminTags.data.find(tag => tag.id === tags.inactiva)?.isActive).toBe(false)
+  })
+
+  it('combina sección y categoría con cualquiera de las etiquetas seleccionadas', async () => {
+    const result = await list({
+      sectionSlug: `${slugPrefix}-principal`,
+      categoryIds: String(categoryId),
+      tagIds: `${tags.abierta},${tags.cerrada},${tags.otra}`
+    })
+    expect(result).toEqual([slugs.openFeatured, slugs.closedFeatured])
+  })
+
+  it('pagina de a cuatro sin solapamientos y conserva una última página parcial', async () => {
+    const all = await list()
+    const pages: string[][] = []
+    for (const page of [1, 2, 3]) pages.push(await list({ perPage: '4', page: String(page) }))
+    expect(pages.map(page => page.length)).toEqual([4, 4, 2])
+    expect(pages.flat()).toEqual(all)
+    expect(new Set(pages.flat()).size).toBe(all.length)
+    expect(await list({ perPage: '4', page: '4' })).toEqual([])
   })
 })
