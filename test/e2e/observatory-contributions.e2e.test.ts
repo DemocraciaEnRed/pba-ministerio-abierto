@@ -1,4 +1,4 @@
-import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { setup, url } from '@nuxt/test-utils/e2e'
 import { fileURLToPath } from 'node:url'
 import { createTestPrisma, type TestPrisma } from './db'
@@ -570,7 +570,7 @@ describe('Server e2e: aportes del Observatorio', async () => {
     })
 
     describe('muestra aleatoria para el marquee', () => {
-      beforeAll(async () => {
+      beforeEach(async () => {
         const logoAssetId = await uploadLogo()
         await prisma.observatoryInstitution.updateMany({
           where: { id: { in: [institutionId, inactiveInstitutionId, institutionInInactiveCategoryId] } },
@@ -578,7 +578,7 @@ describe('Server e2e: aportes del Observatorio', async () => {
         })
       })
 
-      afterAll(async () => {
+      afterEach(async () => {
         await prisma.observatoryInstitution.updateMany({
           where: { id: { in: [institutionId, inactiveInstitutionId, institutionInInactiveCategoryId] } },
           data: { logoAssetId: null }

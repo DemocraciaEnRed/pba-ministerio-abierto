@@ -373,3 +373,5 @@ pnpm test:watch  # modo watch
 ```
 
 Los archivos viven en `test/e2e/`. Cada corrida hace un build del server (tarda ~1 min la primera vez). Las pruebas siembran su propio dato de dominio (consultas, temas, comentarios) con slugs unicos y lo limpian al terminar.
+
+Si preparás datos por HTTP en un bloque `describe` anidado, usá `beforeEach`/`afterEach` en lugar de `beforeAll`/`afterAll`: `@nuxt/test-utils` restablece el contexto de `url()` y sus helpers en cada `beforeEach` y lo borra en cada `afterEach`. Un `beforeAll` anidado que corre después de otros tests no tiene ese contexto disponible.
