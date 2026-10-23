@@ -33,15 +33,6 @@ interface CatalogTreeItem extends TreeItem {
   children?: CatalogTreeItem[]
 }
 
-// Adjunto: un documento PDF o Word, hasta 8 MB.
-const ATTACHMENT_MAX_BYTES = 8 * 1024 * 1024
-const ATTACHMENT_ACCEPT = '.pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-const ATTACHMENT_ALLOWED_MIMES = [
-  'application/pdf',
-  'application/msword',
-  'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-]
-
 const { loggedIn } = useUserSession()
 const toast = useToast()
 const loading = ref(false)
@@ -190,46 +181,14 @@ function removeLink(index: number) {
   state.enlaces.splice(index, 1)
 }
 
-// --- Archivo adjunto ---
-const fileInput = ref<HTMLInputElement>()
-const selectedFile = ref<File | null>(null)
-const fileError = ref<string | null>(null)
+// --- Archivos adjuntos ---
+const files = ref<File[]>([])
 
-function formatFileSize(bytes: number): string {
-  if (bytes < 1024) return `${bytes} B`
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
-}
-
-function onFileChange(event: Event) {
-  fileError.value = null
-  const input = event.target as HTMLInputElement
-  const file = input.files?.[0]
-  if (!file) return
-
-  if (!ATTACHMENT_ALLOWED_MIMES.includes(file.type)) {
-    fileError.value = 'El archivo debe ser un PDF o un documento de Word (.doc/.docx).'
-    input.value = ''
-    return
-  }
-  if (file.size > ATTACHMENT_MAX_BYTES) {
-    fileError.value = 'El archivo supera el máximo permitido de 8 MB.'
-    input.value = ''
-    return
-  }
-
-  selectedFile.value = file
-  // El archivo viaja fuera del JSON: el flag permite validar en el formulario
-  // que el aporte tenga al menos un contenido.
-  state.hasAttachment = true
-}
-
-function clearFile() {
-  selectedFile.value = null
-  fileError.value = null
-  state.hasAttachment = false
-  if (fileInput.value) fileInput.value.value = ''
-}
+// Los archivos viajan fuera del JSON: el flag permite validar en el formulario
+// que el aporte tenga al menos un contenido.
+watch(() => files.value.length, (length) => {
+  state.hasAttachment = length > 0
+})
 
 const formRef = ref<Form<Schema>>()
 
@@ -247,8 +206,8 @@ async function handleSubmit(event: FormSubmitEvent<Schema>) {
   try {
     const formData = new FormData()
     formData.append('payload', JSON.stringify(event.data))
-    if (selectedFile.value) {
-      formData.append('file', selectedFile.value)
+    for (const file of files.value) {
+      formData.append('files', file)
     }
 
     await $fetch('/api/observatory-contributions', {
@@ -559,63 +518,13 @@ async function handleSubmit(event: FormSubmitEvent<Schema>) {
           </UFormField>
 
           <UFormField
-            label="Archivo adjunto (PDF o Word)"
-            name="file"
-            help="Opcional, hasta 8 MB."
+            label="Archivos adjuntos"
+            name="files"
           >
-            <div class="space-y-2">
-              <input
-                ref="fileInput"
-                type="file"
-                :accept="ATTACHMENT_ACCEPT"
-                class="hidden"
-                @change="onFileChange"
-              >
-
-              <div
-                v-if="selectedFile"
-                class="flex items-center justify-between gap-3 rounded-md border border-accented p-3"
-              >
-                <div class="flex items-center gap-2 min-w-0">
-                  <UIcon
-                    name="lucide:file-text"
-                    class="size-5 shrink-0 text-muted"
-                  />
-                  <div class="min-w-0">
-                    <p class="text-sm text-highlighted truncate">
-                      {{ selectedFile.name }}
-                    </p>
-                    <p class="text-xs text-muted">
-                      {{ formatFileSize(selectedFile.size) }}
-                    </p>
-                  </div>
-                </div>
-                <UButton
-                  icon="lucide:x"
-                  color="neutral"
-                  variant="ghost"
-                  size="xs"
-                  aria-label="Quitar archivo"
-                  @click="clearFile"
-                />
-              </div>
-
-              <UButton
-                v-else
-                label="Adjuntar archivo"
-                icon="lucide:paperclip"
-                color="neutral"
-                variant="subtle"
-                @click="fileInput?.click()"
-              />
-
-              <p
-                v-if="fileError"
-                class="text-sm text-error"
-              >
-                {{ fileError }}
-              </p>
-            </div>
+            <AttachmentsPicker
+              v-model="files"
+              :disabled="loading"
+            />
           </UFormField>
         </div>
       </UCard>

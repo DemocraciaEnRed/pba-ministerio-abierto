@@ -43,6 +43,7 @@ describe('Server e2e: exportaciones persistentes (CSV)', async () => {
   let deletedRootId: number
 
   const createdConsultationIds: number[] = []
+  const attachmentAssetIds: number[] = []
 
   beforeAll(async () => {
     prisma = createTestPrisma()
@@ -82,8 +83,30 @@ describe('Server e2e: exportaciones persistentes (CSV)', async () => {
     topicSlug = topic.slug
 
     // Hilo cuyo texto arranca como fórmula de planilla, con una respuesta institucional.
+    const exportAssets = await Promise.all(['uno-export.pdf', 'dos-export.pdf'].map(filename =>
+      prisma.asset.create({
+        data: {
+          assetType: 'uploaded_file',
+          mediaType: 'document',
+          storageProvider: 'local',
+          storagePath: `e2e/${mark}-${filename}`,
+          originalFilename: filename,
+          mimeType: 'application/pdf',
+          sizeBytes: 10
+        }
+      })
+    ))
+    attachmentAssetIds.push(...exportAssets.map(asset => asset.id))
     const formulaRoot = await prisma.comment.create({
-      data: { consultationId, authorUserId: citizen.id, body: '=HYPERLINK("http://malo")', authorMode: 'citizen' }
+      data: {
+        consultationId,
+        authorUserId: citizen.id,
+        body: '=HYPERLINK("http://malo")',
+        authorMode: 'citizen',
+        attachments: {
+          create: exportAssets.map((asset, displayOrder) => ({ assetId: asset.id, displayOrder }))
+        }
+      }
     })
     formulaRootId = formulaRoot.id
     await prisma.comment.create({
@@ -144,6 +167,7 @@ describe('Server e2e: exportaciones persistentes (CSV)', async () => {
       await prisma.comment.deleteMany({ where: { id: { in: commentIds }, parentCommentId: { not: null } } })
       await prisma.comment.deleteMany({ where: { id: { in: commentIds } } })
     }
+    await prisma.asset.deleteMany({ where: { id: { in: attachmentAssetIds } } })
     await prisma.consultationMembership.deleteMany({ where: { consultationId: { in: createdConsultationIds } } })
     await prisma.topic.deleteMany({ where: { consultationId: { in: createdConsultationIds } } })
     await prisma.consultation.deleteMany({ where: { id: { in: createdConsultationIds } } })
@@ -179,6 +203,7 @@ describe('Server e2e: exportaciones persistentes (CSV)', async () => {
   describe('Comentarios de una consulta', () => {
     let fullExport: ExportRecord
     let lines: string[][]
+    let header: string[]
 
     it('genera el CSV en partes, con BOM y encabezados en cada parte', async () => {
       const { record, parts } = await runExport(consultationCommentsBody(), adminCookie)
@@ -198,6 +223,7 @@ describe('Server e2e: exportaciones persistentes (CSV)', async () => {
       }
 
       lines = parts.flatMap(part => csvDataLines(part.csv)).map(parseCsvLine)
+      header = parseCsvLine(parts[0]!.csv.replace(/^\uFEFF/, '').split('\r\n')[0]!)
       expect(lines).toHaveLength(5)
     })
 
@@ -210,6 +236,20 @@ describe('Server e2e: exportaciones persistentes (CSV)', async () => {
       const deleted = lines.find(cells => cells[0] === String(deletedRootId))
       expect(deleted).toBeDefined()
       expect(deleted).toContain('Borrado')
+    })
+
+    it('incluye la cantidad y los nombres de los adjuntos', async () => {
+      const countIndex = header.indexOf('Adjuntos')
+      const namesIndex = header.indexOf('Archivos adjuntos')
+      expect(countIndex).toBeGreaterThan(-1)
+      expect(namesIndex).toBeGreaterThan(-1)
+
+      const withFiles = lines.find(cells => cells[0] === String(formulaRootId))
+      expect(withFiles?.[countIndex]).toBe('2')
+      expect(withFiles?.[namesIndex]).toBe('uno-export.pdf; dos-export.pdf')
+
+      const withoutFiles = lines.find(cells => cells[0] === String(deletedRootId))
+      expect(withoutFiles?.[countIndex]).toBe('0')
     })
 
     it('neutraliza textos que empiezan como fórmula', async () => {

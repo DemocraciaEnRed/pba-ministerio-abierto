@@ -129,13 +129,11 @@ const headerButtons = computed<ButtonProps[]>(() => [
                   />
                   {{ submission.links.length }}
                 </span>
-                <UIcon
-                  v-if="submission.attachment"
-                  name="lucide:paperclip"
-                  class="size-4"
-                  title="Tiene archivo adjunto"
+                <AttachmentsPopover
+                  :attachments="submission.attachments"
+                  size="xs"
                 />
-                <span v-if="!submission.links.length && !submission.attachment">—</span>
+                <span v-if="!submission.links.length && !submission.attachments.length">—</span>
               </div>
             </td>
             <td>{{ formatDate(submission.createdAt) }}</td>

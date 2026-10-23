@@ -103,17 +103,31 @@ model RegionalMeetingSubmission {
   subejeTematico String?
   ideaProyecto String?  @db.Text
   comentarios  String?  @db.Text
-  /// Archivo adjunto opcional (PDF/Word, ≤8MB). Se sirve solo a platform-admin
-  /// mediante un endpoint protegido, nunca por URL pública.
-  attachmentAssetId Int?
   createdAt    DateTime @default(now())
 
-  attachmentAsset Asset?                          @relation("RegionalMeetingSubmissionAttachment", fields: [attachmentAssetId], references: [id], onDelete: SetNull)
+  /// Archivos adjuntos opcionales (hasta 3, 30 MB en total). Se sirven solo a
+  /// platform-admin mediante un endpoint protegido, nunca por URL pública.
+  attachments     RegionalMeetingSubmissionAttachment[]
   links           RegionalMeetingSubmissionLink[]
 
   @@index([createdAt])
   @@index([email])
-  @@index([attachmentAssetId])
+}
+
+/// Archivo adjunto de un aporte de Encuentros Regionales.
+model RegionalMeetingSubmissionAttachment {
+  id           Int      @id @default(autoincrement())
+  submissionId Int
+  assetId      Int
+  displayOrder Int      @default(0)
+  createdAt    DateTime @default(now())
+
+  submission RegionalMeetingSubmission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  asset      Asset                     @relation("RegionalMeetingSubmissionAttachmentAsset", fields: [assetId], references: [id], onDelete: Cascade)
+
+  @@unique([submissionId, assetId])
+  @@index([submissionId, displayOrder])
+  @@index([assetId])
 }
 
 /// Enlace en la nube asociado a un aporte (texto libre para archivos que la

@@ -1,5 +1,6 @@
 import { RegionalMeetingSubmissionsQuerySchema } from '#shared/schemas/regional-meetings'
 import { serializeRegionalMeetingSubmission } from '~~/server/utils/serializers/regionalMeetingSubmission'
+import { attachmentListSelect } from '~~/server/utils/assets/multi-attachments'
 
 // Listado paginado de aportes: exclusivo de platform-admin. No existe vista pública.
 export default defineEventHandler(async (event) => {
@@ -17,9 +18,7 @@ export default defineEventHandler(async (event) => {
       take: query.perPage,
       include: {
         links: true,
-        attachmentAsset: {
-          select: { originalFilename: true, mimeType: true, sizeBytes: true }
-        }
+        attachments: attachmentListSelect
       }
     })
   ])

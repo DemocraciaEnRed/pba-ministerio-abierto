@@ -24,22 +24,6 @@ export function isAllowedGalleryImageMime(mimeType: string): boolean {
 }
 
 /**
- * Adjunto del formulario de aportes de Encuentros Regionales: un documento
- * PDF o Word, hasta 8 MB. Se sirve solo a platform-admin por un endpoint
- * protegido (nunca por URL pública).
- */
-export const SUBMISSION_ATTACHMENT_MAX_SIZE_BYTES = 8 * MB
-export const SUBMISSION_ATTACHMENT_ALLOWED_MIME_TYPES = [
-  'application/pdf',
-  'application/msword',
-  'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-] as const
-
-export function isAllowedSubmissionAttachmentMime(mimeType: string): boolean {
-  return (SUBMISSION_ATTACHMENT_ALLOWED_MIME_TYPES as readonly string[]).includes(mimeType)
-}
-
-/**
  * Instrumento que acredita la personería jurídica en el formulario de
  * inscripción: PDF, Word o imagen escaneada, hasta 8 MB. Se sirve solo a quien
  * administra la consulta por un endpoint protegido.
@@ -57,27 +41,8 @@ export function isAllowedRegistrationProofMime(mimeType: string): boolean {
   return (REGISTRATION_PROOF_ALLOWED_MIME_TYPES as readonly string[]).includes(mimeType)
 }
 
-/**
- * Adjunto opcional de un comentario: documento o imagen común, hasta 10 MB. Se
- * sirve solo a quien administra/modera la consulta por un endpoint protegido.
- */
-export const COMMENT_ATTACHMENT_MAX_SIZE_BYTES = 10 * MB
-export const COMMENT_ATTACHMENT_ALLOWED_MIME_TYPES = [
-  'application/pdf',
-  'application/msword',
-  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-  'application/vnd.ms-excel',
-  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-  'text/plain',
-  'text/csv',
-  'image/jpeg',
-  'image/png',
-  'image/webp'
-] as const
-
-export function isAllowedCommentAttachmentMime(mimeType: string): boolean {
-  return (COMMENT_ATTACHMENT_ALLOWED_MIME_TYPES as readonly string[]).includes(mimeType)
-}
+// Los adjuntos de comentarios y de los aportes del Observatorio y de Encuentros
+// Regionales usan la política compartida de `#shared/utils/attachments`.
 
 const mimeByMediaType: Record<MediaType, readonly string[]> = {
   image: ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml'],

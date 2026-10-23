@@ -2,6 +2,19 @@ import { exportCursorWhere, iterateExportBatchesById } from '../batches'
 import { formatExportDate, type CsvValue } from '../csv'
 import { defineDataExport } from '../types'
 
+/** Adjuntos en dos columnas: cantidad y nombres separados por "; ". */
+const attachmentExportSelect = {
+  select: { asset: { select: { originalFilename: true } } },
+  orderBy: [{ displayOrder: 'asc' as const }, { id: 'asc' as const }]
+}
+
+function attachmentColumns(attachments: { asset: { originalFilename: string | null } }[]): CsvValue[] {
+  return [
+    attachments.length,
+    attachments.map(attachment => attachment.asset.originalFilename ?? 'adjunto').join('; ')
+  ]
+}
+
 function formatLinks(links: { title: string | null, url: string }[]): string {
   return links.map(link => (link.title ? `${link.title}: ${link.url}` : link.url)).join(' | ')
 }
@@ -24,7 +37,8 @@ export const regionalMeetingSubmissionsExport = defineDataExport<Record<string, 
     'Idea o proyecto',
     'Comentarios',
     'Enlaces',
-    'Archivo adjunto',
+    'Adjuntos',
+    'Archivos adjuntos',
     'Fecha de envío'
   ],
 
@@ -43,7 +57,7 @@ export const regionalMeetingSubmissionsExport = defineDataExport<Record<string, 
         orderBy: { id: 'desc' },
         include: {
           links: true,
-          attachmentAsset: { select: { originalFilename: true } }
+          attachments: attachmentExportSelect
         },
         take
       }),
@@ -65,7 +79,7 @@ export const regionalMeetingSubmissionsExport = defineDataExport<Record<string, 
         submission.ideaProyecto ?? '',
         submission.comentarios ?? '',
         formatLinks(submission.links),
-        submission.attachmentAsset?.originalFilename ?? '',
+        ...attachmentColumns(submission.attachments),
         formatExportDate(submission.createdAt)
       ])
     }
@@ -89,7 +103,8 @@ export const observatoryContributionsExport = defineDataExport<Record<string, ne
     'Eje de trabajo',
     'Descripción del aporte',
     'Enlaces',
-    'Archivo adjunto',
+    'Adjuntos',
+    'Archivos adjuntos',
     'Fecha de envío'
   ],
 
@@ -112,7 +127,7 @@ export const observatoryContributionsExport = defineDataExport<Record<string, ne
             include: { workGroup: { select: { name: true } } },
             orderBy: { workGroup: { displayOrder: 'asc' } }
           },
-          attachmentAsset: { select: { originalFilename: true } }
+          attachments: attachmentExportSelect
         },
         take
       }),
@@ -133,7 +148,7 @@ export const observatoryContributionsExport = defineDataExport<Record<string, ne
         contribution.workGroupAssignments.map(assignment => assignment.workGroup.name).join(', '),
         contribution.description ?? '',
         formatLinks(contribution.links),
-        contribution.attachmentAsset?.originalFilename ?? '',
+        ...attachmentColumns(contribution.attachments),
         formatExportDate(contribution.createdAt)
       ])
     }

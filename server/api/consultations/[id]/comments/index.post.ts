@@ -1,13 +1,14 @@
 import {
   assertConsultationCommentingOpen,
   assertValidParent,
+  buildCommentAttachmentCreates,
   commentWithRelationsInclude,
   getInstitutionName,
   parseCommentInput,
-  persistCommentAttachment,
   resolveAuthorMode,
   resolveCommentAvatarUrl
 } from '~~/server/utils/comments'
+import { withStoredAttachments } from '~~/server/utils/assets/multi-attachments'
 import { serializeComment } from '~~/server/utils/serializers/comment'
 import { resolveConsultationIdFromParam } from '~~/server/utils/consultations/resolve'
 
@@ -18,7 +19,7 @@ export default defineEventHandler(async (event) => {
   await assertCan(ctx, 'participate', { type: 'consultation', id: consultationId })
   const userId = ctx.user!.id
 
-  const { data: body, attachment } = await parseCommentInput(event)
+  const { data: body, attachments } = await parseCommentInput(event)
 
   const consultation = await prisma.consultation.findUnique({
     where: { id: consultationId },
@@ -37,9 +38,7 @@ export default defineEventHandler(async (event) => {
     await assertValidParent(body.parentCommentId, { consultationId, topicId: null })
   }
 
-  const attachmentAssetId = attachment ? await persistCommentAttachment(attachment, userId) : null
-
-  const comment = await prisma.comment.create({
+  const comment = await withStoredAttachments(attachments, stored => prisma.comment.create({
     data: {
       consultationId,
       topicId: null,
@@ -47,10 +46,10 @@ export default defineEventHandler(async (event) => {
       parentCommentId: body.parentCommentId,
       body: body.body,
       authorMode,
-      attachmentAssetId
+      attachments: buildCommentAttachmentCreates(stored, userId)
     },
     include: commentWithRelationsInclude
-  })
+  }))
 
   const institutionName = await getInstitutionName()
   const authorAvatarUrl = await resolveCommentAvatarUrl(comment)

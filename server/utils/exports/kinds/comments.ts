@@ -42,7 +42,8 @@ const COMMENT_EXPORT_HEADERS = [
   'Autoría',
   'Estado',
   'Comentario',
-  'Adjunto',
+  'Adjuntos',
+  'Archivos adjuntos',
   ...REACTION_COLUMNS.map(column => `Reacciones: ${column.label}`),
   'Respuestas',
   'Fecha',
@@ -53,7 +54,10 @@ const consultationSelect = { select: { id: true, title: true } } as const
 
 const commentExportInclude = {
   author: { select: { displayName: true, firstName: true, lastName: true, email: true } },
-  attachmentAsset: { select: { originalFilename: true } },
+  attachments: {
+    select: { asset: { select: { originalFilename: true } } },
+    orderBy: { displayOrder: 'asc' }
+  },
   consultation: consultationSelect,
   topic: { select: { title: true, slug: true, consultation: consultationSelect } }
 } as const
@@ -125,7 +129,8 @@ async function toCommentRows(
       comment.authorMode === 'institution' ? 'Institucional' : 'Ciudadana',
       STATUS_LABELS[comment.moderationStatus],
       isDeleted ? '' : comment.body,
-      comment.attachmentAsset?.originalFilename ?? '',
+      comment.attachments.length,
+      comment.attachments.map(attachment => attachment.asset.originalFilename ?? 'adjunto').join('; '),
       ...REACTION_COLUMNS.map(column => reactionCounts.get(`${comment.id}:${column.type}`) ?? 0),
       isReply ? '' : (replyCounts.get(comment.id) ?? 0),
       formatExportDate(comment.createdAt),
@@ -259,6 +264,9 @@ export const platformCommentsExport = defineDataExport<PlatformCommentsExportFil
     const createdAt = buildDayRangeFilter(filters.from, filters.to)
     if (createdAt) {
       clauses.push({ createdAt })
+    }
+    if (filters.withAttachment) {
+      clauses.push({ attachments: { some: {} } })
     }
     return commentRows({ AND: clauses }, batchSize)
   }

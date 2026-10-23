@@ -144,18 +144,13 @@ const fullName = computed(() => {
             </div>
             <div class="flex flex-col">
               <dt class="text-muted">
-                Archivo adjunto
+                Archivos adjuntos
               </dt>
               <dd class="text-highlighted">
-                <UButton
-                  v-if="contribution.attachment"
-                  :to="`/api/observatory-contributions/${contribution.id}/attachment`"
-                  external
-                  :label="contribution.attachment.filename || 'Descargar adjunto'"
-                  icon="lucide:download"
-                  color="neutral"
-                  variant="subtle"
-                  size="sm"
+                <AttachmentsList
+                  v-if="contribution.attachments.length > 0"
+                  :attachments="contribution.attachments"
+                  class="mt-1"
                 />
                 <span v-else>—</span>
               </dd>

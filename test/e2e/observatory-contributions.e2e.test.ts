@@ -2,7 +2,7 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from
 import { setup, url } from '@nuxt/test-utils/e2e'
 import { fileURLToPath } from 'node:url'
 import { createTestPrisma, type TestPrisma } from './db'
-import { api, login } from './http'
+import { api, login, postMultipart, type MultipartFile } from './http'
 import { runExport } from './exports'
 
 const ADMIN_EMAIL = 'admin@consultas.local'
@@ -37,7 +37,7 @@ interface AdminContribution {
   workGroups: { slug: string, name: string }[]
   description: string | null
   links: { id: number, url: string, title: string | null }[]
-  attachment: { filename: string | null } | null
+  attachments: { id: number, filename: string, sizeBytes: number | null, downloadUrl: string }[]
 }
 
 interface ContributionsResponse {
@@ -62,40 +62,20 @@ interface InstitutionCategoryDTO {
   isActive?: boolean
 }
 
-/** POST público multipart de un aporte (`payload` JSON + `file` opcional). */
+/** POST público multipart de un aporte (`payload` JSON + archivos opcionales). */
 async function postContribution(
   payload: ContributionPayload,
-  options: { cookie?: string, file?: { content: string, filename: string, type: string } } = {}
+  options: { cookie?: string, files?: MultipartFile[] } = {}
 ): Promise<{ status: number, data: unknown }> {
-  const formData = new FormData()
-  formData.append('payload', JSON.stringify(payload))
-
-  if (options.file) {
-    formData.append(
-      'file',
-      new Blob([options.file.content], { type: options.file.type }),
-      options.file.filename
-    )
-  }
-
-  const res = await fetch(url('/api/observatory-contributions'), {
-    method: 'POST',
-    headers: options.cookie ? { cookie: options.cookie } : {},
-    body: formData
+  return postMultipart('/api/observatory-contributions', {
+    fields: { payload: JSON.stringify(payload) },
+    files: options.files,
+    cookie: options.cookie
   })
-
-  const text = await res.text()
-  let data: unknown = null
-  if (text) {
-    try {
-      data = JSON.parse(text)
-    } catch {
-      data = text
-    }
-  }
-
-  return { status: res.status, data }
 }
+
+const PDF_CONTENT = '%PDF-1.4 contenido'
+const MB = 1024 * 1024
 
 describe('Server e2e: aportes del Observatorio', async () => {
   await setup({
@@ -301,12 +281,71 @@ describe('Server e2e: aportes del Observatorio', async () => {
       createdEmails.push(payload.email!)
 
       const res = await postContribution(payload, {
-        file: { content: '%PDF-1.4 contenido', filename: 'aporte.pdf', type: 'application/pdf' }
+        files: [{ content: PDF_CONTENT, filename: 'aporte.pdf', type: 'application/pdf' }]
       })
       expect(res.status).toBe(201)
 
       const stored = await findContributionByEmail(payload.email!)
-      expect(stored!.attachment?.filename).toBe('aporte.pdf')
+      expect(stored!.attachments.map(attachment => attachment.filename)).toEqual(['aporte.pdf'])
+    })
+
+    it('acepta hasta 3 archivos y respeta el orden de carga', async () => {
+      const payload = buildPayload({ hasAttachment: true })
+      createdEmails.push(payload.email!)
+
+      const res = await postContribution(payload, {
+        files: [
+          { content: PDF_CONTENT, filename: 'uno.pdf', type: 'application/pdf' },
+          { content: 'col1,col2', filename: 'dos.csv', type: 'text/csv' },
+          { content: 'imagen', filename: 'tres.png', type: 'image/png' }
+        ]
+      })
+      expect(res.status).toBe(201)
+
+      const stored = await findContributionByEmail(payload.email!)
+      expect(stored!.attachments.map(attachment => attachment.filename)).toEqual(['uno.pdf', 'dos.csv', 'tres.png'])
+      for (const attachment of stored!.attachments) {
+        expect(attachment.downloadUrl).toBe(`/api/observatory-contributions/${stored!.id}/attachments/${attachment.id}`)
+      }
+    })
+
+    it('sigue aceptando la parte `file` de un solo archivo', async () => {
+      const payload = buildPayload()
+      createdEmails.push(payload.email!)
+
+      const res = await postContribution(payload, {
+        files: [{ content: PDF_CONTENT, filename: 'legacy.pdf', type: 'application/pdf', field: 'file' }]
+      })
+      expect(res.status).toBe(201)
+
+      const stored = await findContributionByEmail(payload.email!)
+      expect(stored!.attachments.map(attachment => attachment.filename)).toEqual(['legacy.pdf'])
+    })
+
+    it('rechaza más de 3 archivos (422)', async () => {
+      const payload = buildPayload()
+      const res = await postContribution(payload, {
+        files: Array.from({ length: 4 }, (_, index) => ({
+          content: PDF_CONTENT,
+          filename: `archivo-${index}.pdf`,
+          type: 'application/pdf'
+        }))
+      })
+      expect(res.status).toBe(422)
+      expect(await findContributionByEmail(payload.email!)).toBeUndefined()
+    })
+
+    it('rechaza archivos que superan los 30 MB en total (422)', async () => {
+      const payload = buildPayload()
+      const half = new Uint8Array(15 * MB + 1)
+      const res = await postContribution(payload, {
+        files: [
+          { content: half, filename: 'mitad-1.pdf', type: 'application/pdf' },
+          { content: half, filename: 'mitad-2.pdf', type: 'application/pdf' }
+        ]
+      })
+      expect(res.status).toBe(422)
+      expect(await findContributionByEmail(payload.email!)).toBeUndefined()
     })
 
     it('ignora `hasAttachment` si no llegó ningún archivo', async () => {
@@ -316,7 +355,7 @@ describe('Server e2e: aportes del Observatorio', async () => {
 
     it('rechaza un archivo con tipo no permitido', async () => {
       const res = await postContribution(buildPayload(), {
-        file: { content: 'ejecutable', filename: 'aporte.exe', type: 'application/x-msdownload' }
+        files: [{ content: 'ejecutable', filename: 'aporte.exe', type: 'application/x-msdownload' }]
       })
       expect(res.status).toBe(422)
     })
@@ -363,13 +402,40 @@ describe('Server e2e: aportes del Observatorio', async () => {
       expect(res.status).toBe(403)
     })
 
-    it('devuelve 404 al pedir el adjunto de un aporte que no lo tiene', async () => {
+    it('platform-admin descarga cada adjunto por su id', async () => {
+      const payload = buildPayload({ hasAttachment: true })
+      createdEmails.push(payload.email!)
+      await postContribution(payload, {
+        files: [
+          { content: PDF_CONTENT, filename: 'primero.pdf', type: 'application/pdf' },
+          { content: 'texto plano', filename: 'segundo.txt', type: 'text/plain' }
+        ]
+      })
+
+      const stored = await findContributionByEmail(payload.email!)
+      const second = stored!.attachments[1]!
+      const res = await fetch(url(second.downloadUrl), { headers: { cookie: adminCookie } })
+      expect(res.status).toBe(200)
+      expect(res.headers.get('content-disposition')).toContain('segundo.txt')
+      expect(await res.text()).toBe('texto plano')
+    })
+
+    it('devuelve 404 si el adjunto no pertenece al aporte', async () => {
       const payload = buildPayload()
       createdEmails.push(payload.email!)
       await postContribution(payload)
+      const withFile = buildPayload({ hasAttachment: true })
+      createdEmails.push(withFile.email!)
+      await postContribution(withFile, {
+        files: [{ content: PDF_CONTENT, filename: 'ajeno.pdf', type: 'application/pdf' }]
+      })
 
       const stored = await findContributionByEmail(payload.email!)
-      const res = await api(`/api/observatory-contributions/${stored!.id}/attachment`, { cookie: adminCookie })
+      const other = await findContributionByEmail(withFile.email!)
+      const res = await api(
+        `/api/observatory-contributions/${stored!.id}/attachments/${other!.attachments[0]!.id}`,
+        { cookie: adminCookie }
+      )
       expect(res.status).toBe(404)
     })
 
@@ -377,11 +443,11 @@ describe('Server e2e: aportes del Observatorio', async () => {
       const payload = buildPayload({ hasAttachment: true })
       createdEmails.push(payload.email!)
       await postContribution(payload, {
-        file: { content: '%PDF-1.4 contenido', filename: 'privado.pdf', type: 'application/pdf' }
+        files: [{ content: PDF_CONTENT, filename: 'privado.pdf', type: 'application/pdf' }]
       })
 
       const stored = await findContributionByEmail(payload.email!)
-      const res = await api(`/api/observatory-contributions/${stored!.id}/attachment`, { cookie: citizenCookie })
+      const res = await api(stored!.attachments[0]!.downloadUrl, { cookie: citizenCookie })
       expect(res.status).toBe(403)
     })
   })

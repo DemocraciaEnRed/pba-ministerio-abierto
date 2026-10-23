@@ -316,9 +316,9 @@ export const CreateObservatoryContributionSchema = z
       .min(1, 'Elegí al menos un eje de trabajo'),
     description: optionalText(5000),
     enlaces: z.array(contributionLinkSchema).max(20, 'No podés agregar más de 20 enlaces').default([]),
-    /// El archivo viaja aparte del JSON (multipart). Este flag permite validar en
-    /// el formulario que haya al menos un contenido; el server lo re-verifica
-    /// contra el archivo real recibido.
+    /// Los archivos viajan aparte del JSON (multipart). Este flag permite validar
+    /// en el formulario que haya al menos un contenido; el server lo re-verifica
+    /// contra los archivos reales recibidos.
     hasAttachment: z.boolean().default(false),
     // Campo trampa (honeypot): las personas no lo ven, los bots suelen completarlo.
     website: z.string().optional()

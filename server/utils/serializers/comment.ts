@@ -3,6 +3,8 @@ import type {
   CommentModerationStatus,
   CommentReactionType
 } from '../../../prisma/generated/enums'
+import type { AttachmentFileDTO } from '#shared/utils/attachments'
+import { serializeAttachmentFiles, type AttachmentListEntity } from '../assets/multi-attachments'
 
 export type CommentView = 'public' | 'admin'
 
@@ -43,13 +45,8 @@ export type CommentEntity = {
   replyCounts?: CommentReplyCounts
   /** URL del avatar del autor, resuelta en el handler (storage async). */
   authorAvatarUrl?: string | null
-  /** Adjunto opcional (solo se expone en la vista admin/moderación). */
-  attachmentAsset?: {
-    id: number
-    originalFilename: string | null
-    mimeType: string | null
-    sizeBytes: number | null
-  } | null
+  /** Adjuntos (hasta 3). Los archivos solo se exponen en la vista admin/moderación. */
+  attachments?: AttachmentListEntity[]
 }
 
 export interface CommentReplyCounts {
@@ -79,8 +76,8 @@ export interface PublicCommentDTO {
   authorMode: CommentAuthorMode
   authorLabel: string | null
   authorAvatarUrl: string | null
-  /** Indica si el comentario tiene un adjunto (solo informativo, sin acceso al archivo). */
-  hasAttachment: boolean
+  /** Cantidad de adjuntos (solo informativo, sin acceso a los archivos). */
+  attachmentCount: number
   reactions: CommentReactionsSummary
   createdAt: string
   updatedAt: string
@@ -98,16 +95,18 @@ export interface AdminCommentDTO extends Omit<PublicCommentDTO, 'replies'> {
   /** Título del tema contenedor (null si el comentario es de la consulta). */
   topicTitle: string | null
   topicSlug: string | null
-  /** Adjunto descargable por el endpoint protegido (null si no tiene). */
-  attachment: {
-    filename: string
-    mimeType: string | null
-    sizeBytes: number | null
-    downloadUrl: string
-  } | null
+  /** Adjuntos descargables por el endpoint protegido. */
+  attachments: AttachmentFileDTO[]
   /** Respuestas por estado de moderación; presente en la bandeja por hilos. */
   replyCounts?: CommentReplyCounts
   replies?: AdminCommentDTO[]
+}
+
+function serializeCommentAttachments(comment: Pick<CommentEntity, 'id' | 'attachments'>): AttachmentFileDTO[] {
+  return serializeAttachmentFiles(
+    comment.attachments,
+    attachmentId => `/api/comments/${comment.id}/attachments/${attachmentId}`
+  )
 }
 
 const REACTION_TYPES: CommentReactionType[] = ['heart', 'agree', 'idea', 'relevant', 'deepen']
@@ -177,7 +176,7 @@ export function serializeComment(
     authorMode: comment.authorMode,
     authorLabel: resolveCommentAuthorLabel(comment, context.institutionName),
     authorAvatarUrl: comment.authorAvatarUrl ?? null,
-    hasAttachment: comment.attachmentAsset != null,
+    attachmentCount: comment.attachments?.length ?? 0,
     reactions: buildReactionsSummary(comment.reactions, context.currentUserId),
     createdAt: comment.createdAt.toISOString(),
     updatedAt: comment.updatedAt.toISOString(),
@@ -201,14 +200,7 @@ export function serializeComment(
     deletedByUserId: comment.deletedByUserId,
     topicTitle: comment.topic?.title ?? null,
     topicSlug: comment.topic?.slug ?? null,
-    attachment: comment.attachmentAsset
-      ? {
-          filename: comment.attachmentAsset.originalFilename ?? 'adjunto',
-          mimeType: comment.attachmentAsset.mimeType,
-          sizeBytes: comment.attachmentAsset.sizeBytes,
-          downloadUrl: `/api/comments/${comment.id}/attachment`
-        }
-      : null
+    attachments: serializeCommentAttachments(comment)
   }
 
   if (comment.replyCounts) {
@@ -248,7 +240,9 @@ export interface AdminCommentLogEntryDTO {
   authorAvatarUrl: string | null
   authorMode: CommentAuthorMode
   moderationStatus: CommentModerationStatus
-  hasAttachment: boolean
+  attachmentCount: number
+  /** Adjuntos descargables (para el popover del registro). */
+  attachments: AttachmentFileDTO[]
   consultation: { id: number, slug: string, title: string }
   topic: { id: number, slug: string, title: string } | null
   createdAt: string
@@ -282,7 +276,8 @@ export function serializeCommentLogEntry(
     authorAvatarUrl: comment.authorAvatarUrl ?? null,
     authorMode: comment.authorMode,
     moderationStatus: comment.moderationStatus,
-    hasAttachment: comment.attachmentAsset != null,
+    attachmentCount: comment.attachments?.length ?? 0,
+    attachments: serializeCommentAttachments(comment),
     consultation: { id: consultation.id, slug: consultation.slug, title: consultation.title },
     topic: comment.topic
       ? { id: comment.topic.id, slug: comment.topic.slug, title: comment.topic.title }

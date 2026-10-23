@@ -248,11 +248,11 @@ function menuItems(comment: AdminComment): DropdownMenuItem[][] {
       target: '_blank'
     }
   ]
-  if (comment.attachment) {
+  for (const attachment of comment.attachments) {
     links.push({
-      label: `Descargar adjunto (${comment.attachment.filename})`,
+      label: `Descargar ${attachment.filename}`,
       icon: 'i-lucide-paperclip',
-      to: comment.attachment.downloadUrl,
+      to: attachment.downloadUrl,
       external: true,
       download: true
     })
@@ -264,36 +264,46 @@ function menuItems(comment: AdminComment): DropdownMenuItem[][] {
 
 <template>
   <div class="space-y-4">
-    <div class="space-y-3">
-      <div class="flex flex-wrap items-end gap-3">
-        <UInput
-          v-model="searchInput"
-          icon="i-lucide-search"
-          placeholder="Buscar por texto, nombre o correo"
-          aria-label="Buscar comentarios"
-          class="w-full sm:w-72"
-        />
-        <USelect
-          v-model="filters.moderationStatus"
-          :items="statusOptions"
-          value-key="value"
-          aria-label="Estado de moderación"
-          class="w-full sm:w-48"
-        />
-        <USelect
-          v-model="filters.order"
-          :items="orderOptions"
-          value-key="value"
-          aria-label="Orden"
-          class="w-full sm:w-44"
-        />
-        <DateRangeField
-          v-model:from="filters.from"
-          v-model:to="filters.to"
-          aria-label="Rango de fechas"
-          class="w-full sm:w-auto"
-        />
+    <div class="space-y-3 rounded-lg border border-default p-4">
+      <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <UFormField label="Buscar">
+          <UInput
+            v-model="searchInput"
+            icon="i-lucide-search"
+            placeholder="Texto, nombre o correo"
+            aria-label="Buscar comentarios"
+            class="w-full"
+          />
+        </UFormField>
+        <UFormField label="Estado">
+          <USelect
+            v-model="filters.moderationStatus"
+            :items="statusOptions"
+            value-key="value"
+            aria-label="Estado de moderación"
+            class="w-full"
+          />
+        </UFormField>
+        <UFormField label="Orden">
+          <USelect
+            v-model="filters.order"
+            :items="orderOptions"
+            value-key="value"
+            aria-label="Orden"
+            class="w-full"
+          />
+        </UFormField>
+        <UFormField label="Fechas">
+          <DateRangeField
+            v-model:from="filters.from"
+            v-model:to="filters.to"
+            aria-label="Rango de fechas"
+            class="w-full"
+          />
+        </UFormField>
       </div>
+
+      <USeparator />
 
       <div class="flex flex-wrap items-center justify-between gap-3">
         <div class="flex flex-wrap items-center gap-4">
@@ -306,16 +316,15 @@ function menuItems(comment: AdminComment): DropdownMenuItem[][] {
             label="Con adjunto"
           />
         </div>
-        <div class="flex items-center gap-1">
-          <UButton
-            v-if="hasActiveFilters || searchInput"
-            label="Limpiar filtros"
-            icon="i-lucide-x"
-            color="neutral"
-            variant="ghost"
-            @click="clearFilters"
-          />
-        </div>
+        <UButton
+          v-if="hasActiveFilters || searchInput"
+          label="Limpiar filtros"
+          icon="i-lucide-x"
+          color="neutral"
+          variant="ghost"
+          size="sm"
+          @click="clearFilters"
+        />
       </div>
     </div>
 
@@ -376,13 +385,9 @@ function menuItems(comment: AdminComment): DropdownMenuItem[][] {
               variant="subtle"
               size="sm"
             />
-            <UBadge
-              v-if="comment.attachment"
-              label="Adjunto"
-              icon="i-lucide-paperclip"
-              color="neutral"
-              variant="soft"
-              size="sm"
+            <AttachmentsPopover
+              :attachments="comment.attachments"
+              size="xs"
             />
             <UTooltip
               v-for="reaction in activeCommentReactions(comment.reactions.counts)"

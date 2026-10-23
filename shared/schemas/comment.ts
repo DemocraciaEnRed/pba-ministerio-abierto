@@ -82,6 +82,7 @@ export const PlatformCommentsLogQuerySchema = z.object({
   moderationStatus: moderationStatusFilter,
   from: dayField,
   to: dayField,
+  withAttachment: queryFlagField,
   page: pageField,
   perPage: z.coerce.number().int('La cantidad debe ser un entero').min(1, 'La cantidad mínima es 1').max(100, 'La cantidad máxima es 100').default(20)
 }).superRefine(refineDayRange)

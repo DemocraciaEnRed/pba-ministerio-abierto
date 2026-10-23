@@ -22,6 +22,7 @@ interface AdminComment {
   authorMode: 'citizen' | 'institution'
   moderationStatus?: 'visible' | 'hidden' | 'deleted'
   replyCounts?: ReplyCounts
+  attachments?: { id: number, filename: string, downloadUrl: string }[]
 }
 
 interface Paginated<T> {
@@ -36,7 +37,8 @@ interface LogEntry {
   excerpt: string
   authorEmail: string
   moderationStatus: 'visible' | 'hidden' | 'deleted'
-  hasAttachment: boolean
+  attachmentCount: number
+  attachments: { id: number, filename: string, downloadUrl: string }[]
   consultation: { id: number, slug: string, title: string }
   topic: { id: number, slug: string, title: string } | null
 }
@@ -164,7 +166,7 @@ describe('Server e2e: bandeja por hilos, filtros y registro de comentarios', asy
         authorUserId: citizen.id,
         body: 'Raíz con adjunto sin respuesta',
         authorMode: 'citizen',
-        attachmentAssetId
+        attachments: { create: { assetId: attachmentAssetId, displayOrder: 0 } }
       }
     })
     attachmentRootId = attachmentRoot.id
@@ -307,6 +309,7 @@ describe('Server e2e: bandeja por hilos, filtros y registro de comentarios', asy
       const res = await inbox('level=top&withAttachment=true')
       expect(res.status).toBe(200)
       expect(res.data.items.map(c => c.id)).toEqual([attachmentRootId])
+      expect(res.data.items[0]?.attachments?.map(attachment => attachment.filename)).toEqual(['adjunto-e2e.pdf'])
     })
 
     it('`order=mostReplied` ordena por cantidad de respuestas', async () => {
@@ -420,7 +423,10 @@ describe('Server e2e: bandeja por hilos, filtros y registro de comentarios', asy
         topic: { id: topicId, slug: 'tema-hilos-e2e' }
       })
 
-      expect(res.data.items.find(entry => entry.id === attachmentRootId)?.hasAttachment).toBe(true)
+      const entry = res.data.items.find(item => item.id === attachmentRootId)
+      expect(entry?.attachmentCount).toBe(1)
+      expect(entry?.attachments.map(attachment => attachment.filename)).toEqual(['adjunto-e2e.pdf'])
+      expect(entry?.attachments[0]?.downloadUrl).toMatch(new RegExp(`^/api/comments/${attachmentRootId}/attachments/\\d+$`))
     })
 
     it('filtra por estado, texto y fechas', async () => {
@@ -440,6 +446,15 @@ describe('Server e2e: bandeja por hilos, filtros y registro de comentarios', asy
         { cookie: adminCookie }
       )
       expect(range.data.items.map(entry => entry.id)).toEqual([oldRootId])
+    })
+
+    it('`withAttachment` deja solo comentarios con adjunto', async () => {
+      const res = await api<Paginated<LogEntry>>(
+        `/api/admin/comments?consultationId=${consultationId}&withAttachment=true`,
+        { cookie: adminCookie }
+      )
+      expect(res.status).toBe(200)
+      expect(res.data.items.map(entry => entry.id)).toEqual([attachmentRootId])
     })
   })
 })

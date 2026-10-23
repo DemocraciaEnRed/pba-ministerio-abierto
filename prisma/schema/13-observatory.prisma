@@ -96,13 +96,12 @@ model ObservatoryContribution {
   institutionName         String
   institutionCategoryName String
   description String? @db.Text
-  /// Archivo adjunto opcional (PDF/Word, ≤8MB). Se sirve solo a platform-admin
-  /// mediante un endpoint protegido, nunca por URL pública.
-  attachmentAssetId Int?
-  createdAt         DateTime @default(now())
+  createdAt   DateTime @default(now())
 
   institution     ObservatoryInstitution?       @relation(fields: [institutionId], references: [id], onDelete: SetNull)
-  attachmentAsset Asset?                        @relation("ObservatoryContributionAttachment", fields: [attachmentAssetId], references: [id], onDelete: SetNull)
+  /// Archivos adjuntos opcionales (hasta 3, 30 MB en total). Se sirven solo a
+  /// platform-admin mediante un endpoint protegido, nunca por URL pública.
+  attachments     ObservatoryContributionAttachment[]
   links           ObservatoryContributionLink[]
   /// Grupos de trabajo elegidos (uno o varios). El catálogo es fijo (sin ABM):
   /// `reuniones-plenarias` queda excluido a nivel aplicación.
@@ -111,7 +110,22 @@ model ObservatoryContribution {
   @@index([createdAt])
   @@index([email])
   @@index([institutionId])
-  @@index([attachmentAssetId])
+}
+
+/// Archivo adjunto de un aporte del Observatorio.
+model ObservatoryContributionAttachment {
+  id             Int      @id @default(autoincrement())
+  contributionId Int
+  assetId        Int
+  displayOrder   Int      @default(0)
+  createdAt      DateTime @default(now())
+
+  contribution ObservatoryContribution @relation(fields: [contributionId], references: [id], onDelete: Cascade)
+  asset        Asset                   @relation("ObservatoryContributionAttachmentAsset", fields: [assetId], references: [id], onDelete: Cascade)
+
+  @@unique([contributionId, assetId])
+  @@index([contributionId, displayOrder])
+  @@index([assetId])
 }
 
 /// Asignación de un grupo de trabajo del Observatorio a una consulta. Reemplaza

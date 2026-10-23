@@ -24,6 +24,7 @@ const filters = reactive({
   moderationStatus: 'all' as StatusFilter,
   from: '',
   to: '',
+  withAttachment: false,
   page: 1,
   perPage: 20
 })
@@ -51,6 +52,7 @@ const hasActiveFilters = computed(() =>
   || filters.moderationStatus !== 'all'
   || Boolean(filters.from)
   || Boolean(filters.to)
+  || filters.withAttachment
 )
 
 function clearFilters(): void {
@@ -62,6 +64,7 @@ function clearFilters(): void {
     moderationStatus: 'all',
     from: '',
     to: '',
+    withAttachment: false,
     page: 1
   })
 }
@@ -73,7 +76,8 @@ const queryParams = computed(() => ({
   consultationId: filters.consultationId ?? undefined,
   moderationStatus: filters.moderationStatus === 'all' ? undefined : filters.moderationStatus,
   from: filters.from || undefined,
-  to: filters.to || undefined
+  to: filters.to || undefined,
+  withAttachment: filters.withAttachment ? 'true' : undefined
 }))
 
 // `useRequestFetch` reenvía la cookie de sesión durante el SSR: el endpoint es
@@ -89,7 +93,7 @@ const entries = computed(() => data.value?.items ?? [])
 const pagination = computed(() => data.value?.pagination)
 
 watch(
-  () => [filters.q, filters.consultationId, filters.moderationStatus, filters.from, filters.to],
+  () => [filters.q, filters.consultationId, filters.moderationStatus, filters.from, filters.to, filters.withAttachment],
   () => {
     filters.page = 1
   }
@@ -175,7 +179,8 @@ function exportCsv(): void {
       consultationId: filters.consultationId ?? undefined,
       moderationStatus: filters.moderationStatus === 'all' ? undefined : filters.moderationStatus,
       from: filters.from || undefined,
-      to: filters.to || undefined
+      to: filters.to || undefined,
+      withAttachment: filters.withAttachment
     }
   }, {
     detail: 'Incluye los comentarios y respuestas que coinciden con los filtros, en cualquier estado, con la consulta, el tema y el correo de cada autor/a. De los comentarios borrados no se exporta el texto.'
@@ -222,47 +227,65 @@ function openThread(entry: AdminCommentLogEntry): void {
 
     <UPageBody>
       <div class="space-y-4">
-        <div class="flex flex-wrap items-end gap-3">
-          <UInput
-            v-model="searchInput"
-            icon="i-lucide-search"
-            placeholder="Buscar por texto, nombre o correo"
-            aria-label="Buscar comentarios"
-            class="w-full sm:w-72"
-          />
-          <USelectMenu
-            v-model="filters.consultationId"
-            v-model:search-term="consultationSearch"
-            :items="consultationOptions"
-            value-key="value"
-            :loading="loadingConsultations"
-            ignore-filter
-            clear
-            placeholder="Todas las consultas"
-            :search-input="{ placeholder: 'Buscar consulta...' }"
-            aria-label="Consulta"
-            class="w-full sm:w-72"
-          />
-          <USelect
-            v-model="filters.moderationStatus"
-            :items="statusOptions"
-            value-key="value"
-            aria-label="Estado de moderación"
-            class="w-full sm:w-48"
-          />
-          <DateRangeField
-            v-model:from="filters.from"
-            v-model:to="filters.to"
-            aria-label="Rango de fechas"
-            class="w-full sm:w-auto"
-          />
-          <div class="ms-auto flex items-center gap-1">
+        <div class="space-y-3 rounded-lg border border-default p-4">
+          <div class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            <UFormField label="Buscar">
+              <UInput
+                v-model="searchInput"
+                icon="i-lucide-search"
+                placeholder="Texto, nombre o correo"
+                aria-label="Buscar comentarios"
+                class="w-full"
+              />
+            </UFormField>
+            <UFormField label="Consulta">
+              <USelectMenu
+                v-model="filters.consultationId"
+                v-model:search-term="consultationSearch"
+                :items="consultationOptions"
+                value-key="value"
+                :loading="loadingConsultations"
+                ignore-filter
+                clear
+                placeholder="Todas las consultas"
+                :search-input="{ placeholder: 'Buscar consulta...' }"
+                aria-label="Consulta"
+                class="w-full"
+              />
+            </UFormField>
+            <UFormField label="Estado">
+              <USelect
+                v-model="filters.moderationStatus"
+                :items="statusOptions"
+                value-key="value"
+                aria-label="Estado de moderación"
+                class="w-full"
+              />
+            </UFormField>
+            <UFormField label="Fechas">
+              <DateRangeField
+                v-model:from="filters.from"
+                v-model:to="filters.to"
+                aria-label="Rango de fechas"
+                class="w-full"
+              />
+            </UFormField>
+          </div>
+
+          <USeparator />
+
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <USwitch
+              v-model="filters.withAttachment"
+              label="Con adjunto"
+            />
             <UButton
               v-if="hasActiveFilters || searchInput"
               label="Limpiar filtros"
               icon="i-lucide-x"
               color="neutral"
               variant="ghost"
+              size="sm"
               @click="clearFilters"
             />
           </div>
@@ -331,13 +354,9 @@ function openThread(entry: AdminCommentLogEntry): void {
                   variant="subtle"
                   size="sm"
                 />
-                <UBadge
-                  v-if="entry.hasAttachment"
-                  label="Adjunto"
-                  icon="i-lucide-paperclip"
-                  color="neutral"
-                  variant="soft"
-                  size="sm"
+                <AttachmentsPopover
+                  :attachments="entry.attachments"
+                  size="xs"
                 />
               </template>
 

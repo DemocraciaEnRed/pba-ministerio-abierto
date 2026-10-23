@@ -146,12 +146,17 @@ function onReplyCreated(created: PublicComment): void {
               locale="es-AR"
             />
           </span>
-          <UIcon
-            v-if="comment.hasAttachment"
-            name="i-lucide-paperclip"
-            class="size-3.5 text-muted"
-            aria-label="Incluye un archivo adjunto"
-          />
+          <span
+            v-if="comment.attachmentCount > 0"
+            class="inline-flex items-center gap-0.5 text-xs text-muted"
+            :aria-label="comment.attachmentCount === 1 ? 'Incluye un archivo adjunto' : `Incluye ${comment.attachmentCount} archivos adjuntos`"
+          >
+            <UIcon
+              name="i-lucide-paperclip"
+              class="size-3.5"
+            />
+            {{ comment.attachmentCount }}
+          </span>
         </div>
 
         <p class="text-sm text-default whitespace-pre-line">

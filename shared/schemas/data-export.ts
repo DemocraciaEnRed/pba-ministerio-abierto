@@ -47,7 +47,8 @@ export const PlatformCommentsExportFiltersSchema = z.object({
   moderationStatus: moderationStatusField,
   q: searchField,
   from: dayField,
-  to: dayField
+  to: dayField,
+  withAttachment: flagField
 }).superRefine(refineDayRange)
 
 /** Pedido de una exportación. Cada tipo define su alcance y sus filtros. */

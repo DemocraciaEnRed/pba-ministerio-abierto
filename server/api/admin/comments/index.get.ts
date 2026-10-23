@@ -44,6 +44,9 @@ export default defineEventHandler(async (event) => {
   if (createdAt) {
     clauses.push({ createdAt })
   }
+  if (query.withAttachment) {
+    clauses.push({ attachments: { some: {} } })
+  }
 
   const where: CommentWhereInput = { AND: clauses }
   const skip = (query.page - 1) * query.perPage

@@ -66,22 +66,6 @@ const reactions = computed(() => activeCommentReactions(props.comment.reactions.
       </div>
 
       <div class="flex shrink-0 gap-1">
-        <UTooltip
-          v-if="comment.attachment"
-          arrow
-          :text="`Descargar adjunto (${comment.attachment.filename})`"
-        >
-          <UButton
-            :to="comment.attachment.downloadUrl"
-            external
-            download
-            icon="i-lucide-paperclip"
-            color="neutral"
-            variant="ghost"
-            size="xs"
-            aria-label="Descargar adjunto"
-          />
-        </UTooltip>
         <UDropdownMenu
           v-if="actions.length > 0"
           :items="actions"
@@ -101,6 +85,12 @@ const reactions = computed(() => activeCommentReactions(props.comment.reactions.
     <p class="whitespace-pre-wrap text-sm">
       {{ comment.body }}
     </p>
+
+    <AttachmentsList
+      v-if="comment.attachments.length > 0"
+      :attachments="comment.attachments"
+      class="rounded-md border border-default p-2"
+    />
 
     <div
       v-if="reactions.length > 0"

@@ -1,4 +1,5 @@
 import type { PageCardProps } from '@nuxt/ui'
+import type { AttachmentFileDTO } from '#shared/utils/attachments'
 
 export type Visibility = 'hidden' | 'visible' | 'archived'
 export type ParticipationState = 'scheduled' | 'open' | 'closed'
@@ -277,7 +278,8 @@ export interface PublicComment {
   authorMode: CommentAuthorMode
   authorLabel: string | null
   authorAvatarUrl: string | null
-  hasAttachment: boolean
+  /** Cantidad de adjuntos (la descarga es exclusiva de gestores/admins). */
+  attachmentCount: number
   reactions: CommentReactionsSummary
   createdAt: string
   updatedAt: string
@@ -357,12 +359,7 @@ export interface AdminComment {
   deletedAt: string | null
   topicTitle: string | null
   topicSlug: string | null
-  attachment: {
-    filename: string
-    mimeType: string | null
-    sizeBytes: number | null
-    downloadUrl: string
-  } | null
+  attachments: AttachmentFileDTO[]
   reactions: CommentReactionsSummary
   replyCounts?: CommentReplyCounts
   createdAt: string
@@ -390,7 +387,8 @@ export interface AdminCommentLogEntry {
   authorAvatarUrl: string | null
   authorMode: CommentAuthorMode
   moderationStatus: CommentModerationStatus
-  hasAttachment: boolean
+  attachmentCount: number
+  attachments: AttachmentFileDTO[]
   consultation: { id: number, slug: string, title: string }
   topic: { id: number, slug: string, title: string } | null
   createdAt: string

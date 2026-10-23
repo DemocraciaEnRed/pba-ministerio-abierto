@@ -1,5 +1,6 @@
 import { ObservatoryContributionsQuerySchema } from '#shared/schemas/observatory'
 import { serializeObservatoryContribution } from '~~/server/utils/serializers/observatoryContribution'
+import { attachmentListSelect } from '~~/server/utils/assets/multi-attachments'
 
 // Listado paginado de aportes: exclusivo de platform-admin. No existe vista pública.
 export default defineEventHandler(async (event) => {
@@ -21,9 +22,7 @@ export default defineEventHandler(async (event) => {
           include: { workGroup: { select: { slug: true, name: true } } },
           orderBy: { workGroup: { displayOrder: 'asc' } }
         },
-        attachmentAsset: {
-          select: { originalFilename: true, mimeType: true, sizeBytes: true }
-        }
+        attachments: attachmentListSelect
       }
     })
   ])

@@ -1,65 +1,19 @@
-import { createHash } from 'node:crypto'
 import { CreateObservatoryContributionSchema } from '#shared/schemas/observatory'
 import { isContributionWorkGroupSlug } from '#shared/data/observatory-work-groups'
 import { VALIDATION_ERROR_MESSAGE } from '~~/server/utils/validate'
-import { useStorageDriver } from '~~/server/utils/storage'
-import { buildAssetStorageKey } from '~~/server/utils/assets/upload'
 import {
-  SUBMISSION_ATTACHMENT_MAX_SIZE_BYTES,
-  isAllowedSubmissionAttachmentMime
-} from '~~/server/utils/assets/policy'
-
-interface MultipartPart {
-  name?: string
-  data?: Buffer
-  filename?: string
-  type?: string
-}
-
-interface ParsedAttachment {
-  buffer: Buffer
-  originalFilename: string
-  mimeType: string
-  sizeBytes: number
-  checksum: string
-}
-
-/** Valida y arma el adjunto opcional (PDF/Word ≤ 8 MB) desde el multipart. */
-function parseOptionalAttachment(parts: MultipartPart[]): ParsedAttachment | null {
-  const filePart = parts.find(part => part.name === 'file' && part.data && part.filename)
-  if (!filePart?.data) return null
-
-  const mimeType = filePart.type?.trim()
-  if (!mimeType || !isAllowedSubmissionAttachmentMime(mimeType)) {
-    throw createError({
-      statusCode: 422,
-      message: 'El archivo debe ser un PDF o un documento de Word (.doc/.docx).'
-    })
-  }
-
-  const sizeBytes = filePart.data.length
-  if (sizeBytes === 0) {
-    throw createError({ statusCode: 422, message: 'El archivo está vacío.' })
-  }
-  if (sizeBytes > SUBMISSION_ATTACHMENT_MAX_SIZE_BYTES) {
-    throw createError({ statusCode: 422, message: 'El archivo supera el máximo permitido de 8 MB.' })
-  }
-
-  return {
-    buffer: filePart.data,
-    originalFilename: filePart.filename ?? 'archivo',
-    mimeType,
-    sizeBytes,
-    checksum: createHash('sha256').update(filePart.data).digest('hex')
-  }
-}
+  buildAttachmentCreates,
+  parseUploadAttachments,
+  withStoredAttachments,
+  type UploadMultipartPart
+} from '~~/server/utils/assets/multi-attachments'
 
 // Envío público (sin login) del formulario de aportes institucionales del
 // Observatorio. Llega como multipart/form-data con una parte `payload` (JSON) y
-// una parte `file` opcional (PDF/Word). La respuesta es genérica; la lectura de
-// los aportes es exclusiva de platform-admin.
+// hasta 3 partes `files` opcionales (documentos o imágenes, 30 MB en total). La
+// respuesta es genérica; la lectura de los aportes es exclusiva de platform-admin.
 export default defineEventHandler(async (event) => {
-  const parts = (await readMultipartFormData(event)) as MultipartPart[] | null
+  const parts = (await readMultipartFormData(event)) as UploadMultipartPart[] | null
 
   const payloadPart = parts?.find(part => part.name === 'payload')
   if (!payloadPart?.data) {
@@ -123,11 +77,11 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 422, message: 'Elegí una institución válida.' })
   }
 
-  const attachment = parseOptionalAttachment(parts ?? [])
+  const attachments = parseUploadAttachments(parts)
 
   // `hasAttachment` es solo una ayuda para validar en el formulario: acá se
-  // controla contra el archivo realmente recibido.
-  if (!body.description && !attachment && body.enlaces.length === 0) {
+  // controla contra los archivos realmente recibidos.
+  if (!body.description && attachments.length === 0 && body.enlaces.length === 0) {
     throw createError({
       statusCode: 422,
       message: VALIDATION_ERROR_MESSAGE,
@@ -135,61 +89,27 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  const driver = useStorageDriver()
-  let storageKey: string | null = null
-  if (attachment) {
-    storageKey = buildAssetStorageKey('assets', attachment.mimeType)
-    // `public: false` para que en S3 no haya URL pública: el adjunto solo se
-    // sirve por el endpoint protegido de admin.
-    await driver.put({
-      key: storageKey,
-      body: attachment.buffer,
-      contentType: attachment.mimeType,
-      public: false
-    })
-  }
-
-  await prisma.$transaction(async (tx) => {
-    let attachmentAssetId: number | null = null
-
-    if (attachment && storageKey) {
-      const asset = await tx.asset.create({
-        data: {
-          assetType: 'uploaded_file',
-          mediaType: 'document',
-          storageProvider: driver.name,
-          storagePath: storageKey,
-          originalFilename: attachment.originalFilename,
-          mimeType: attachment.mimeType,
-          sizeBytes: attachment.sizeBytes,
-          checksum: attachment.checksum
-        }
-      })
-      attachmentAssetId = asset.id
-    }
-
-    await tx.observatoryContribution.create({
-      data: {
-        firstName: body.firstName,
-        lastName: body.lastName,
-        email: body.email,
-        phone: body.phone,
-        provincia: body.provincia,
-        municipio: body.municipio,
-        institutionId: institution.id,
-        institutionName: institution.name,
-        institutionCategoryName: institution.category.name,
-        description: body.description,
-        attachmentAssetId,
-        workGroupAssignments: {
-          create: workGroupIds.map(workGroupId => ({ workGroupId }))
-        },
-        links: {
-          create: body.enlaces.map(link => ({ url: link.url, title: link.title }))
-        }
+  await withStoredAttachments(attachments, stored => prisma.observatoryContribution.create({
+    data: {
+      firstName: body.firstName,
+      lastName: body.lastName,
+      email: body.email,
+      phone: body.phone,
+      provincia: body.provincia,
+      municipio: body.municipio,
+      institutionId: institution.id,
+      institutionName: institution.name,
+      institutionCategoryName: institution.category.name,
+      description: body.description,
+      attachments: { create: buildAttachmentCreates(stored) },
+      workGroupAssignments: {
+        create: workGroupIds.map(workGroupId => ({ workGroupId }))
+      },
+      links: {
+        create: body.enlaces.map(link => ({ url: link.url, title: link.title }))
       }
-    })
-  })
+    }
+  }))
 
   setResponseStatus(event, 201)
   return { success: true }

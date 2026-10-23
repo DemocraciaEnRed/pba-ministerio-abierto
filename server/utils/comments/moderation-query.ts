@@ -51,7 +51,7 @@ function buildCommentPredicate(filters: ModerationFilters): CommentWhereInput | 
     clauses.push({ createdAt })
   }
   if (filters.withAttachment) {
-    clauses.push({ attachmentAssetId: { not: null } })
+    clauses.push({ attachments: { some: {} } })
   }
 
   return clauses.length > 0 ? { AND: clauses } : null
