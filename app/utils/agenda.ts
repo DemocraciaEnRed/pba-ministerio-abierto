@@ -1,5 +1,6 @@
 import dayjs from 'dayjs'
 import 'dayjs/locale/es'
+import { REGISTRATION_EVENT_MODE_LABELS } from '#shared/data/consultation-registrations'
 
 /** Cantidad de días que cubre la agenda de la home. */
 export const AGENDA_DAYS = 30
@@ -15,6 +16,7 @@ export interface AgendaSource {
     path?: string
     venueName?: string
     venueCity?: string
+    eventMode?: keyof typeof REGISTRATION_EVENT_MODE_LABELS
   } | null
   /**
    * Encuentro presencial de Encuentros Regionales (inscripción en un formulario
@@ -50,7 +52,10 @@ export function resolveAgendaEncounter(item: AgendaSource): AgendaEncounter | nu
       eventAt: item.registration.eventAt,
       opensAt: item.registration.opensAt,
       closesAt: item.registration.closesAt,
-      venue: [item.registration.venueName, item.registration.venueCity].filter(Boolean).join(', '),
+      venue: [
+        item.registration.eventMode && item.registration.eventMode !== 'in_person' ? REGISTRATION_EVENT_MODE_LABELS[item.registration.eventMode] : null,
+        [item.registration.venueName, item.registration.venueCity].filter(Boolean).join(', ')
+      ].filter(Boolean).join(' · '),
       path: item.registration.path ?? null,
       external: false
     }

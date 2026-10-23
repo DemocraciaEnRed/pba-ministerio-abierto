@@ -32,8 +32,34 @@ const venueTextField = (label: string, max: number) =>
   z
     .string()
     .trim()
-    .min(1, `${label} es requerido`)
     .max(max, `${label} no puede superar los ${max} caracteres`)
+    .transform(value => value || null)
+    .nullable()
+    .optional()
+    .default(null)
+
+export const REGISTRATION_EVENT_MODES = ['in_person', 'virtual', 'hybrid'] as const
+export const REGISTRATION_ADMISSION_POLICIES = ['directory_only', 'directory_and_other', 'open'] as const
+export const REGISTRATION_ATTENDANCE_MODES = ['in_person', 'virtual'] as const
+export const REGISTRATION_INSTITUTION_SOURCES = ['directory', 'other', 'individual'] as const
+
+export interface RegistrationRules {
+  eventMode: typeof REGISTRATION_EVENT_MODES[number]
+  admissionPolicy: typeof REGISTRATION_ADMISSION_POLICIES[number]
+}
+
+const meetingUrlField = z
+  .string()
+  .trim()
+  .max(500, 'El enlace no puede superar los 500 caracteres')
+  .transform(value => value || null)
+  .nullable()
+  .optional()
+  .default(null)
+  .refine(
+    value => !value || z.url({ protocol: /^https?$/ }).safeParse(value).success,
+    'Ingresá un enlace válido que empiece con http:// o https://'
+  )
 
 export const ConsultationRegistrationFormSchema = z
   .object({
@@ -42,16 +68,36 @@ export const ConsultationRegistrationFormSchema = z
     eventAt: dateTimeField('La fecha del evento'),
     opensAt: dateTimeField('La fecha de apertura'),
     closesAt: dateTimeField('La fecha de cierre'),
+    eventMode: z.enum(REGISTRATION_EVENT_MODES, { error: 'Elegí una modalidad válida' }).default('in_person'),
+    admissionPolicy: z.enum(REGISTRATION_ADMISSION_POLICIES, { error: 'Elegí una política de admisión válida' }).default('directory_only'),
+    meetingUrl: meetingUrlField,
     venueName: venueTextField('El lugar', 160),
     venueAddress: venueTextField('La dirección', 200),
     venueCity: venueTextField('La ciudad', 120),
-    venueProvince: z.enum(PROVINCES, { error: 'Elegí una provincia' }),
+    venueProvince: z.union([z.enum(PROVINCES, { error: 'Elegí una provincia' }), z.literal(''), z.null()])
+      .optional()
+      .transform(value => value || null),
     // Workflow de acreditaciones (opcional): cuando se habilita exige su ventana.
     accreditationEnabled: z.boolean().default(false),
     accreditationOpensAt: nullableDateTimeField('La apertura de acreditaciones'),
     accreditationClosesAt: nullableDateTimeField('El cierre de acreditaciones')
   })
   .superRefine((data, ctx) => {
+    if (data.eventMode !== 'virtual') {
+      for (const [field, label] of [
+        ['venueName', 'El lugar'],
+        ['venueAddress', 'La dirección'],
+        ['venueCity', 'La ciudad'],
+        ['venueProvince', 'La provincia']
+      ] as const) {
+        if (!data[field]) {
+          ctx.addIssue({ code: 'custom', path: [field], message: `${label} es requerido` })
+        }
+      }
+    }
+    if (data.eventMode === 'in_person' && data.meetingUrl) {
+      ctx.addIssue({ code: 'custom', path: ['meetingUrl'], message: 'El enlace virtual solo corresponde a reuniones virtuales o híbridas' })
+    }
     if (data.opensAt >= data.closesAt) {
       ctx.addIssue({
         code: 'custom',
@@ -96,6 +142,21 @@ export const ConsultationRegistrationFormSchema = z
       })
     }
   })
+
+export function buildConsultationRegistrationFormSchema(kind: RegistrationFormKind) {
+  return ConsultationRegistrationFormSchema.superRefine((data, ctx) => {
+    if (kind === 'observatory') return
+    if (data.eventMode !== 'in_person') {
+      ctx.addIssue({ code: 'custom', path: ['eventMode'], message: 'Esta instancia solo admite inscripción presencial' })
+    }
+    if (data.admissionPolicy !== 'directory_only') {
+      ctx.addIssue({ code: 'custom', path: ['admissionPolicy'], message: 'La política institucional solo aplica al Observatorio' })
+    }
+    if (data.meetingUrl) {
+      ctx.addIssue({ code: 'custom', path: ['meetingUrl'], message: 'El enlace virtual solo aplica al Observatorio' })
+    }
+  })
+}
 
 // --- Inscripción (formulario público) ---
 
@@ -166,6 +227,10 @@ const registrationBaseShape = {
   presentationSummary: optionalText(5000),
   documentationDetail: optionalText(5000),
   questions: questionsField.default([]),
+  attendanceMode: z.enum(REGISTRATION_ATTENDANCE_MODES, { error: 'Elegí una modalidad de asistencia válida' }).nullable().optional().default(null),
+  institutionSource: z.enum(REGISTRATION_INSTITUTION_SOURCES, { error: 'Elegí cómo participás' }).nullable().optional().default(null),
+  institutionId: z.number().int('Elegí una institución válida').positive('Elegí una institución válida').nullable().optional().default(null),
+  institutionName: optionalText(191),
   // Campo trampa (honeypot): las personas no lo ven, los bots suelen completarlo.
   website: z.string().optional()
 }
@@ -175,8 +240,38 @@ const registrationBaseShape = {
  * participación y sección de exposición. El servidor resuelve el `kind` desde
  * la base, así que el cliente no puede saltearse esas validaciones.
  */
-export function buildConsultationRegistrationSchema(kind: RegistrationFormKind) {
-  return z.object(registrationBaseShape).superRefine((data, ctx) => {
+export function buildConsultationRegistrationSchema(
+  kind: RegistrationFormKind,
+  rules: RegistrationRules = { eventMode: 'in_person', admissionPolicy: 'directory_only' }
+) {
+  const shape = kind === 'observatory'
+    ? { ...registrationBaseShape, character: registrationBaseShape.character.default('individual') }
+    : registrationBaseShape
+
+  return z.object(shape).superRefine((data, ctx) => {
+    if (kind === 'observatory') {
+      if (rules.eventMode === 'hybrid' && !data.attendanceMode) {
+        ctx.addIssue({ code: 'custom', path: ['attendanceMode'], message: 'Elegí si participás de manera presencial o virtual' })
+      } else if (rules.eventMode !== 'hybrid' && data.attendanceMode && data.attendanceMode !== rules.eventMode) {
+        ctx.addIssue({ code: 'custom', path: ['attendanceMode'], message: 'La modalidad elegida no está disponible en esta reunión' })
+      }
+
+      if (!data.institutionSource) {
+        ctx.addIssue({ code: 'custom', path: ['institutionSource'], message: 'Elegí cómo participás' })
+      } else if (
+        (data.institutionSource === 'other' && rules.admissionPolicy === 'directory_only')
+        || (data.institutionSource === 'individual' && rules.admissionPolicy !== 'open')
+      ) {
+        ctx.addIssue({ code: 'custom', path: ['institutionSource'], message: 'Esta reunión no admite esa forma de participación' })
+      }
+      if (data.institutionSource === 'directory' && !data.institutionId) {
+        ctx.addIssue({ code: 'custom', path: ['institutionId'], message: 'Elegí una institución del directorio' })
+      }
+      if (data.institutionSource === 'other' && !data.institutionName) {
+        ctx.addIssue({ code: 'custom', path: ['institutionName'], message: 'Ingresá el nombre de tu organización' })
+      }
+      return
+    }
     if (data.character === 'legal_entity') {
       if (!data.entityName) {
         ctx.addIssue({ code: 'custom', path: ['entityName'], message: 'Ingresá la denominación o razón social' })
@@ -241,6 +336,11 @@ export const ConsultationRegistrationsQuerySchema = z.object({
   perPage: z.coerce.number().int('La cantidad debe ser un entero').min(1, 'La cantidad mínima es 1').max(100, 'La cantidad máxima es 100').default(20)
 })
 
+export const ConsultationRegistrationFormQuerySchema = z.object({
+  view: z.enum(['public'], { error: 'La vista solicitada no es válida' }).optional()
+})
+
 export type ConsultationRegistrationFormInput = z.output<typeof ConsultationRegistrationFormSchema>
 export type CreateConsultationRegistrationInput = z.output<ReturnType<typeof buildConsultationRegistrationSchema>>
 export type ConsultationRegistrationsQueryInput = z.output<typeof ConsultationRegistrationsQuerySchema>
+export type ConsultationRegistrationFormQueryInput = z.output<typeof ConsultationRegistrationFormQuerySchema>

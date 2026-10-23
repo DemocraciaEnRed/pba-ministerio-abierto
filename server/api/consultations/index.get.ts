@@ -72,7 +72,7 @@ export default defineEventHandler(async (event) => {
         },
         // Resumen de la inscripción presencial para cards y agenda.
         registrationForm: {
-          select: { id: true, eventAt: true, opensAt: true, closesAt: true, venueName: true, venueCity: true }
+          select: { id: true, eventAt: true, opensAt: true, closesAt: true, eventMode: true, venueName: true, venueCity: true }
         },
         // Cantidad de temas visibles (no ocultos) para la métrica "N temas" de la card.
         _count: {

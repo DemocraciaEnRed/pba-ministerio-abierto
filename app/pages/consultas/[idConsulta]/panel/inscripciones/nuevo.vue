@@ -59,7 +59,9 @@ async function createForm(payload: RegistrationFormPayload) {
 
     <UPageBody>
       <ConsultasRegistrationForm
+        v-if="kind"
         mode="create"
+        :kind="kind"
         :event-noun="eventNoun"
         :loading="saving"
         @submit="createForm"

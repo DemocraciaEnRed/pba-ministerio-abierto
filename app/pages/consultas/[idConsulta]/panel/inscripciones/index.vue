@@ -5,6 +5,9 @@ import type { AdminConsultationRegistrationFormDTO } from '~~/server/utils/seria
 import {
   REGISTRATION_CHARACTER_LABELS,
   REGISTRATION_PARTICIPATION_MODE_LABELS,
+  REGISTRATION_EVENT_MODE_LABELS,
+  REGISTRATION_INSTITUTION_SOURCE_LABELS,
+  REGISTRATION_ATTENDANCE_MODE_LABELS,
   registrationEventNoun
 } from '#shared/data/consultation-registrations'
 import { consultationTypeRegistrationKind } from '#shared/data/consultation-types'
@@ -39,7 +42,8 @@ const { data: form, status: formStatus, refresh: refreshForm } = await useAsyncD
       return await requestFetch<AdminConsultationRegistrationFormDTO>(
         `/api/consultations/${consultationId.value}/registration-form`
       )
-    } catch {
+    } catch (error) {
+      if (!error || typeof error !== 'object' || !('statusCode' in error) || error.statusCode !== 404) throw error
       // 404 = todavía no se creó el formulario; es un estado válido de la pantalla.
       return null
     }
@@ -200,7 +204,8 @@ const headerButtons = computed<ButtonProps[]>(() => {
 
 const venue = computed(() => {
   if (!form.value) return ''
-  return `${form.value.venueName} — ${form.value.venueAddress}, ${form.value.venueCity}, ${form.value.venueProvince}`
+  const place = [form.value.venueName, form.value.venueAddress, form.value.venueCity, form.value.venueProvince].filter(Boolean).join(', ')
+  return kind.value === 'observatory' ? [REGISTRATION_EVENT_MODE_LABELS[form.value.eventMode], place].filter(Boolean).join(' · ') : place
 })
 
 function nextPage() {
@@ -275,8 +280,8 @@ function prevPage() {
             <tr>
               <th>Persona</th>
               <th>DNI</th>
-              <th>Carácter</th>
-              <th>Participación</th>
+              <th>{{ kind === 'observatory' ? 'Institución / participación' : 'Carácter' }}</th>
+              <th>{{ kind === 'observatory' ? 'Modalidad' : 'Participación' }}</th>
               <th>Inscripción</th>
               <th>Acciones</th>
             </tr>
@@ -291,9 +296,14 @@ function prevPage() {
                 {{ registration.firstName }} {{ registration.lastName }}
               </td>
               <td>{{ registration.dni }}</td>
-              <td>{{ REGISTRATION_CHARACTER_LABELS[registration.character] }}</td>
               <td>
-                {{ registration.participationMode ? REGISTRATION_PARTICIPATION_MODE_LABELS[registration.participationMode] : '—' }}
+                {{ registration.institutionSource
+                  ? registration.institutionName || REGISTRATION_INSTITUTION_SOURCE_LABELS[registration.institutionSource]
+                  : REGISTRATION_CHARACTER_LABELS[registration.character] }}
+              </td>
+              <td>
+                {{ registration.attendanceMode ? REGISTRATION_ATTENDANCE_MODE_LABELS[registration.attendanceMode]
+                  : registration.participationMode ? REGISTRATION_PARTICIPATION_MODE_LABELS[registration.participationMode] : '—' }}
               </td>
               <td>{{ formatDate(registration.createdAt) }}</td>
               <td>

@@ -2,6 +2,7 @@
 import type { BadgeProps, UserProps } from '@nuxt/ui'
 import { getConsultationType } from '#shared/data/consultation-types'
 import type { PublicConsultationListItem } from '~/types/consulta'
+import { REGISTRATION_EVENT_MODE_LABELS } from '#shared/data/consultation-registrations'
 
 const props = withDefaults(
   defineProps<{
@@ -103,7 +104,8 @@ const registrationBadge = computed<BadgeProps | null>(() => {
 const venueLabel = computed(() => {
   const value = registration.value
   if (!value) return ''
-  return [value.venueName, value.venueCity].filter(Boolean).join(', ')
+  const place = [value.venueName, value.venueCity].filter(Boolean).join(', ')
+  return value.eventMode && value.eventMode !== 'in_person' ? [REGISTRATION_EVENT_MODE_LABELS[value.eventMode], place].filter(Boolean).join(' · ') : place
 })
 
 // En horizontal el pie va en el slot `authors` (queda a la derecha, junto al

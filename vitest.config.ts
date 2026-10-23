@@ -1,5 +1,6 @@
 import { defineConfig } from 'vitest/config'
 import { config as loadEnv } from 'dotenv'
+import { fileURLToPath } from 'node:url'
 
 // Los tests e2e levantan un server real y pegan a la base de datos de test.
 // Cargamos .env.test (que apunta a `consultas_ciudadanas_test`) antes de todo,
@@ -10,6 +11,11 @@ loadEnv({ path: '.env.test', override: true })
 process.env.NUXT_EXPORTS_ROWS_PER_FILE = '3'
 
 export default defineConfig({
+  resolve: {
+    alias: {
+      '#shared': fileURLToPath(new URL('./shared', import.meta.url))
+    }
+  },
   test: {
     include: ['test/e2e/**/*.{test,spec}.ts'],
     environment: 'node',

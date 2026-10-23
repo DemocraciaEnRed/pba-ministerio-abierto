@@ -7,7 +7,10 @@ import {
 import {
   REGISTRATION_CHARACTER_LABELS,
   REGISTRATION_PARTICIPATION_MODE_LABELS,
-  REGISTRATION_PRIVACY_CONTACT_EMAIL
+  REGISTRATION_PRIVACY_CONTACT_EMAIL,
+  REGISTRATION_INSTITUTION_SOURCE_LABELS,
+  REGISTRATION_ATTENDANCE_MODE_LABELS,
+  type RegistrationConfirmation
 } from '#shared/data/consultation-registrations'
 import type { PublicConsultationRegistrationFormDTO } from '~~/server/utils/serializers/consultationRegistrationForm'
 import type { SelfUserDTO } from '~~/server/utils/serializers/user'
@@ -35,8 +38,42 @@ const PROOF_ALLOWED_MIMES = [
 ]
 
 const isHearing = computed(() => props.form.kind === 'hearing')
+const isObservatory = computed(() => props.form.kind === 'observatory')
 
-const schema = computed(() => buildConsultationRegistrationSchema(props.form.kind))
+const schema = computed(() => buildConsultationRegistrationSchema(props.form.kind, props.form))
+const confirmation = useState<RegistrationConfirmation | null>('registration-confirmation', () => null)
+confirmation.value = null
+
+interface InstitutionOption {
+  id: number
+  categoryId: number
+  name: string
+  isActive?: boolean
+}
+interface InstitutionCategoryOption {
+  id: number
+  isActive?: boolean
+}
+const { data: directory, error: directoryError, refresh: refreshDirectory } = await useAsyncData(
+  () => `registration-directory-${props.consultationId}`,
+  async () => {
+    if (!isObservatory.value) return []
+    const [institutions, categories] = await Promise.all([
+      $fetch<InstitutionOption[]>('/api/observatory-institutions'),
+      $fetch<InstitutionCategoryOption[]>('/api/observatory-institution-categories')
+    ])
+    const activeCategoryIds = new Set(categories.filter(category => category.isActive !== false).map(category => category.id))
+    return institutions.filter(institution => institution.isActive !== false && activeCategoryIds.has(institution.categoryId))
+  }
+)
+const institutionSources = computed(() =>
+  (Object.keys(REGISTRATION_INSTITUTION_SOURCE_LABELS) as Array<keyof typeof REGISTRATION_INSTITUTION_SOURCE_LABELS>)
+    .filter(value => value === 'directory'
+      || (value === 'other' && props.form.admissionPolicy !== 'directory_only')
+      || (value === 'individual' && props.form.admissionPolicy === 'open'))
+    .map(value => ({ value, label: REGISTRATION_INSTITUTION_SOURCE_LABELS[value] }))
+)
+const attendanceModes = Object.entries(REGISTRATION_ATTENDANCE_MODE_LABELS).map(([value, label]) => ({ value, label }))
 
 const { loggedIn } = useUserSession()
 const toast = useToast()
@@ -66,6 +103,10 @@ const state = reactive<{
   documentationDetail?: string
   questions: string[]
   website?: string
+  attendanceMode?: 'in_person' | 'virtual'
+  institutionSource: 'directory' | 'other' | 'individual'
+  institutionId?: number
+  institutionName?: string
 }>({
   firstName: undefined,
   lastName: undefined,
@@ -83,10 +124,25 @@ const state = reactive<{
   presentationSummary: undefined,
   documentationDetail: undefined,
   questions: [''],
-  website: undefined
+  website: undefined,
+  attendanceMode: undefined,
+  institutionSource: 'directory',
+  institutionId: undefined,
+  institutionName: undefined
 })
 
-const isLegalEntity = computed(() => state.character === 'legal_entity')
+watch(() => props.form.eventMode, (mode) => {
+  state.attendanceMode = mode === 'hybrid' ? undefined : mode
+}, { immediate: true })
+watch(() => state.institutionSource, () => {
+  state.institutionId = undefined
+  state.institutionName = undefined
+})
+onBeforeRouteLeave((to) => {
+  if (to.path !== `${props.publicPath}/inscripcion/exito`) confirmation.value = null
+})
+
+const isLegalEntity = computed(() => !isObservatory.value && state.character === 'legal_entity')
 const isSpeaker = computed(() =>
   isHearing.value && state.participationMode !== undefined && state.participationMode !== 'attendee'
 )
@@ -100,8 +156,8 @@ onMounted(async () => {
     state.email = me.email ?? state.email
     // El teléfono se guarda como `+54XXXX`; el input muestra el `+54` aparte.
     state.phone = me.phone ? me.phone.replace(/^\+54/, '') : state.phone
-  } catch {
-    // Si falla el prefill, el formulario sigue funcionando vacío.
+  } catch (error) {
+    toast.add({ title: 'No pudimos autocompletar tus datos', description: getErrorMessage(error), color: 'warning' })
   }
 })
 
@@ -167,17 +223,19 @@ function handleValidationError() {
 
 async function handleSubmit(event: FormSubmitEvent<Schema>) {
   loading.value = true
+  confirmation.value = null
   try {
     const formData = new FormData()
-    formData.append('payload', JSON.stringify(event.data))
+    formData.append('payload', JSON.stringify({ ...event.data, phone: state.phone }))
     if (selectedFile.value && isLegalEntity.value) {
       formData.append('file', selectedFile.value)
     }
 
-    await $fetch(`/api/consultations/${props.consultationId}/registrations`, {
+    const response = await $fetch<{ success: boolean, confirmation?: RegistrationConfirmation }>(`/api/consultations/${props.consultationId}/registrations`, {
       method: 'POST',
       body: formData
     })
+    confirmation.value = response.confirmation ?? null
 
     await navigateTo(`${props.publicPath}/inscripcion/exito`)
   } catch (error) {
@@ -319,6 +377,7 @@ async function handleSubmit(event: FormSubmitEvent<Schema>) {
           </UFormField>
 
           <UFormField
+            v-if="!isObservatory"
             label="Carácter en que participa"
             name="character"
             required
@@ -329,6 +388,89 @@ async function handleSubmit(event: FormSubmitEvent<Schema>) {
               variant="card"
             />
           </UFormField>
+        </div>
+      </UCard>
+
+      <UCard
+        v-if="isObservatory"
+        variant="subtle"
+      >
+        <template #header>
+          <h2 class="text-lg font-semibold text-highlighted">
+            Participación en la reunión
+          </h2>
+        </template>
+        <div class="space-y-4">
+          <UFormField
+            label="Cómo participás"
+            name="institutionSource"
+            required
+          >
+            <URadioGroup
+              v-model="state.institutionSource"
+              :items="institutionSources"
+              variant="card"
+            />
+          </UFormField>
+          <template v-if="state.institutionSource === 'directory'">
+            <UAlert
+              v-if="directoryError"
+              color="error"
+              title="No pudimos cargar el directorio"
+              :description="getErrorMessage(directoryError)"
+              :actions="[{ label: 'Reintentar', onClick: () => refreshDirectory() }]"
+            />
+            <UFormField
+              label="Institución"
+              name="institutionId"
+              required
+            >
+              <USelectMenu
+                v-model="state.institutionId"
+                :items="directory ?? []"
+                label-key="name"
+                value-key="id"
+                placeholder="Buscá y elegí tu institución"
+                class="w-full"
+              />
+            </UFormField>
+            <p class="text-sm text-muted">
+              La elección es declarativa y no verifica tu representación institucional.
+            </p>
+          </template>
+          <UFormField
+            v-else-if="state.institutionSource === 'other'"
+            label="Nombre de la organización"
+            name="institutionName"
+            required
+          >
+            <UInput
+              v-model="state.institutionName"
+              :maxlength="191"
+              class="w-full"
+            />
+            <template #help>
+              La inscripción no incorpora la organización al directorio.
+            </template>
+          </UFormField>
+          <UFormField
+            v-if="form.eventMode === 'hybrid'"
+            label="Modalidad de asistencia"
+            name="attendanceMode"
+            required
+          >
+            <URadioGroup
+              v-model="state.attendanceMode"
+              :items="attendanceModes"
+              variant="card"
+            />
+          </UFormField>
+          <p
+            v-else
+            class="text-sm"
+          >
+            Modalidad de asistencia: <strong>{{ REGISTRATION_ATTENDANCE_MODE_LABELS[form.eventMode] }}</strong>
+          </p>
         </div>
       </UCard>
 

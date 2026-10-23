@@ -1,6 +1,8 @@
 import {
   REGISTRATION_CHARACTER_LABELS,
-  REGISTRATION_PARTICIPATION_MODE_LABELS
+  REGISTRATION_PARTICIPATION_MODE_LABELS,
+  REGISTRATION_ATTENDANCE_MODE_LABELS,
+  REGISTRATION_INSTITUTION_SOURCE_LABELS
 } from '#shared/data/consultation-registrations'
 import { consultationTypeRegistrationKind } from '#shared/data/consultation-types'
 import { exportCursorWhere, iterateExportBatchesById } from '../batches'
@@ -56,7 +58,12 @@ export const consultationRegistrationsExport = defineDataExport<Record<string, n
     'Descripción de la exposición',
     'Documentación acompañada',
     'Preguntas',
-    'Fecha de inscripción'
+    'Fecha de inscripción',
+    'Modalidad de asistencia',
+    'Origen institucional',
+    'ID de institución',
+    'Institución',
+    'Categoría de institución'
   ],
 
   async describe({ consultationId }) {
@@ -108,7 +115,12 @@ export const consultationRegistrationsExport = defineDataExport<Record<string, n
         registration.presentationSummary ?? '',
         registration.documentationDetail ?? '',
         registration.questions.map(question => question.body).join(' | '),
-        formatExportDate(registration.createdAt)
+        formatExportDate(registration.createdAt),
+        registration.attendanceMode ? REGISTRATION_ATTENDANCE_MODE_LABELS[registration.attendanceMode] : '',
+        registration.institutionSource ? REGISTRATION_INSTITUTION_SOURCE_LABELS[registration.institutionSource] : '',
+        registration.institutionId ?? '',
+        registration.institutionName ?? '',
+        registration.institutionCategoryName ?? ''
       ])
     }
   }

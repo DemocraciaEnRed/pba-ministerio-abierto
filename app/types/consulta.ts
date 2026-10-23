@@ -220,6 +220,7 @@ export interface RegionalMeetingSummary {
 
 /** Resumen del formulario de inscripción presencial de una instancia. */
 export interface ConsultationRegistrationSummary {
+  eventMode: 'in_person' | 'virtual' | 'hybrid'
   /** Página pública de inscripción. */
   path: string
   state: 'scheduled' | 'open' | 'closed'

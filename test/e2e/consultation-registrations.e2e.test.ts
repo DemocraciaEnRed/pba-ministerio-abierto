@@ -98,10 +98,11 @@ describe('Server e2e: formulario de inscripción', async () => {
   let hearingId: number
   let publicId: number
   let noFormId: number
+  let regionId: number
 
   const createdConsultationIds: number[] = []
 
-  async function createConsultation(slug: string, sectionSlug: string) {
+  async function createConsultation(slug: string, sectionSlug: string, options: { regionId?: number, regionalMeeting?: Record<string, unknown> } = {}) {
     const section = await prisma.section.findUniqueOrThrow({
       where: { slug: sectionSlug },
       select: { id: true }
@@ -118,7 +119,9 @@ describe('Server e2e: formulario de inscripción', async () => {
         body: null,
         startsAt: new Date().toISOString(),
         endsAt: null,
-        closedMessage: null
+        closedMessage: null,
+        regionId: options.regionId ?? null,
+        regionalMeeting: options.regionalMeeting ?? null
       }
     })
 
@@ -149,10 +152,20 @@ describe('Server e2e: formulario de inscripción', async () => {
     prisma = createTestPrisma()
     adminCookie = await login(ADMIN_EMAIL, DEV_PASSWORD)
     citizenCookie = await login(CITIZEN_EMAIL, DEV_PASSWORD)
+    regionId = (await prisma.region.findFirstOrThrow({ select: { id: true } })).id
 
     hearingId = await createConsultation(hearingSlug, 'audiencias-publicas')
     publicId = await createConsultation(publicSlug, 'consultas-publicas')
-    noFormId = await createConsultation(noFormSlug, 'encuentros-regionales')
+    noFormId = await createConsultation(noFormSlug, 'encuentros-regionales', {
+      regionId,
+      regionalMeeting: {
+        location: 'Centro regional',
+        heldAt: new Date(Date.now() + DAY_MS).toISOString(),
+        registrationUrl: null,
+        registrationOpensAt: null,
+        registrationClosesAt: null
+      }
+    })
   })
 
   afterAll(async () => {

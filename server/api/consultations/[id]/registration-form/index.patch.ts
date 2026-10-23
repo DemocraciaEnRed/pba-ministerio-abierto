@@ -1,12 +1,12 @@
-import { ConsultationRegistrationFormSchema } from '#shared/schemas/consultation-registrations'
+import { buildConsultationRegistrationFormSchema } from '#shared/schemas/consultation-registrations'
 import { serializeConsultationRegistrationForm } from '~~/server/utils/serializers/consultationRegistrationForm'
 import { serializeAccreditation } from '~~/server/utils/serializers/accreditation'
 import { resolveRegistrationConsultation } from '~~/server/utils/consultations/registration-form'
 import { syncFormAccreditation, loadFormAccreditation } from '~~/server/utils/consultations/accreditation'
 
 export default defineEventHandler(async (event) => {
-  const body = await parseBody(event, ConsultationRegistrationFormSchema)
   const { consultationId, kind, publicPath } = await resolveRegistrationConsultation(event)
+  const body = await parseBody(event, buildConsultationRegistrationFormSchema(kind))
   const ctx = await getAuthContext(event)
   await assertCan(ctx, 'manage', { type: 'consultation', id: consultationId })
 
@@ -27,10 +27,13 @@ export default defineEventHandler(async (event) => {
       eventAt: body.eventAt,
       opensAt: body.opensAt,
       closesAt: body.closesAt,
-      venueName: body.venueName,
-      venueAddress: body.venueAddress,
-      venueCity: body.venueCity,
-      venueProvince: body.venueProvince
+      eventMode: body.eventMode,
+      admissionPolicy: body.admissionPolicy,
+      meetingUrl: body.meetingUrl,
+      venueName: body.eventMode === 'virtual' ? null : body.venueName,
+      venueAddress: body.eventMode === 'virtual' ? null : body.venueAddress,
+      venueCity: body.eventMode === 'virtual' ? null : body.venueCity,
+      venueProvince: body.eventMode === 'virtual' ? null : body.venueProvince
     },
     include: { _count: { select: { registrations: true } } }
   })

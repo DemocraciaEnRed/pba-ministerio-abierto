@@ -5,14 +5,37 @@ enum RegistrationParticipantCharacter {
 }
 
 /// Forma de participación. Solo aplica a las audiencias públicas; en las
-/// consultas públicas queda en null.
+/// otras variantes queda en null.
 enum RegistrationParticipationMode {
   attendee
   speaker_request
   speaker_report
 }
 
-/// Formulario de inscripción presencial de una audiencia o consulta pública.
+enum RegistrationEventMode {
+  in_person
+  virtual
+  hybrid
+}
+
+enum RegistrationAdmissionPolicy {
+  directory_only
+  directory_and_other
+  open
+}
+
+enum RegistrationAttendanceMode {
+  in_person
+  virtual
+}
+
+enum RegistrationInstitutionSource {
+  directory
+  other
+  individual
+}
+
+/// Formulario de inscripción de una audiencia, consulta, diálogo o reunión.
 /// Hay a lo sumo uno por consulta y solo se puede crear en los tipos que lo
 /// habilitan (ver `registrationFormKind` en shared/data/consultation-types.ts).
 model ConsultationRegistrationForm {
@@ -21,15 +44,19 @@ model ConsultationRegistrationForm {
   title          String
   /// Cuerpo con formato (markdown) que se muestra en la página de inscripción.
   body           String?  @db.Text
-  /// Fecha y hora en que se realiza la audiencia/consulta.
+  /// Fecha y hora en que se realiza el evento.
   eventAt        DateTime
   /// Ventana de inscripción.
   opensAt        DateTime
   closesAt       DateTime
-  venueName      String
-  venueAddress   String
-  venueCity      String
-  venueProvince  String
+  eventMode      RegistrationEventMode @default(in_person)
+  admissionPolicy RegistrationAdmissionPolicy @default(directory_only)
+  /// Solo visible para la administración y tras una inscripción virtual.
+  meetingUrl     String? @db.VarChar(500)
+  venueName      String?
+  venueAddress   String?
+  venueCity      String?
+  venueProvince  String?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
@@ -40,7 +67,7 @@ model ConsultationRegistrationForm {
   @@index([opensAt, closesAt])
 }
 
-/// Inscripción de una persona a una audiencia/consulta pública. El formulario es
+/// Inscripción de una persona a un evento. El formulario es
 /// público: `userId` solo se completa cuando hay sesión, y en ese caso el índice
 /// único impide inscribirse dos veces (MySQL admite múltiples NULL).
 model ConsultationRegistration {
@@ -53,6 +80,12 @@ model ConsultationRegistration {
   email               String
   phone               String
   character           RegistrationParticipantCharacter @default(individual)
+  attendanceMode      RegistrationAttendanceMode?
+  institutionSource   RegistrationInstitutionSource?
+  institutionId       Int?
+  /// Snapshot institucional: no cambia al editar o desactivar el directorio.
+  institutionName     String?
+  institutionCategoryName String?
   /// Bloque de persona jurídica: solo se completa cuando `character` es `legal_entity`.
   entityName          String?
   entityAddress       String?
@@ -71,10 +104,12 @@ model ConsultationRegistration {
   proofAsset Asset?                            @relation("ConsultationRegistrationProof", fields: [proofAssetId], references: [id], onDelete: SetNull)
   questions ConsultationRegistrationQuestion[]
   accreditationEntries AccreditationEntry[]    @relation("AccreditationEntryRegistration")
+  institution ObservatoryInstitution? @relation(fields: [institutionId], references: [id], onDelete: SetNull)
 
   @@unique([formId, userId])
   @@index([formId, createdAt])
   @@index([email])
+  @@index([institutionId])
 }
 
 /// Preguntas que el/la expositor/a formula al inscribirse.

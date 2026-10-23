@@ -1,7 +1,8 @@
 import type {
   ConsultationFormat,
   ResultsVisibility,
-  Visibility
+  Visibility,
+  RegistrationEventMode
 } from '../../../prisma/generated/enums'
 import type { ParticipationState } from '../participation-state'
 import { deriveParticipationState } from '../participation-state'
@@ -69,8 +70,9 @@ type RegistrationSummaryEntity = {
   eventAt: Date
   opensAt: Date
   closesAt: Date
-  venueName: string
-  venueCity: string
+  eventMode: RegistrationEventMode
+  venueName: string | null
+  venueCity: string | null
 }
 
 /**
@@ -87,6 +89,7 @@ export interface ConsultationRegistrationSummaryDTO {
   closesAt: string
   venueName: string
   venueCity: string
+  eventMode: RegistrationEventMode
 }
 
 export interface ConsultationTaxonomyDTO {
@@ -257,6 +260,7 @@ function serializeRegistrationSummary(
     eventAt: form.eventAt.toISOString(),
     opensAt: form.opensAt.toISOString(),
     closesAt: form.closesAt.toISOString(),
+    eventMode: form.eventMode ?? 'in_person',
     venueName: form.venueName ?? '',
     venueCity: form.venueCity ?? ''
   }

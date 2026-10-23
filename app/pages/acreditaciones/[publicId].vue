@@ -7,6 +7,7 @@ import {
   type AccreditationEntryDetailsInput
 } from '#shared/schemas/accreditations'
 import type { PublicAccreditationDTO } from '~~/server/utils/serializers/accreditation'
+import { REGISTRATION_EVENT_MODE_LABELS } from '#shared/data/consultation-registrations'
 
 definePageMeta({
   layout: 'clean'
@@ -258,7 +259,14 @@ async function onSaveDetails(event: FormSubmitEvent<AccreditationEntryDetailsInp
               {{ accreditation.formTitle }}
             </h1>
             <p class="text-sm text-toned">
-              {{ accreditation.venueName }} — {{ accreditation.venueCity }}, {{ accreditation.venueProvince }}
+              {{ accreditation.kind === 'observatory' ? REGISTRATION_EVENT_MODE_LABELS[accreditation.eventMode] : '' }}
+              {{ [accreditation.venueName, accreditation.venueCity, accreditation.venueProvince].filter(Boolean).join(', ') }}
+            </p>
+            <p
+              v-if="accreditation.kind === 'observatory'"
+              class="text-sm text-muted"
+            >
+              Este registro es declarativo para ambas modalidades. No verifica identidad ni conexión a la reunión.
             </p>
           </div>
 

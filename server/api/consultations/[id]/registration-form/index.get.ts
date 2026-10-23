@@ -1,8 +1,11 @@
 import { serializeConsultationRegistrationForm } from '~~/server/utils/serializers/consultationRegistrationForm'
 import { serializeAccreditation } from '~~/server/utils/serializers/accreditation'
 import { resolveRegistrationConsultation } from '~~/server/utils/consultations/registration-form'
+import { ConsultationRegistrationFormQuerySchema } from '#shared/schemas/consultation-registrations'
 
 export default defineEventHandler(async (event) => {
+  const query = await parseQuery(event, ConsultationRegistrationFormQuerySchema)
+  setResponseHeader(event, 'Cache-Control', 'private, no-store')
   const { consultationId, kind, publicPath } = await resolveRegistrationConsultation(event)
   const ctx = await getAuthContext(event)
 
@@ -21,7 +24,7 @@ export default defineEventHandler(async (event) => {
   const canManage = ctx.isPlatformAdmin
     || (ctx.user ? await ctx.isConsultationAdmin(consultationId) : false)
 
-  if (!canManage) {
+  if (!canManage || query.view === 'public') {
     return serializeConsultationRegistrationForm(form, 'public', { kind, consultationPath: publicPath })
   }
 

@@ -10,6 +10,7 @@ import {
 import { resolveRegistrationConsultation } from '~~/server/utils/consultations/registration-form'
 import { resolveRegistrationState } from '~~/server/utils/serializers/consultationRegistrationForm'
 import { sendRegistrationConfirmationEmail } from '~~/server/utils/mailer/messages'
+import { serializeRegistrationConfirmation } from '~~/server/utils/serializers/consultationRegistration'
 
 interface MultipartPart {
   name?: string
@@ -93,7 +94,7 @@ export default defineEventHandler(async (event) => {
 
   const hasProofFile = Boolean(parts?.some(part => part.name === 'file' && part.data?.length && part.filename))
 
-  const result = buildConsultationRegistrationSchema(kind).safeParse({
+  const result = buildConsultationRegistrationSchema(kind, form).safeParse({
     ...(rawPayload as Record<string, unknown>),
     hasProofFile
   })
@@ -131,11 +132,38 @@ export default defineEventHandler(async (event) => {
     }
   }
 
-  const isLegalEntity = body.character === 'legal_entity'
+  const isObservatory = kind === 'observatory'
+  const character = isObservatory
+    ? (body.institutionSource === 'individual' ? 'individual' : 'legal_entity')
+    : body.character
+  const isLegalEntity = character === 'legal_entity'
+  const attendanceMode = isObservatory
+    ? (form.eventMode === 'hybrid' ? body.attendanceMode : form.eventMode)
+    : null
+  if (isObservatory && !attendanceMode) {
+    throw createError({ statusCode: 422, message: 'Elegí una modalidad de asistencia válida' })
+  }
+
+  const institution = isObservatory && body.institutionSource === 'directory'
+    ? await prisma.observatoryInstitution.findFirst({
+        where: { id: body.institutionId!, isActive: true, category: { isActive: true } },
+        select: { id: true, name: true, category: { select: { name: true } } }
+      })
+    : null
+  if (isObservatory && body.institutionSource === 'directory' && !institution) {
+    throw createError({
+      statusCode: 422,
+      message: VALIDATION_ERROR_MESSAGE,
+      data: [{ field: 'institutionId', message: 'Elegí una institución activa del directorio' }]
+    })
+  }
+  const institutionName = isObservatory
+    ? (institution?.name ?? (body.institutionSource === 'other' ? body.institutionName : null))
+    : null
   const participationMode = kind === 'hearing' ? body.participationMode : null
   const isSpeaker = participationMode !== null && participationMode !== 'attendee'
 
-  const proof = isLegalEntity ? parseOptionalProof(parts ?? []) : null
+  const proof = isLegalEntity && !isObservatory ? parseOptionalProof(parts ?? []) : null
 
   const driver = useStorageDriver()
   let storageKey: string | null = null
@@ -182,14 +210,19 @@ export default defineEventHandler(async (event) => {
         dni: body.dni,
         email: body.email,
         phone: body.phone,
-        character: body.character,
+        character,
+        attendanceMode,
+        institutionSource: isObservatory ? body.institutionSource : null,
+        institutionId: institution?.id ?? null,
+        institutionName,
+        institutionCategoryName: institution?.category.name ?? null,
         // Los datos de la persona jurídica solo se guardan si se declaró una.
-        entityName: isLegalEntity ? body.entityName : null,
-        entityAddress: isLegalEntity ? body.entityAddress : null,
-        entityEmail: isLegalEntity ? body.entityEmail : null,
-        entityPhone: isLegalEntity ? body.entityPhone : null,
+        entityName: isLegalEntity && !isObservatory ? body.entityName : null,
+        entityAddress: isLegalEntity && !isObservatory ? body.entityAddress : null,
+        entityEmail: isLegalEntity && !isObservatory ? body.entityEmail : null,
+        entityPhone: isLegalEntity && !isObservatory ? body.entityPhone : null,
         proofAssetId,
-        proofUrl: isLegalEntity ? body.proofUrl : null,
+        proofUrl: isLegalEntity && !isObservatory ? body.proofUrl : null,
         participationMode,
         presentationSummary: isSpeaker ? body.presentationSummary : null,
         documentationDetail: isSpeaker ? body.documentationDetail : null,
@@ -200,6 +233,7 @@ export default defineEventHandler(async (event) => {
     })
   })
 
+  let emailSent = true
   try {
     await sendRegistrationConfirmationEmail(body.email, {
       displayName: `${body.firstName} ${body.lastName}`,
@@ -212,12 +246,33 @@ export default defineEventHandler(async (event) => {
       venueCity: form.venueCity,
       venueProvince: form.venueProvince,
       participationMode,
-      isLegalEntity
+      isLegalEntity,
+      observatory: isObservatory && attendanceMode
+        ? {
+            attendanceMode,
+            institutionSource: body.institutionSource!,
+            institutionName: institutionName ?? null,
+            meetingUrl: attendanceMode === 'virtual' ? form.meetingUrl : null
+          }
+        : null
     })
   } catch (error) {
+    emailSent = false
     console.error('[registrations] email failed:', error)
   }
 
   setResponseStatus(event, 201)
+  if (isObservatory && attendanceMode) {
+    setResponseHeader(event, 'Cache-Control', 'no-store')
+    return {
+      success: true,
+      confirmation: serializeRegistrationConfirmation({
+        consultationId: String(consultationId),
+        attendanceMode,
+        meetingUrl: attendanceMode === 'virtual' ? form.meetingUrl : null,
+        emailSent
+      })
+    }
+  }
   return { success: true }
 })

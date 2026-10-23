@@ -73,6 +73,7 @@ model ObservatoryInstitution {
   category      ObservatoryInstitutionCategory @relation(fields: [categoryId], references: [id], onDelete: Restrict)
   logoAsset     Asset?                         @relation("ObservatoryInstitutionLogo", fields: [logoAssetId], references: [id], onDelete: SetNull)
   contributions ObservatoryContribution[]
+  registrations ConsultationRegistration[]
 
   @@index([categoryId, displayOrder])
   @@index([isActive, displayOrder])

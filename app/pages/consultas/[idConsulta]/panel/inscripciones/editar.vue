@@ -97,8 +97,9 @@ async function updateForm(payload: RegistrationFormPayload) {
       </UPageCard>
 
       <ConsultasRegistrationForm
-        v-else
+        v-else-if="kind"
         mode="edit"
+        :kind="kind"
         :event-noun="eventNoun"
         :initial-values="form"
         :loading="saving"

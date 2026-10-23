@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { PublicConsultationRegistrationFormDTO } from '~~/server/utils/serializers/consultationRegistrationForm'
-import { registrationEventNoun } from '#shared/data/consultation-registrations'
+import { registrationEventNoun, REGISTRATION_EVENT_MODE_LABELS } from '#shared/data/consultation-registrations'
 import type { ThemeUI } from '@nuxt/ui/runtime/types/theme.js'
 
 definePageMeta({
@@ -13,7 +13,8 @@ const consultationId = computed(() => String(route.params.idConsulta))
 const { data: form } = await useAsyncData(
   () => `consultation-registration-form-public-${consultationId.value}`,
   () => $fetch<PublicConsultationRegistrationFormDTO>(
-    `/api/consultations/${consultationId.value}/registration-form`
+    `/api/consultations/${consultationId.value}/registration-form`,
+    { query: { view: 'public' } }
   ),
   { watch: [consultationId] }
 )
@@ -44,9 +45,10 @@ const eventDate = computed(() =>
 
 const venue = computed(() => {
   if (!form.value) return ''
-  return [form.value.venueName, form.value.venueAddress, form.value.venueCity, form.value.venueProvince]
+  const place = [form.value.venueName, form.value.venueAddress, form.value.venueCity, form.value.venueProvince]
     .filter(Boolean)
     .join(', ')
+  return form.value.kind === 'observatory' ? [REGISTRATION_EVENT_MODE_LABELS[form.value.eventMode], place].filter(Boolean).join(' · ') : place
 })
 
 usePageSeo({
@@ -98,7 +100,7 @@ const themeUi: ThemeUI = {
               </div>
               <div>
                 <dt class="text-muted">
-                  Lugar
+                  {{ form.kind === 'observatory' ? 'Modalidad y lugar' : 'Lugar' }}
                 </dt>
                 <dd class="font-medium text-highlighted">
                   {{ venue }}

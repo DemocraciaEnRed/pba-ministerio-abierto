@@ -1,4 +1,5 @@
 import type { RegistrationFormKind } from '#shared/data/consultation-types'
+import type { RegistrationEventMode } from '~~/prisma/generated/enums'
 
 export type AccreditationView = 'public' | 'admin'
 
@@ -19,9 +20,10 @@ type AccreditationFormContext = {
   kind: RegistrationFormKind
   formTitle: string
   eventAt: Date
-  venueName: string
-  venueCity: string
-  venueProvince: string
+  eventMode: RegistrationEventMode
+  venueName: string | null
+  venueCity: string | null
+  venueProvince: string | null
 }
 
 type AccreditationEntryEntity = {
@@ -39,9 +41,10 @@ export interface PublicAccreditationDTO {
   kind: RegistrationFormKind
   formTitle: string
   eventAt: string
-  venueName: string
-  venueCity: string
-  venueProvince: string
+  eventMode: RegistrationEventMode
+  venueName: string | null
+  venueCity: string | null
+  venueProvince: string | null
   state: AccreditationState
 }
 
@@ -106,6 +109,7 @@ export function serializeAccreditation(
       kind: formContext.kind,
       formTitle: formContext.formTitle,
       eventAt: formContext.eventAt.toISOString(),
+      eventMode: formContext.eventMode,
       venueName: formContext.venueName,
       venueCity: formContext.venueCity,
       venueProvince: formContext.venueProvince,
