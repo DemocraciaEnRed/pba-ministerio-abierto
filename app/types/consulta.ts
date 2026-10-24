@@ -1,4 +1,5 @@
 import type { PageCardProps } from '@nuxt/ui'
+import type { AttachmentFileDTO } from '#shared/utils/attachments'
 
 export type Visibility = 'hidden' | 'visible' | 'archived'
 export type ParticipationState = 'scheduled' | 'open' | 'closed'
@@ -6,11 +7,13 @@ export type ConsultationFormat = 'single' | 'multiple'
 export type ResultsVisibility = 'hidden' | 'participants_only' | 'public'
 
 /**
- * Detalle público de una consulta, tal como lo devuelve `GET /api/consultations/:slug`.
+ * Detalle público de una consulta, tal como lo devuelve `GET /api/consultations//:id`.
  */
 export interface ConsultationDetail {
   id: number
   slug: string
+  /** URL pública canónica (`/{seccion}/{id}/{nombre}`). */
+  publicPath: string
   title: string
   summary: string | null
   body: string | null
@@ -33,6 +36,8 @@ export interface ConsultationDetail {
   /** Portada de la consulta para el hero; `null` cuando no hay imagen cargada. */
   coverUrl: string | null
   coverAltText: string | null
+  /** Encuentro presencial (Encuentros Regionales); `null` si no tiene. */
+  regionalMeeting: RegionalMeetingSummary | null
   /** Indica si el usuario actual puede gestionar la consulta (admin o gestor). */
   canManage?: boolean
 }
@@ -46,7 +51,7 @@ export type ConsultaHeroMetadata = PageCardProps
 export type MechanismType = 'support' | 'vote' | 'survey'
 
 /**
- * Tema de una consulta, tal como lo devuelve `GET /api/consultations/:slug/topics` (vista pública).
+ * Tema de una consulta, tal como lo devuelve `GET /api/consultations//:id/topics` (vista pública).
  */
 export interface ConsultationTopic {
   id: number
@@ -74,7 +79,7 @@ export interface ConsultationTopic {
 
 /**
  * Enlace relacionado de un tema, tal como lo devuelve
- * `GET /api/consultations/:slug/topics/:temaSlug/links` (vista pública).
+ * `GET /api/consultations//:id/topics/:temaSlug/links` (vista pública).
  */
 export interface TopicLink {
   id: number
@@ -85,7 +90,7 @@ export interface TopicLink {
 
 /**
  * Adjunto de un tema, tal como lo devuelve
- * `GET /api/consultations/:slug/topics/:temaSlug/attachments`.
+ * `GET /api/consultations//:id/topics/:temaSlug/attachments`.
  */
 export interface TopicAttachment {
   id: number
@@ -100,7 +105,7 @@ export interface TopicAttachment {
 
 /**
  * Imagen de galería (vista pública) de una consulta o tema, tal como la
- * devuelven `GET /api/consultations/:slug/gallery` y el endpoint análogo de
+ * devuelven `GET /api/consultations//:id/gallery` y el endpoint análogo de
  * temas.
  */
 export interface GalleryImage {
@@ -114,11 +119,14 @@ export interface GalleryImage {
 
 /**
  * Resumen liviano de la consulta padre embebido en el detalle de un tema
- * (`GET /api/consultations/:slug/topics/:temaSlug/detail`). Solo lo que el hero
+ * (`GET /api/consultations//:id/topics/:temaSlug/detail`). Solo lo que el hero
  * y el breadcrumb necesitan.
  */
 export interface TopicParentConsultation {
+  id: number
   slug: string
+  /** URL pública canónica de la consulta. */
+  publicPath: string
   title: string
   visibility: Visibility
   startsAt: string | null
@@ -161,11 +169,13 @@ export interface ConsultationWorkGroup extends ConsultationTaxonomy {
 
 /**
  * Item del listado público de consultas (`GET /api/consultations`, vista
- * pública). Es lo que consume la card de consulta en `/consultas` y la HOME.
+ * pública). Es lo que consume la card de consulta en los listados de sección y la HOME.
  */
 export interface PublicConsultationListItem {
   id: number
   slug: string
+  /** URL pública canónica (`/{seccion}/{id}/{nombre}`). */
+  publicPath: string
   title: string
   summary: string | null
   body: string | null
@@ -188,6 +198,38 @@ export interface PublicConsultationListItem {
   coverAltText: string | null
   /** Cantidad de temas visibles; `null` cuando el endpoint no la calcula. */
   topicsCount: number | null
+  /** Inscripción presencial; `null` si la instancia no tiene formulario. */
+  registration: ConsultationRegistrationSummary | null
+  /** Encuentro presencial (Encuentros Regionales); `null` si no tiene. */
+  regionalMeeting?: RegionalMeetingSummary | null
+}
+
+/**
+ * Datos del encuentro presencial de una consulta de Encuentros Regionales. En
+ * la vista pública `registrationUrl` solo viene con la inscripción abierta.
+ */
+export interface RegionalMeetingSummary {
+  location: string
+  heldAt: string
+  year: number
+  registrationUrl: string | null
+  registrationOpensAt: string | null
+  registrationClosesAt: string | null
+  registrationState: 'scheduled' | 'open' | 'closed' | null
+}
+
+/** Resumen del formulario de inscripción presencial de una instancia. */
+export interface ConsultationRegistrationSummary {
+  eventMode: 'in_person' | 'virtual' | 'hybrid'
+  /** Página pública de inscripción. */
+  path: string
+  state: 'scheduled' | 'open' | 'closed'
+  /** Fecha y hora del encuentro presencial. */
+  eventAt: string
+  opensAt: string
+  closesAt: string
+  venueName: string
+  venueCity: string
 }
 
 /**
@@ -197,6 +239,8 @@ export interface PublicConsultationListItem {
 export interface AdminConsultationListItem {
   id: number
   slug: string
+  /** URL pública canónica (`/{seccion}/{id}/{nombre}`). */
+  publicPath: string
   title: string
   summary: string | null
   body: string | null
@@ -239,7 +283,7 @@ export interface CommentReactionsSummary {
 
 /**
  * Comentario en su vista pública, tal como lo devolverá el endpoint de
- * comentarios (`GET /api/consultations/:slug/comments`). El listado de primer
+ * comentarios (`GET /api/consultations//:id/comments`). El listado de primer
  * nivel trae `replyCount`; las respuestas se cargan bajo demanda y paginadas
  * desde `GET /api/comments/:id/replies`.
  */
@@ -253,7 +297,8 @@ export interface PublicComment {
   authorMode: CommentAuthorMode
   authorLabel: string | null
   authorAvatarUrl: string | null
-  hasAttachment: boolean
+  /** Cantidad de adjuntos (la descarga es exclusiva de gestores/admins). */
+  attachmentCount: number
   reactions: CommentReactionsSummary
   createdAt: string
   updatedAt: string
@@ -300,4 +345,75 @@ export interface CommentMetrics {
   deltaPct: number | null
   allTimeTotal: number
   lastCommentAt: string | null
+}
+
+/** Estado de moderación de un comentario en la vista admin. */
+export type CommentModerationStatus = 'visible' | 'hidden' | 'deleted'
+
+/** Respuestas de un hilo agrupadas por estado de moderación. */
+export interface CommentReplyCounts {
+  total: number
+  visible: number
+  hidden: number
+  deleted: number
+}
+
+/**
+ * Comentario en su vista admin (bandeja de moderación, detalle y respuestas con
+ * `view=moderation`). `replyCounts` solo viene en la bandeja por hilos.
+ */
+export interface AdminComment {
+  id: number
+  containerType: 'consultation' | 'topic'
+  consultationId: number | null
+  topicId: number | null
+  parentCommentId: number | null
+  body: string
+  authorMode: CommentAuthorMode
+  authorLabel: string | null
+  authorEmail: string
+  authorAvatarUrl: string | null
+  authorUserId: number
+  moderationStatus: CommentModerationStatus
+  deletedAt: string | null
+  topicTitle: string | null
+  topicSlug: string | null
+  attachments: AttachmentFileDTO[]
+  reactions: CommentReactionsSummary
+  replyCounts?: CommentReplyCounts
+  createdAt: string
+  updatedAt: string
+}
+
+/** Respuesta paginada de la bandeja de moderación o del hilo en modo moderación. */
+export interface AdminCommentsResponse {
+  items: AdminComment[]
+  pagination: PaginationMeta
+}
+
+/** Orden de la bandeja de moderación. */
+export type CommentModerationOrder = 'recent' | 'oldest' | 'mostReplied'
+
+/** Entrada del registro de comentarios de la plataforma (`GET /api/admin/comments`). */
+export interface AdminCommentLogEntry {
+  id: number
+  rootCommentId: number
+  isReply: boolean
+  excerpt: string
+  authorUserId: number
+  authorLabel: string | null
+  authorEmail: string
+  authorAvatarUrl: string | null
+  authorMode: CommentAuthorMode
+  moderationStatus: CommentModerationStatus
+  attachmentCount: number
+  attachments: AttachmentFileDTO[]
+  consultation: { id: number, slug: string, title: string }
+  topic: { id: number, slug: string, title: string } | null
+  createdAt: string
+}
+
+export interface AdminCommentLogResponse {
+  items: AdminCommentLogEntry[]
+  pagination: PaginationMeta
 }

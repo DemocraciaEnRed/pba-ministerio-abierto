@@ -46,6 +46,49 @@ export async function api<T = unknown>(path: string, options: ApiOptions = {}): 
   }
 }
 
+export interface MultipartFile {
+  content: string | Uint8Array
+  filename: string
+  type: string
+  /** Nombre de la parte (por defecto `files`). */
+  field?: string
+}
+
+/**
+ * POST multipart/form-data: campos de texto + archivos (cada uno en su propia
+ * parte, por defecto `files`). Igual que `api`, no lanza en respuestas no-2xx.
+ */
+export async function postMultipart<T = unknown>(
+  path: string,
+  options: { fields?: Record<string, string>, files?: MultipartFile[], cookie?: string } = {}
+): Promise<ApiResponse<T>> {
+  const formData = new FormData()
+  for (const [name, value] of Object.entries(options.fields ?? {})) {
+    formData.append(name, value)
+  }
+  for (const file of options.files ?? []) {
+    formData.append(file.field ?? 'files', new Blob([file.content], { type: file.type }), file.filename)
+  }
+
+  const res = await fetch(url(path), {
+    method: 'POST',
+    headers: options.cookie ? { cookie: options.cookie } : {},
+    body: formData
+  })
+
+  const text = await res.text()
+  let data: unknown = null
+  if (text) {
+    try {
+      data = JSON.parse(text)
+    } catch {
+      data = text
+    }
+  }
+
+  return { status: res.status, data: data as T, setCookie: res.headers.getSetCookie?.() ?? [] }
+}
+
 /**
  * Inicia sesión con las credenciales dadas y devuelve el header `cookie` a
  * reenviar en las siguientes requests autenticadas.

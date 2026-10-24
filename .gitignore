@@ -32,4 +32,7 @@ coverage
 /prisma/generated
 
 # Documentación interna (no se publica)
-docs/
+/docs/*
+
+# El manual de administración se versiona por separado.
+!/docs/manual-administracion/

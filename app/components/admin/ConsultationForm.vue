@@ -1,14 +1,18 @@
 <script setup lang="ts">
-import { isKnownConsultationTypeSlug } from '#shared/data/consultation-types'
+import { consultationTypeAllowsRegion, isKnownConsultationTypeSlug } from '#shared/data/consultation-types'
+import type { RegionalMeetingFormValues } from '~/components/admin/RegionalMeetingFields.vue'
 import { CreateConsultationSchema, UpdateConsultationSchema } from '#shared/schemas/consultation'
+import { slugifyConsultationName } from '#shared/utils/consultation-url'
 
 type ConsultationFormat = 'single' | 'multiple'
 type ResultsVisibility = 'hidden' | 'participants_only' | 'public'
 
 export interface ConsultationFormInitialValues {
+  id?: number | null
   slug: string
   title: string
   sectionId?: number | null
+  sectionSlug?: string | null
   sectionName?: string | null
   summary: string | null
   body: string | null
@@ -19,10 +23,19 @@ export interface ConsultationFormInitialValues {
   commentsEnabled: boolean
   commentsGuidance: string | null
   resultsVisibility: ResultsVisibility
+  regionId?: number | null
+  regionalMeeting?: {
+    location: string
+    heldAt: string
+    registrationUrl: string | null
+    registrationOpensAt: string | null
+    registrationClosesAt: string | null
+  } | null
 }
 
 export interface ConsultationFormPayload {
-  slug: string
+  /** Solo se envía si se personalizó la dirección; si falta, el servidor la genera o la conserva. */
+  slug?: string
   title: string
   sectionId: number | null
   summary: string | null
@@ -34,6 +47,15 @@ export interface ConsultationFormPayload {
   commentsEnabled: boolean
   commentsGuidance: string | null
   resultsVisibility: ResultsVisibility
+  /** Solo para los tipos que admiten región (Encuentros Regionales). */
+  regionId?: number | null
+  regionalMeeting?: {
+    location: string
+    heldAt: string | null
+    registrationUrl: string | null
+    registrationOpensAt: string | null
+    registrationClosesAt: string | null
+  } | null
 }
 
 const props = withDefaults(defineProps<{
@@ -65,11 +87,23 @@ const form = reactive({
   resultsVisibility: 'public' as ResultsVisibility
 })
 
-type FieldName = keyof ConsultationFormPayload
-const errors = reactive<Partial<Record<FieldName, string>>>({})
+const regionId = ref<number | undefined>(undefined)
+const regionalMeeting = ref<RegionalMeetingFormValues>({
+  location: '',
+  heldAt: null,
+  registrationUrl: '',
+  registrationOpensAt: null,
+  registrationClosesAt: null
+})
 
-// El slug se autogenera desde el título hasta que el usuario lo edite a mano.
-const slugTouched = ref(false)
+// Claves de error: nombre del campo o ruta anidada (p. ej. `regionalMeeting.heldAt`).
+const errors = reactive<Partial<Record<string, string>>>({})
+
+// La dirección web se genera desde el título (alta) o se conserva (edición),
+// salvo que quien administra elija personalizarla.
+const customizeAddress = ref(false)
+const toast = useToast()
+const toAbsoluteUrl = useAbsoluteUrl()
 
 const formatOptions = [
   { label: 'Única', value: 'single' },
@@ -83,7 +117,7 @@ const visibilityOptions = [
 ] satisfies { label: string, value: ResultsVisibility }[]
 
 // El tipo se elige una sola vez, en el alta: define qué estructura habilita la consulta.
-const { data: sections } = useAsyncData(
+const { data: sections } = useAsyncData<Array<{ id: number, slug: string, name: string }>>(
   'consultation-form-sections',
   () => $fetch<Array<{ id: number, slug: string, name: string }>>('/api/sections'),
   { default: () => [], immediate: props.mode === 'create' }
@@ -94,16 +128,6 @@ const sectionOptions = computed(() =>
     .filter(section => isKnownConsultationTypeSlug(section.slug))
     .map(section => ({ label: section.name, value: section.id }))
 )
-
-function slugify(value: string): string {
-  return value
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-    .slice(0, 120)
-}
 
 function hydrate(values: ConsultationFormInitialValues | null) {
   form.slug = values?.slug ?? ''
@@ -119,7 +143,15 @@ function hydrate(values: ConsultationFormInitialValues | null) {
   form.commentsEnabled = values?.commentsEnabled ?? true
   form.commentsGuidance = values?.commentsGuidance ?? ''
   form.resultsVisibility = 'public'
-  slugTouched.value = Boolean(values?.slug)
+  regionId.value = values?.regionId ?? undefined
+  regionalMeeting.value = {
+    location: values?.regionalMeeting?.location ?? '',
+    heldAt: values?.regionalMeeting?.heldAt ?? null,
+    registrationUrl: values?.regionalMeeting?.registrationUrl ?? '',
+    registrationOpensAt: values?.regionalMeeting?.registrationOpensAt ?? null,
+    registrationClosesAt: values?.regionalMeeting?.registrationClosesAt ?? null
+  }
+  customizeAddress.value = false
 }
 
 watch(() => props.initialValues, hydrate, { immediate: true })
@@ -132,19 +164,54 @@ const commentsHidden = computed({
   }
 })
 
-watch(() => form.title, (title) => {
-  if (props.mode === 'create' && !slugTouched.value) {
-    form.slug = slugify(title)
-  }
+// Nombre que se usará en la dirección si no se personaliza.
+const automaticAddressName = computed(() =>
+  props.mode === 'create'
+    ? slugifyConsultationName(form.title) || 'consulta'
+    : props.initialValues?.slug ?? ''
+)
+
+const selectedSectionSlug = computed(() => {
+  if (props.mode === 'edit') return props.initialValues?.sectionSlug ?? null
+  return sections.value?.find(section => section.id === form.sectionId)?.slug ?? null
 })
 
-function onSlugInput() {
-  slugTouched.value = true
+const allowsRegion = computed(() => consultationTypeAllowsRegion(selectedSectionSlug.value))
+
+// Vista previa de la dirección pública. En el alta el número todavía no existe.
+const addressPreview = computed(() => {
+  const name = (customizeAddress.value ? form.slug.trim() : automaticAddressName.value) || '…'
+  const section = selectedSectionSlug.value ?? 'tipo-de-consulta'
+  const id = props.initialValues?.id ?? 'número'
+  return toAbsoluteUrl(`/${section}/${id}/${name}`)
+})
+
+// Dirección guardada (solo en edición): es la que conviene copiar y difundir.
+const savedAddress = computed(() => {
+  const values = props.initialValues
+  if (props.mode !== 'edit' || !values?.id || !values.sectionSlug) return null
+  return toAbsoluteUrl(consultationPublicPath({ id: values.id, slug: values.slug, section: { slug: values.sectionSlug } }))
+})
+
+function toggleCustomizeAddress() {
+  customizeAddress.value = !customizeAddress.value
+  form.slug = automaticAddressName.value
+  errors.slug = undefined
+}
+
+async function copySavedAddress() {
+  if (!savedAddress.value) return
+  try {
+    await navigator.clipboard.writeText(savedAddress.value)
+    toast.add({ title: 'Enlace copiado', description: savedAddress.value, color: 'success' })
+  } catch {
+    toast.add({ title: 'No se pudo copiar el enlace', color: 'error' })
+  }
 }
 
 function buildPayload(): ConsultationFormPayload {
   return {
-    slug: form.slug.trim(),
+    slug: customizeAddress.value ? form.slug.trim() : undefined,
     title: form.title.trim(),
     sectionId: form.sectionId ?? null,
     summary: form.summary.trim() || null,
@@ -155,12 +222,24 @@ function buildPayload(): ConsultationFormPayload {
     closedMessage: (form.closedMessage ?? '').trim() || null,
     commentsEnabled: form.commentsEnabled,
     commentsGuidance: (form.commentsGuidance ?? '').trim() || null,
-    resultsVisibility: form.resultsVisibility
+    resultsVisibility: form.resultsVisibility,
+    ...(allowsRegion.value
+      ? {
+          regionId: regionId.value ?? null,
+          regionalMeeting: {
+            location: regionalMeeting.value.location.trim(),
+            heldAt: regionalMeeting.value.heldAt,
+            registrationUrl: regionalMeeting.value.registrationUrl.trim() || null,
+            registrationOpensAt: regionalMeeting.value.registrationOpensAt,
+            registrationClosesAt: regionalMeeting.value.registrationClosesAt
+          }
+        }
+      : {})
   }
 }
 
 function clearErrors() {
-  for (const key of Object.keys(errors) as FieldName[]) {
+  for (const key of Object.keys(errors)) {
     errors[key] = undefined
   }
 }
@@ -169,15 +248,23 @@ function validate(payload: ConsultationFormPayload): boolean {
   clearErrors()
   const schema = props.mode === 'create' ? CreateConsultationSchema : UpdateConsultationSchema
   const result = schema.safeParse(payload)
-  if (result.success) return true
+  let valid = result.success
 
-  for (const issue of result.error.issues) {
-    const field = issue.path[0] as FieldName | undefined
-    if (field && !errors[field]) {
-      errors[field] = issue.message
+  if (!result.success) {
+    for (const issue of result.error.issues) {
+      const field = issue.path.join('.')
+      if (field && !errors[field]) {
+        errors[field] = issue.message
+      }
     }
   }
-  return false
+
+  // El schema los deja opcionales; para Encuentros Regionales son obligatorios.
+  if (allowsRegion.value && !payload.regionId) {
+    errors.regionId = 'Elegí una región'
+    valid = false
+  }
+  return valid
 }
 
 function onSubmit() {
@@ -224,25 +311,46 @@ const titleMax = 180
       </UFormField>
 
       <UFormField
-        label="Slug"
-        description="Identificador para la URL pública (/consultas/…). Solo minúsculas, números y guiones."
-        required
+        label="Dirección web"
+        :description="mode === 'create'
+          ? 'Se arma con el tipo de consulta, un número que se asigna al crearla y un nombre tomado del título.'
+          : 'Cambiar el título no cambia la dirección. Los enlaces que ya difundiste siguen funcionando aunque la personalices.'"
         :error="errors.slug"
+        class="md:col-span-2"
       >
-        <template #hint>
-          <UTooltip text="Se genera automáticamente desde el título, pero podés ajustarlo.">
-            <UIcon
-              name="i-lucide-info"
-              class="text-muted"
+        <div class="space-y-2">
+          <div class="flex flex-wrap items-center gap-2">
+            <code class="min-w-0 flex-1 break-all rounded-md bg-elevated px-3 py-2 text-sm">{{ addressPreview }}</code>
+            <UButton
+              v-if="savedAddress"
+              label="Copiar enlace"
+              icon="i-lucide-copy"
+              color="neutral"
+              variant="subtle"
+              @click="copySavedAddress"
             />
-          </UTooltip>
-        </template>
-        <UInput
-          v-model="form.slug"
-          placeholder="plan-arbolado-urbano-2026"
-          class="w-full"
-          @input="onSlugInput"
-        />
+            <UButton
+              :label="customizeAddress ? 'Usar dirección automática' : 'Personalizar dirección'"
+              :icon="customizeAddress ? 'i-lucide-undo-2' : 'i-lucide-pencil'"
+              color="neutral"
+              variant="ghost"
+              @click="toggleCustomizeAddress"
+            />
+          </div>
+          <UInput
+            v-if="customizeAddress"
+            v-model="form.slug"
+            placeholder="plan-arbolado-urbano-2026"
+            aria-label="Nombre de la dirección web"
+            class="w-full"
+          />
+          <p
+            v-if="customizeAddress"
+            class="text-xs text-muted"
+          >
+            Solo minúsculas, números y guiones. Puede repetirse en otras consultas: el número identifica a cada una.
+          </p>
+        </div>
       </UFormField>
 
       <UFormField
@@ -282,6 +390,14 @@ const titleMax = 180
           class="w-full"
         />
       </UFormField>
+
+      <AdminRegionalMeetingFields
+        v-if="allowsRegion"
+        v-model:region-id="regionId"
+        v-model:meeting="regionalMeeting"
+        :consultation-id="initialValues?.id ?? null"
+        :errors="errors"
+      />
 
       <UFormField
         label="Resumen"

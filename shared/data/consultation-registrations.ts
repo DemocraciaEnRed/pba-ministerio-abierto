@@ -1,5 +1,35 @@
 import type { RegistrationFormKind } from '#shared/data/consultation-types'
 
+export const REGISTRATION_EVENT_MODE_LABELS = {
+  in_person: 'Presencial',
+  virtual: 'Virtual',
+  hybrid: 'Híbrida'
+} as const
+
+export const REGISTRATION_ADMISSION_POLICY_LABELS = {
+  directory_only: 'Solo instituciones del directorio',
+  directory_and_other: 'Directorio y otras organizaciones',
+  open: 'Abierto también a personas físicas'
+} as const
+
+export const REGISTRATION_INSTITUTION_SOURCE_LABELS = {
+  directory: 'Institución del directorio',
+  other: 'Otra organización',
+  individual: 'Persona física'
+} as const
+
+export const REGISTRATION_ATTENDANCE_MODE_LABELS = {
+  in_person: 'Presencial',
+  virtual: 'Virtual'
+} as const
+
+export interface RegistrationConfirmation {
+  consultationId: string
+  attendanceMode: 'in_person' | 'virtual'
+  meetingUrl: string | null
+  emailSent: boolean
+}
+
 export const REGISTRATION_CHARACTER_LABELS = {
   individual: 'Particular interesado (persona humana)',
   legal_entity: 'Representante de Persona Jurídica'
@@ -18,6 +48,8 @@ export function registrationEventNoun(kind: RegistrationFormKind): string {
       return 'audiencia pública'
     case 'dialogue':
       return 'instancia de diálogo'
+    case 'observatory':
+      return 'reunión de trabajo'
     default:
       return 'consulta pública'
   }

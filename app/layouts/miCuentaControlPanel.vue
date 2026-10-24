@@ -2,7 +2,7 @@
 import type { NavigationMenuItem, ThemeUI } from '@nuxt/ui'
 
 const route = useRoute()
-const { canManageConsultations } = useAccountRoles()
+const { canManageConsultations, isCollaborator, isPlatformAdmin } = useAccountRoles()
 
 const itemsNavigationMenu = computed<NavigationMenuItem[][]>(() => [
   [
@@ -25,17 +25,25 @@ const itemsNavigationMenu = computed<NavigationMenuItem[][]>(() => [
       active: route.path.startsWith('/mi-cuenta/avatar')
     }
   ],
-  ...(canManageConsultations.value
+  ...(canManageConsultations.value || isCollaborator.value || isPlatformAdmin.value
     ? [[
         {
-          label: 'Participación',
+          label: 'Gestión',
           type: 'label' as const
         },
+        ...(canManageConsultations.value
+          ? [{
+              label: 'Mis consultas',
+              to: '/mi-cuenta/consultas',
+              icon: 'i-lucide-clipboard-list',
+              active: route.path.startsWith('/mi-cuenta/consultas')
+            }]
+          : []),
         {
-          label: 'Mis consultas',
-          to: '/mi-cuenta/consultas',
-          icon: 'i-lucide-clipboard-list',
-          active: route.path.startsWith('/mi-cuenta/consultas')
+          label: 'Mis exportaciones',
+          to: '/mi-cuenta/exportaciones',
+          icon: 'i-lucide-file-down',
+          active: route.path.startsWith('/mi-cuenta/exportaciones')
         }
       ]]
     : []),

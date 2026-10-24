@@ -1,3 +1,4 @@
+import { posix } from 'node:path'
 import { lookup } from 'mrmime'
 
 /**
@@ -14,7 +15,8 @@ export default defineEventHandler(async (event) => {
   }
 
   const key = event.context.params?.path
-  if (!key) {
+  // Las exportaciones solo se descargan por su endpoint autorizado.
+  if (!key || posix.normalize(key).replace(/^\/+/, '').startsWith('exports/')) {
     throw createError({ statusCode: 404, statusMessage: 'Not Found' })
   }
 

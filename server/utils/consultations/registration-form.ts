@@ -1,11 +1,14 @@
 import type { H3Event } from 'h3'
 import type { RegistrationFormKind } from '#shared/data/consultation-types'
 import { consultationTypeRegistrationKind } from '#shared/data/consultation-types'
-import { resolveConsultationIdFromParam } from '~~/server/utils/consultations/slug'
+import { resolveConsultationIdFromParam } from '~~/server/utils/consultations/resolve'
+import { consultationPublicPath } from '#shared/utils/consultation-url'
 
 export interface RegistrationConsultationContext {
   consultationId: number
   slug: string
+  /** URL pública canónica de la consulta (`/{seccion}/{id}/{nombre}`). */
+  publicPath: string
   title: string
   kind: RegistrationFormKind
 }
@@ -37,6 +40,7 @@ export async function resolveRegistrationConsultation(event: H3Event): Promise<R
   return {
     consultationId: consultation.id,
     slug: consultation.slug,
+    publicPath: consultationPublicPath(consultation),
     title: consultation.title,
     kind
   }

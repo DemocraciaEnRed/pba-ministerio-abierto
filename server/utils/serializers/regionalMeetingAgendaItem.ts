@@ -1,25 +1,59 @@
-import type { AgendaItemState } from '../../../prisma/generated/enums'
+import type { Visibility } from '../../../prisma/generated/enums'
+import type { ParticipationState } from '../participation-state'
+import { deriveParticipationState } from '../participation-state'
+import { consultationPublicPath } from '#shared/utils/consultation-url'
+import { regionalMeetingYear } from '#shared/utils/regional-meetings'
+import type { RegistrationState } from './consultationRegistrationForm'
+import { resolveRegistrationState } from './consultationRegistrationForm'
 
 export type RegionalMeetingAgendaItemView = 'public' | 'admin'
 
-type AgendaItemRegion = {
+export type RegionalMeetingEntity = {
+  id: number
+  location: string
+  heldAt: Date
+  registrationUrl: string | null
+  registrationOpensAt: Date | null
+  registrationClosesAt: Date | null
+}
+
+type AgendaRegionEntity = {
   id: number
   slug: string
   name: string
 }
 
-type AgendaItemEntity = {
+type AgendaConsultationEntity = {
   id: number
-  location: string
-  heldAt: Date
-  year: number | null
-  state: AgendaItemState
-  highlighted: boolean
-  registrationUrl: string | null
-  createdAt: Date
-  updatedAt: Date
-  region: AgendaItemRegion
+  slug: string
+  title: string
+  visibility: Visibility
+  startsAt: Date | null
+  endsAt: Date | null
+  section?: { slug: string } | null
+  region: AgendaRegionEntity | null
 }
+
+export type RegionalMeetingAgendaItemEntity = RegionalMeetingEntity & {
+  consultation: AgendaConsultationEntity
+}
+
+/**
+ * Datos del encuentro presencial embebidos en la consulta. En la vista pública
+ * la URL de inscripción solo se expone mientras la ventana está abierta.
+ */
+export interface PublicRegionalMeetingDTO {
+  location: string
+  heldAt: string
+  year: number
+  registrationUrl: string | null
+  registrationOpensAt: string | null
+  registrationClosesAt: string | null
+  /** `null` cuando el encuentro no tiene inscripción. */
+  registrationState: RegistrationState | null
+}
+
+export type AdminRegionalMeetingDTO = PublicRegionalMeetingDTO
 
 export interface AgendaItemRegionDTO {
   id: number
@@ -27,50 +61,75 @@ export interface AgendaItemRegionDTO {
   name: string
 }
 
-export interface PublicRegionalMeetingAgendaItemDTO {
+export interface PublicRegionalMeetingAgendaItemDTO extends PublicRegionalMeetingDTO {
   id: number
-  location: string
-  heldAt: string
-  year: number | null
-  state: AgendaItemState
-  highlighted: boolean
-  registrationUrl: string | null
-  region: AgendaItemRegionDTO
+  region: AgendaItemRegionDTO | null
+  consultation: {
+    id: number
+    title: string
+    publicPath: string
+    participationState: ParticipationState
+  }
 }
 
 export interface AdminRegionalMeetingAgendaItemDTO extends PublicRegionalMeetingAgendaItemDTO {
-  createdAt: string
-  updatedAt: string
+  consultation: PublicRegionalMeetingAgendaItemDTO['consultation'] & {
+    visibility: Visibility
+  }
 }
 
-export function serializeRegionalMeetingAgendaItem(item: AgendaItemEntity, view: 'public'): PublicRegionalMeetingAgendaItemDTO
-export function serializeRegionalMeetingAgendaItem(item: AgendaItemEntity, view: 'admin'): AdminRegionalMeetingAgendaItemDTO
-export function serializeRegionalMeetingAgendaItem(
-  item: AgendaItemEntity,
+export function serializeRegionalMeeting(item: RegionalMeetingEntity, view: 'public'): PublicRegionalMeetingDTO
+export function serializeRegionalMeeting(item: RegionalMeetingEntity, view: 'admin'): AdminRegionalMeetingDTO
+export function serializeRegionalMeeting(item: RegionalMeetingEntity, view: RegionalMeetingAgendaItemView): PublicRegionalMeetingDTO | AdminRegionalMeetingDTO
+export function serializeRegionalMeeting(
+  item: RegionalMeetingEntity,
   view: RegionalMeetingAgendaItemView
-): PublicRegionalMeetingAgendaItemDTO | AdminRegionalMeetingAgendaItemDTO {
-  const base: PublicRegionalMeetingAgendaItemDTO = {
-    id: item.id,
+): PublicRegionalMeetingDTO | AdminRegionalMeetingDTO {
+  const registrationState = item.registrationUrl && item.registrationOpensAt && item.registrationClosesAt
+    ? resolveRegistrationState({ opensAt: item.registrationOpensAt, closesAt: item.registrationClosesAt })
+    : null
+
+  return {
     location: item.location,
     heldAt: item.heldAt.toISOString(),
-    year: item.year,
-    state: item.state,
-    highlighted: item.highlighted,
-    registrationUrl: item.registrationUrl,
-    region: {
-      id: item.region.id,
-      slug: item.region.slug,
-      name: item.region.name
-    }
+    year: regionalMeetingYear(item.heldAt),
+    registrationUrl: view === 'admin' || registrationState === 'open' ? item.registrationUrl : null,
+    registrationOpensAt: item.registrationOpensAt?.toISOString() ?? null,
+    registrationClosesAt: item.registrationClosesAt?.toISOString() ?? null,
+    registrationState
+  }
+}
+
+export function serializeRegionalMeetingAgendaItem(item: RegionalMeetingAgendaItemEntity, view: 'public'): PublicRegionalMeetingAgendaItemDTO
+export function serializeRegionalMeetingAgendaItem(item: RegionalMeetingAgendaItemEntity, view: 'admin'): AdminRegionalMeetingAgendaItemDTO
+export function serializeRegionalMeetingAgendaItem(
+  item: RegionalMeetingAgendaItemEntity,
+  view: RegionalMeetingAgendaItemView
+): PublicRegionalMeetingAgendaItemDTO | AdminRegionalMeetingAgendaItemDTO {
+  const { consultation } = item
+  const region = consultation.region
+    ? { id: consultation.region.id, slug: consultation.region.slug, name: consultation.region.name }
+    : null
+  const consultationBase = {
+    id: consultation.id,
+    title: consultation.title,
+    publicPath: consultationPublicPath(consultation),
+    participationState: deriveParticipationState(consultation)
   }
 
   if (view === 'public') {
-    return base
+    return {
+      id: item.id,
+      ...serializeRegionalMeeting(item, 'public'),
+      region,
+      consultation: consultationBase
+    }
   }
 
   return {
-    ...base,
-    createdAt: item.createdAt.toISOString(),
-    updatedAt: item.updatedAt.toISOString()
+    id: item.id,
+    ...serializeRegionalMeeting(item, 'admin'),
+    region,
+    consultation: { ...consultationBase, visibility: consultation.visibility }
   }
 }

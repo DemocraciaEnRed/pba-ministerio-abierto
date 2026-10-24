@@ -160,18 +160,13 @@ const ejeCompleto = computed(() => {
             </div>
             <div class="flex flex-col">
               <dt class="text-muted">
-                Archivo adjunto
+                Archivos adjuntos
               </dt>
               <dd class="text-highlighted">
-                <UButton
-                  v-if="submission.attachment"
-                  :to="`/api/regional-meetings/submissions/${submission.id}/attachment`"
-                  external
-                  :label="submission.attachment.filename || 'Descargar adjunto'"
-                  icon="lucide:download"
-                  color="neutral"
-                  variant="subtle"
-                  size="sm"
+                <AttachmentsList
+                  v-if="submission.attachments.length > 0"
+                  :attachments="submission.attachments"
+                  class="mt-1"
                 />
                 <span v-else>—</span>
               </dd>

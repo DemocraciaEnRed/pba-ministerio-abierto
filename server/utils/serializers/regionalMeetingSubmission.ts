@@ -1,15 +1,12 @@
+import type { AttachmentFileDTO } from '#shared/utils/attachments'
+import { serializeAttachmentFiles, type AttachmentListEntity } from '../assets/multi-attachments'
+
 export type RegionalMeetingSubmissionView = 'admin'
 
 type SubmissionLinkEntity = {
   id: number
   url: string
   title: string | null
-}
-
-type SubmissionAttachmentEntity = {
-  originalFilename: string | null
-  mimeType: string | null
-  sizeBytes: number | null
 }
 
 type SubmissionEntity = {
@@ -25,22 +22,15 @@ type SubmissionEntity = {
   subejeTematico: string | null
   ideaProyecto: string | null
   comentarios: string | null
-  attachmentAssetId: number | null
   createdAt: Date
   links: SubmissionLinkEntity[]
-  attachmentAsset: SubmissionAttachmentEntity | null
+  attachments: AttachmentListEntity[]
 }
 
 export interface RegionalMeetingSubmissionLinkDTO {
   id: number
   url: string
   title: string | null
-}
-
-export interface RegionalMeetingSubmissionAttachmentDTO {
-  filename: string | null
-  mimeType: string | null
-  sizeBytes: number | null
 }
 
 export interface AdminRegionalMeetingSubmissionDTO {
@@ -57,7 +47,7 @@ export interface AdminRegionalMeetingSubmissionDTO {
   ideaProyecto: string | null
   comentarios: string | null
   links: RegionalMeetingSubmissionLinkDTO[]
-  attachment: RegionalMeetingSubmissionAttachmentDTO | null
+  attachments: AttachmentFileDTO[]
   createdAt: string
 }
 
@@ -85,13 +75,10 @@ export function serializeRegionalMeetingSubmission(
       url: link.url,
       title: link.title
     })),
-    attachment: submission.attachmentAsset
-      ? {
-          filename: submission.attachmentAsset.originalFilename,
-          mimeType: submission.attachmentAsset.mimeType,
-          sizeBytes: submission.attachmentAsset.sizeBytes
-        }
-      : null,
+    attachments: serializeAttachmentFiles(
+      submission.attachments,
+      attachmentId => `/api/regional-meetings/submissions/${submission.id}/attachments/${attachmentId}`
+    ),
     createdAt: submission.createdAt.toISOString()
   }
 }

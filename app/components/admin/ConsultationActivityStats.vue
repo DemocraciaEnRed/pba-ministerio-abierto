@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { CommentMetrics, CommentMetricsRange } from '~/types/consulta'
 
-const props = defineProps<{ slug: string }>()
+const props = defineProps<{ consultationId: string | number }>()
 
 const range = ref<CommentMetricsRange>('14d')
 
@@ -9,12 +9,12 @@ const range = ref<CommentMetricsRange>('14d')
 // solo para gestores de la consulta.
 const requestFetch = useRequestFetch()
 const { data: metrics, status } = await useAsyncData(
-  () => `admin-consultation-comment-metrics-${props.slug}-${range.value}`,
+  () => `admin-consultation-comment-metrics-${props.consultationId}-${range.value}`,
   () => requestFetch<CommentMetrics>(
-    `/api/consultations/${props.slug}/comment-metrics`,
+    `/api/consultations/${props.consultationId}/comment-metrics`,
     { query: { range: range.value } }
   ),
-  { watch: [range, () => props.slug] }
+  { watch: [range, () => props.consultationId] }
 )
 
 const loading = computed(() => status.value === 'pending')
@@ -62,7 +62,7 @@ const periodLabel = computed(() => commentMetricsPeriodLabel(range.value))
         icon="i-lucide-message-square"
         label="Comentarios nuevos"
         :hint="`${metrics?.topLevel ?? 0} de primer nivel · ${metrics?.replies ?? 0} respuestas`"
-        :to="`/consultas/${slug}/panel/comentarios`"
+        :to="consultationPanelPath(consultationId, 'comentarios')"
       >
         <div class="flex items-baseline gap-2">
           <span class="text-lg font-semibold text-highlighted">{{ loading ? '—' : metrics?.total ?? 0 }}</span>
@@ -93,7 +93,7 @@ const periodLabel = computed(() => commentMetricsPeriodLabel(range.value))
         :value="loading ? '—' : moderatedCount"
         :color="moderatedCount > 0 ? 'warning' : 'neutral'"
         :hint="`${metrics?.hidden ?? 0} ocultos · ${metrics?.deleted ?? 0} eliminados`"
-        :to="`/consultas/${slug}/panel/comentarios`"
+        :to="consultationPanelPath(consultationId, 'comentarios')"
       />
 
       <AdminPanelStat

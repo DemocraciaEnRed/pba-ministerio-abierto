@@ -4,9 +4,8 @@ import type { ConsultationTopic } from '~/types/consulta'
 
 const props = defineProps<{
   tema: ConsultationTopic
+  consultationPath: string
 }>()
-
-const route = useRoute()
 
 /** Badge según el estado de participación del tema. */
 const badge = computed<BadgeProps>(() =>
@@ -15,8 +14,8 @@ const badge = computed<BadgeProps>(() =>
     : { label: 'Participación cerrada', color: 'neutral', variant: 'subtle' }
 )
 
-/** Destino del tema dentro de la consulta actual. */
-const to = computed(() => `/consultas/${route.params.slugConsulta}/temas/${props.tema.slug}`)
+/** Destino del tema dentro de la consulta actual (`consultationPath` es su URL canónica). */
+const to = computed(() => `${props.consultationPath}/temas/${props.tema.slug}`)
 </script>
 
 <template>

@@ -1,8 +1,8 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
-import { setup } from '@nuxt/test-utils/e2e'
+import { setup, url } from '@nuxt/test-utils/e2e'
 import { fileURLToPath } from 'node:url'
 import { createTestPrisma, type TestPrisma } from './db'
-import { api, login } from './http'
+import { api, login, postMultipart } from './http'
 
 const CITIZEN_EMAIL = 'ciudadania@consultas.local'
 const ADMIN_EMAIL = 'admin@consultas.local'
@@ -18,13 +18,18 @@ interface PublicComment {
   body: string
   authorMode: 'citizen' | 'institution'
   authorLabel: string | null
+  attachmentCount: number
   reactions: { counts: Record<string, number>, mine: string[] }
   replies?: PublicComment[]
 }
 
 interface AdminComment extends PublicComment {
   moderationStatus: 'visible' | 'hidden' | 'deleted'
+  attachments: { id: number, filename: string, sizeBytes: number | null, downloadUrl: string }[]
 }
+
+const PDF_CONTENT = '%PDF-1.4 contenido'
+const MB = 1024 * 1024
 
 describe('Server e2e: routing anidado + comentarios (fase 6)', async () => {
   await setup({
@@ -202,7 +207,12 @@ describe('Server e2e: routing anidado + comentarios (fase 6)', async () => {
     })
     const commentIds = comments.map(c => c.id)
     if (commentIds.length > 0) {
+      const attachments = await prisma.commentAttachment.findMany({
+        where: { commentId: { in: commentIds } },
+        select: { assetId: true }
+      })
       await prisma.commentReaction.deleteMany({ where: { commentId: { in: commentIds } } })
+      await prisma.asset.deleteMany({ where: { id: { in: attachments.map(attachment => attachment.assetId) } } })
       // Borrar respuestas antes que raíces para respetar la auto-relación.
       await prisma.comment.deleteMany({ where: { id: { in: commentIds }, parentCommentId: { not: null } } })
       await prisma.comment.deleteMany({ where: { id: { in: commentIds } } })
@@ -219,10 +229,9 @@ describe('Server e2e: routing anidado + comentarios (fase 6)', async () => {
       expect(Array.isArray(res.data)).toBe(true)
     })
 
-    it('resuelve la consulta por slug', async () => {
-      const res = await api<{ id: number }>(`/api/consultations/${openConsultationSlug}`)
-      expect(res.status).toBe(200)
-      expect(res.data.id).toBe(openConsultationId)
+    it('no resuelve la consulta por slug: la API acepta solo id (404)', async () => {
+      const res = await api(`/api/consultations/${openConsultationSlug}`)
+      expect(res.status).toBe(404)
     })
 
     it('resuelve la consulta por id numérico', async () => {
@@ -311,6 +320,125 @@ describe('Server e2e: routing anidado + comentarios (fase 6)', async () => {
         body: { body: '   ' }
       })
       expect(res.status).toBe(422)
+    })
+  })
+
+  describe('Adjuntos', () => {
+    function commentsPath(): string {
+      return `/api/consultations/${openConsultationId}/comments`
+    }
+
+    it('acepta hasta 3 archivos y el público solo ve la cantidad', async () => {
+      const res = await postMultipart<PublicComment>(commentsPath(), {
+        cookie: citizenCookie,
+        fields: { body: 'Comentario con tres adjuntos' },
+        files: [
+          { content: PDF_CONTENT, filename: 'uno.pdf', type: 'application/pdf' },
+          { content: 'col1,col2', filename: 'dos.csv', type: 'text/csv' },
+          { content: 'imagen', filename: 'tres.png', type: 'image/png' }
+        ]
+      })
+      expect(res.status).toBe(201)
+      expect(res.data.attachmentCount).toBe(3)
+      expect(res.data).not.toHaveProperty('attachments')
+
+      const asAdmin = await api<AdminComment>(`/api/comments/${res.data.id}`, { cookie: adminCookie })
+      expect(asAdmin.data.attachments.map(attachment => attachment.filename)).toEqual(['uno.pdf', 'dos.csv', 'tres.png'])
+      for (const attachment of asAdmin.data.attachments) {
+        expect(attachment.downloadUrl).toBe(`/api/comments/${res.data.id}/attachments/${attachment.id}`)
+      }
+    })
+
+    it('acepta adjuntos en comentarios de tema', async () => {
+      const res = await postMultipart<PublicComment>(
+        `/api/consultations/${openConsultationId}/topics/${topicId}/comments`,
+        {
+          cookie: citizenCookie,
+          fields: { body: 'Comentario de tema con adjunto' },
+          files: [{ content: PDF_CONTENT, filename: 'tema.pdf', type: 'application/pdf', field: 'file' }]
+        }
+      )
+      expect(res.status).toBe(201)
+      expect(res.data.attachmentCount).toBe(1)
+    })
+
+    it('rechaza más de 3 archivos (422)', async () => {
+      const res = await postMultipart(commentsPath(), {
+        cookie: citizenCookie,
+        fields: { body: 'Demasiados adjuntos' },
+        files: Array.from({ length: 4 }, (_, index) => ({
+          content: PDF_CONTENT,
+          filename: `archivo-${index}.pdf`,
+          type: 'application/pdf'
+        }))
+      })
+      expect(res.status).toBe(422)
+    })
+
+    it('rechaza archivos que superan los 30 MB en total (422)', async () => {
+      const half = new Uint8Array(15 * MB + 1)
+      const res = await postMultipart(commentsPath(), {
+        cookie: citizenCookie,
+        fields: { body: 'Adjuntos demasiado pesados' },
+        files: [
+          { content: half, filename: 'mitad-1.pdf', type: 'application/pdf' },
+          { content: half, filename: 'mitad-2.pdf', type: 'application/pdf' }
+        ]
+      })
+      expect(res.status).toBe(422)
+    })
+
+    it('rechaza tipos de archivo no permitidos (422)', async () => {
+      const res = await postMultipart(commentsPath(), {
+        cookie: citizenCookie,
+        fields: { body: 'Adjunto ejecutable' },
+        files: [{ content: 'ejecutable', filename: 'virus.exe', type: 'application/x-msdownload' }]
+      })
+      expect(res.status).toBe(422)
+    })
+
+    it('solo gestores/admins descargan cada adjunto por su id', async () => {
+      const created = await postMultipart<PublicComment>(commentsPath(), {
+        cookie: citizenCookie,
+        fields: { body: 'Comentario con dos adjuntos' },
+        files: [
+          { content: PDF_CONTENT, filename: 'primero.pdf', type: 'application/pdf' },
+          { content: 'texto plano', filename: 'segundo.txt', type: 'text/plain' }
+        ]
+      })
+      const asAdmin = await api<AdminComment>(`/api/comments/${created.data.id}`, { cookie: adminCookie })
+      const second = asAdmin.data.attachments[1]!
+
+      const download = await fetch(url(second.downloadUrl), { headers: { cookie: adminCookie } })
+      expect(download.status).toBe(200)
+      expect(download.headers.get('content-disposition')).toContain('segundo.txt')
+      expect(await download.text()).toBe('texto plano')
+
+      const asCitizen = await api(second.downloadUrl, { cookie: citizenCookie })
+      expect(asCitizen.status).toBe(403)
+
+      const anonymous = await api(second.downloadUrl)
+      expect(anonymous.status).toBe(401)
+    })
+
+    it('devuelve 404 si el adjunto no pertenece al comentario', async () => {
+      const withFile = await postMultipart<PublicComment>(commentsPath(), {
+        cookie: citizenCookie,
+        fields: { body: 'Comentario dueño del adjunto' },
+        files: [{ content: PDF_CONTENT, filename: 'ajeno.pdf', type: 'application/pdf' }]
+      })
+      const other = await api<PublicComment>(commentsPath(), {
+        method: 'POST',
+        cookie: citizenCookie,
+        body: { body: 'Comentario sin adjuntos' }
+      })
+      const asAdmin = await api<AdminComment>(`/api/comments/${withFile.data.id}`, { cookie: adminCookie })
+
+      const res = await api(
+        `/api/comments/${other.data.id}/attachments/${asAdmin.data.attachments[0]!.id}`,
+        { cookie: adminCookie }
+      )
+      expect(res.status).toBe(404)
     })
   })
 

@@ -236,6 +236,9 @@ const comoHacemosPageSectionUi: ThemeUI['pageSection'] = {
         </UPageBody>
       </UPage>
     </UContainer>
+    <!--
+      Listado de consultas en tarjetas: oculto a pedido del Ministerio (se accede
+      a cada encuentro desde la agenda). Se conserva para poder reactivarlo.
     <USeparator
       icon="pba:encuentros-regionales"
       :ui="{ icon: 'size-18 text-primary' }"
@@ -251,6 +254,7 @@ const comoHacemosPageSectionUi: ThemeUI['pageSection'] = {
         <EncuentrosRegionalesConsultasCardLists />
       </UContainer>
     </div>
+    -->
     <USeparator />
     <div class="bg-accented/25 dark:bg-accented/10 py-12 sm:py-16 md:py-16 lg:py-16 drop-shadow-md">
       <UContainer>

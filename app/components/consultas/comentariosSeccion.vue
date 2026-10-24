@@ -4,7 +4,7 @@ import type { CommentOrder, ParticipationState, PublicComment } from '~/types/co
 const props = withDefaults(
   defineProps<{
     /** Slug de la consulta contenedora. */
-    consultationSlug: string
+    consultationId: string
     /** Slug del tema, si el hilo es a nivel tema. */
     topicSlug?: string
     /** Ventana de participación abierta (permite crear comentarios). */
@@ -41,14 +41,14 @@ const closedAlert = computed(() => scheduled.value
 
 const basePath = computed(() =>
   props.topicSlug
-    ? `/api/consultations/${props.consultationSlug}/topics/${props.topicSlug}/comments`
-    : `/api/consultations/${props.consultationSlug}/comments`
+    ? `/api/consultations/${props.consultationId}/topics/${props.topicSlug}/comments`
+    : `/api/consultations/${props.consultationId}/comments`
 )
 
 // Fetch propio del hilo: client-only y perezoso, para no bloquear la carga
 // (SSR) de la página. `view=thread` garantiza el hilo público aun para gestores.
 const { data, status, error } = useAsyncData(
-  `comments-${props.consultationSlug}-${props.topicSlug ?? 'root'}`,
+  `comments-${props.consultationId}-${props.topicSlug ?? 'root'}`,
   () => $fetch<PublicComment[]>(basePath.value, { query: { view: 'thread' } }),
   {
     server: false,

@@ -18,7 +18,6 @@ model Comment {
   body             String   @db.Text
   authorMode       CommentAuthorMode @default(citizen)
   moderationStatus CommentModerationStatus @default(visible)
-  attachmentAssetId Int?
   deletedAt        DateTime?
   deletedByUserId  Int?
   createdAt        DateTime @default(now())
@@ -31,8 +30,8 @@ model Comment {
   parentComment  Comment?  @relation("CommentReplies", fields: [parentCommentId], references: [id], onDelete: Cascade)
   replies        Comment[] @relation("CommentReplies")
   reactions      CommentReaction[]
-  // Adjunto opcional del comentario: solo lo descargan gestores/admins.
-  attachmentAsset Asset?   @relation("CommentAttachment", fields: [attachmentAssetId], references: [id], onDelete: SetNull)
+  // Adjuntos opcionales (hasta 3): solo los descargan gestores/admins.
+  attachments    CommentAttachment[]
 
   @@index([consultationId, moderationStatus])
   @@index([topicId, moderationStatus])
@@ -40,6 +39,23 @@ model Comment {
   @@index([topicId, createdAt])
   @@index([authorUserId])
   @@index([parentCommentId])
+}
+
+/// Archivo adjunto de un comentario (hasta 3 por comentario, 30 MB en total).
+/// Se sirve solo a quien modera la consulta, por un endpoint protegido.
+model CommentAttachment {
+  id           Int      @id @default(autoincrement())
+  commentId    Int
+  assetId      Int
+  displayOrder Int      @default(0)
+  createdAt    DateTime @default(now())
+
+  comment Comment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  asset   Asset   @relation("CommentAttachmentAsset", fields: [assetId], references: [id], onDelete: Cascade)
+
+  @@unique([commentId, assetId])
+  @@index([commentId, displayOrder])
+  @@index([assetId])
 }
 
 enum CommentReactionType {

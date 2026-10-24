@@ -11,6 +11,7 @@ Este repositorio contiene el frontend y el backend en una única aplicación **N
 - **Producto base:** Consultas Digitales (Democracia en Red), un *flavor* de democraciaOS.
 - **Instancia:** Ministerio Abierto — Ministerio de Infraestructura y Servicios Públicos, Provincia de Buenos Aires.
 - **Alcance funcional y de producto:** ver [docs/lineamientos-producto.md](docs/lineamientos-producto.md).
+- **Manual de administración:** ver [índice y recorridos por rol](docs/manual-administracion/README.md) (1.0 candidata a revisión; pruebas operativas y capturas pendientes).
 - **Dirección técnica y arquitectura:** ver [docs/lineamientos-tecnicos.md](docs/lineamientos-tecnicos.md) y [AGENTS.md](AGENTS.md).
 
 > Nota: algunos identificadores internos del entorno de desarrollo (nombres de base de datos como `consultas_ciudadanas`, emails `@consultas.local`, etc.) conservan la nomenclatura del producto base y no afectan la identidad de la instancia.
@@ -372,3 +373,5 @@ pnpm test:watch  # modo watch
 ```
 
 Los archivos viven en `test/e2e/`. Cada corrida hace un build del server (tarda ~1 min la primera vez). Las pruebas siembran su propio dato de dominio (consultas, temas, comentarios) con slugs unicos y lo limpian al terminar.
+
+Si preparás datos por HTTP en un bloque `describe` anidado, usá `beforeEach`/`afterEach` en lugar de `beforeAll`/`afterAll`: `@nuxt/test-utils` restablece el contexto de `url()` y sus helpers en cada `beforeEach` y lo borra en cada `afterEach`. Un `beforeAll` anidado que corre después de otros tests no tiene ese contexto disponible.

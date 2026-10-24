@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import { ConsultationRegistrationFormSchema } from '#shared/schemas/consultation-registrations'
+import { buildConsultationRegistrationFormSchema, type RegistrationRules } from '#shared/schemas/consultation-registrations'
+import type { RegistrationFormKind } from '#shared/data/consultation-types'
+import { REGISTRATION_EVENT_MODE_LABELS, REGISTRATION_ADMISSION_POLICY_LABELS } from '#shared/data/consultation-registrations'
 import type { AdminConsultationRegistrationFormDTO } from '~~/server/utils/serializers/consultationRegistrationForm'
 import { PROVINCES, type Province } from '#shared/data/argentina'
 
@@ -13,6 +15,9 @@ export interface RegistrationFormPayload {
   venueAddress: string
   venueCity: string
   venueProvince: string
+  eventMode: RegistrationRules['eventMode']
+  admissionPolicy: RegistrationRules['admissionPolicy']
+  meetingUrl: string | null
   accreditationEnabled: boolean
   accreditationOpensAt: string | null
   accreditationClosesAt: string | null
@@ -21,6 +26,7 @@ export interface RegistrationFormPayload {
 const props = withDefaults(defineProps<{
   mode: 'create' | 'edit'
   eventNoun: string
+  kind: RegistrationFormKind
   initialValues?: AdminConsultationRegistrationFormDTO | null
   loading?: boolean
 }>(), {
@@ -43,6 +49,9 @@ const form = reactive({
   venueAddress: '',
   venueCity: '',
   venueProvince: 'Buenos Aires' as Province,
+  eventMode: 'in_person' as RegistrationRules['eventMode'],
+  admissionPolicy: 'directory_only' as RegistrationRules['admissionPolicy'],
+  meetingUrl: '',
   accreditationEnabled: false,
   accreditationOpensAt: null as string | null,
   accreditationClosesAt: null as string | null
@@ -50,6 +59,9 @@ const form = reactive({
 
 // Cantidad de ingresos ya registrados: si hay, deshabilitar conserva el historial.
 const accreditationEntriesCount = computed(() => props.initialValues?.accreditation?.entriesCount ?? 0)
+const isObservatory = computed(() => props.kind === 'observatory')
+const eventModes = Object.entries(REGISTRATION_EVENT_MODE_LABELS).map(([value, label]) => ({ value, label }))
+const admissionPolicies = Object.entries(REGISTRATION_ADMISSION_POLICY_LABELS).map(([value, label]) => ({ value, label }))
 
 type FieldName = keyof RegistrationFormPayload
 const errors = reactive<Partial<Record<FieldName, string>>>({})
@@ -64,6 +76,9 @@ function hydrate(values: AdminConsultationRegistrationFormDTO | null) {
   form.venueAddress = values?.venueAddress ?? ''
   form.venueCity = values?.venueCity ?? ''
   form.venueProvince = (values?.venueProvince as Province | undefined) ?? 'Buenos Aires'
+  form.eventMode = values?.eventMode ?? 'in_person'
+  form.admissionPolicy = values?.admissionPolicy ?? 'directory_only'
+  form.meetingUrl = values?.meetingUrl ?? ''
   form.accreditationEnabled = values?.accreditation?.enabled ?? false
   // Prefill de la ventana aunque esté histórica, para reutilizarla al reactivar.
   form.accreditationOpensAt = values?.accreditation?.opensAt ?? null
@@ -83,6 +98,9 @@ function buildPayload(): RegistrationFormPayload {
     venueAddress: form.venueAddress.trim(),
     venueCity: form.venueCity.trim(),
     venueProvince: form.venueProvince,
+    eventMode: isObservatory.value ? form.eventMode : 'in_person',
+    admissionPolicy: isObservatory.value ? form.admissionPolicy : 'directory_only',
+    meetingUrl: isObservatory.value && form.eventMode !== 'in_person' ? form.meetingUrl.trim() || null : null,
     accreditationEnabled: form.accreditationEnabled,
     accreditationOpensAt: form.accreditationEnabled ? form.accreditationOpensAt : null,
     accreditationClosesAt: form.accreditationEnabled ? form.accreditationClosesAt : null
@@ -97,7 +115,7 @@ function clearErrors() {
 
 function validate(payload: RegistrationFormPayload): boolean {
   clearErrors()
-  const result = ConsultationRegistrationFormSchema.safeParse(payload)
+  const result = buildConsultationRegistrationFormSchema(props.kind).safeParse(payload)
   if (result.success) return true
 
   for (const issue of result.error.issues) {
@@ -186,7 +204,55 @@ const titleMax = 200
       </UFormField>
     </div>
 
-    <div class="grid gap-4 md:grid-cols-2">
+    <template v-if="isObservatory">
+      <UAlert
+        v-if="initialValues && initialValues.registrationsCount > 0"
+        color="warning"
+        variant="subtle"
+        title="Ya hay personas inscriptas"
+        description="Los cambios afectan nuevas inscripciones, no modifican las anteriores ni reenvían correos. Si cambiás la modalidad o el enlace, comunicalo por fuera de la plataforma."
+      />
+      <UFormField
+        label="Modalidad de la reunión"
+        required
+        :error="errors.eventMode"
+      >
+        <USelect
+          v-model="form.eventMode"
+          :items="eventModes"
+          class="w-full"
+        />
+      </UFormField>
+      <UFormField
+        label="Quiénes pueden inscribirse"
+        required
+        :error="errors.admissionPolicy"
+      >
+        <USelect
+          v-model="form.admissionPolicy"
+          :items="admissionPolicies"
+          class="w-full"
+        />
+      </UFormField>
+      <UFormField
+        v-if="form.eventMode !== 'in_person'"
+        label="Enlace de la reunión virtual"
+        description="Opcional. Se muestra solo al confirmar una inscripción virtual y en su correo. Si lo cargás o cambiás después, comunicalo por fuera de la plataforma."
+        :error="errors.meetingUrl"
+      >
+        <UInput
+          v-model="form.meetingUrl"
+          type="url"
+          placeholder="https://..."
+          class="w-full"
+        />
+      </UFormField>
+    </template>
+
+    <div
+      v-if="!isObservatory || form.eventMode !== 'virtual'"
+      class="grid gap-4 md:grid-cols-2"
+    >
       <UFormField
         label="Lugar"
         description="Nombre del espacio físico (por ejemplo, Teatro Municipal)."

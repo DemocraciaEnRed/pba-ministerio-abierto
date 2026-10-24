@@ -1,15 +1,12 @@
+import type { AttachmentFileDTO } from '#shared/utils/attachments'
+import { serializeAttachmentFiles, type AttachmentListEntity } from '../assets/multi-attachments'
+
 export type ObservatoryContributionView = 'admin'
 
 type ContributionLinkEntity = {
   id: number
   url: string
   title: string | null
-}
-
-type ContributionAttachmentEntity = {
-  originalFilename: string | null
-  mimeType: string | null
-  sizeBytes: number | null
 }
 
 type ContributionWorkGroupEntity = {
@@ -32,19 +29,13 @@ type ContributionEntity = {
   createdAt: Date
   workGroupAssignments: { workGroup: ContributionWorkGroupEntity }[]
   links: ContributionLinkEntity[]
-  attachmentAsset: ContributionAttachmentEntity | null
+  attachments: AttachmentListEntity[]
 }
 
 export interface ObservatoryContributionLinkDTO {
   id: number
   url: string
   title: string | null
-}
-
-export interface ObservatoryContributionAttachmentDTO {
-  filename: string | null
-  mimeType: string | null
-  sizeBytes: number | null
 }
 
 export interface ObservatoryContributionWorkGroupDTO {
@@ -66,7 +57,7 @@ export interface AdminObservatoryContributionDTO {
   workGroups: ObservatoryContributionWorkGroupDTO[]
   description: string | null
   links: ObservatoryContributionLinkDTO[]
-  attachment: ObservatoryContributionAttachmentDTO | null
+  attachments: AttachmentFileDTO[]
   createdAt: string
 }
 
@@ -97,13 +88,10 @@ export function serializeObservatoryContribution(
       url: link.url,
       title: link.title
     })),
-    attachment: contribution.attachmentAsset
-      ? {
-          filename: contribution.attachmentAsset.originalFilename,
-          mimeType: contribution.attachmentAsset.mimeType,
-          sizeBytes: contribution.attachmentAsset.sizeBytes
-        }
-      : null,
+    attachments: serializeAttachmentFiles(
+      contribution.attachments,
+      attachmentId => `/api/observatory-contributions/${contribution.id}/attachments/${attachmentId}`
+    ),
     createdAt: contribution.createdAt.toISOString()
   }
 }

@@ -1,5 +1,6 @@
 import type { RegistrationFormKind } from '#shared/data/consultation-types'
 import type { AdminAccreditationDTO } from '~~/server/utils/serializers/accreditation'
+import type { RegistrationAdmissionPolicy, RegistrationEventMode } from '~~/prisma/generated/enums'
 
 export type ConsultationRegistrationFormView = 'public' | 'admin'
 
@@ -14,10 +15,13 @@ type RegistrationFormEntity = {
   eventAt: Date
   opensAt: Date
   closesAt: Date
-  venueName: string
-  venueAddress: string
-  venueCity: string
-  venueProvince: string
+  eventMode: RegistrationEventMode
+  admissionPolicy: RegistrationAdmissionPolicy
+  meetingUrl: string | null
+  venueName: string | null
+  venueAddress: string | null
+  venueCity: string | null
+  venueProvince: string | null
   createdAt: Date
   updatedAt: Date
 }
@@ -27,18 +31,23 @@ export interface PublicConsultationRegistrationFormDTO {
   title: string
   body: string | null
   kind: RegistrationFormKind
+  /** URL pública canónica de la consulta; `null` si el handler no la provee. */
+  consultationPath: string | null
   eventAt: string
   opensAt: string
   closesAt: string
-  venueName: string
-  venueAddress: string
-  venueCity: string
-  venueProvince: string
+  eventMode: RegistrationEventMode
+  admissionPolicy: RegistrationAdmissionPolicy
+  venueName: string | null
+  venueAddress: string | null
+  venueCity: string | null
+  venueProvince: string | null
   registrationState: RegistrationState
 }
 
 export interface AdminConsultationRegistrationFormDTO extends PublicConsultationRegistrationFormDTO {
   consultationId: number
+  meetingUrl: string | null
   registrationsCount: number
   accreditation: AdminAccreditationDTO | null
   createdAt: string
@@ -47,6 +56,7 @@ export interface AdminConsultationRegistrationFormDTO extends PublicConsultation
 
 export interface SerializeRegistrationFormContext {
   kind: RegistrationFormKind
+  consultationPath?: string | null
   registrationsCount?: number
   accreditation?: AdminAccreditationDTO | null
   now?: Date
@@ -78,9 +88,12 @@ export function serializeConsultationRegistrationForm(
     title: form.title,
     body: form.body,
     kind: context.kind,
+    consultationPath: context.consultationPath ?? null,
     eventAt: form.eventAt.toISOString(),
     opensAt: form.opensAt.toISOString(),
     closesAt: form.closesAt.toISOString(),
+    eventMode: form.eventMode,
+    admissionPolicy: form.admissionPolicy,
     venueName: form.venueName,
     venueAddress: form.venueAddress,
     venueCity: form.venueCity,
@@ -95,6 +108,7 @@ export function serializeConsultationRegistrationForm(
   return {
     ...base,
     consultationId: form.consultationId,
+    meetingUrl: form.meetingUrl,
     registrationsCount: context.registrationsCount ?? 0,
     accreditation: context.accreditation ?? null,
     createdAt: form.createdAt.toISOString(),

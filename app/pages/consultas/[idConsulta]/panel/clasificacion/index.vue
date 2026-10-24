@@ -1,0 +1,43 @@
+<script setup lang="ts">
+import { consultationTypeAllowsWorkGroup } from '#shared/data/consultation-types'
+
+definePageMeta({
+  layout: 'consultas-control-panel',
+  middleware: 'consultation-manager'
+})
+
+usePrivatePageSeo('Clasificación')
+
+const { data: consultation, refresh } = useConsultationAdmin()
+
+const allowsWorkGroup = computed(() => consultationTypeAllowsWorkGroup(consultation.value?.section?.slug))
+</script>
+
+<template>
+  <UPage>
+    <UPageHeader
+      title="Clasificación"
+      description="Ordená la consulta para el listado público y los filtros."
+    />
+
+    <UPageBody>
+      <div class="max-w-2xl space-y-6">
+        <AdminConsultationTaxonomyForm
+          v-if="consultation"
+          :consultation-id="consultation.id"
+          :section-id="consultation.section?.id ?? null"
+          :section-name="consultation.section?.name ?? null"
+          :initial-categories="consultation.categories"
+          :initial-tags="consultation.tags"
+          @saved="refresh"
+        />
+        <AdminConsultationWorkGroupForm
+          v-if="consultation && allowsWorkGroup"
+          :consultation-id="consultation.id"
+          :initial-work-group-ids="consultation.observatoryWorkGroups?.map(group => group.id) ?? []"
+          @saved="refresh"
+        />
+      </div>
+    </UPageBody>
+  </UPage>
+</template>

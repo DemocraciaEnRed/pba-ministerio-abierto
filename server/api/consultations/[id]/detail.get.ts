@@ -1,0 +1,155 @@
+import { parseConsultationIdParam, resolveConsultationById } from '~~/server/utils/consultations/resolve'
+import { serializeConsultation } from '~~/server/utils/serializers/consultation'
+import { serializeTopic } from '~~/server/utils/serializers/topic'
+import { serializeConsultationLink } from '~~/server/utils/serializers/consultationLink'
+import { listAttachments } from '~~/server/utils/assets/attachments'
+import { listGalleryImages } from '~~/server/utils/assets/gallery'
+import { getCoverImage, getCoverImagesByOwner } from '~~/server/utils/assets/cover'
+import { serializeConsultationRegistrationForm } from '~~/server/utils/serializers/consultationRegistrationForm'
+import { consultationTypeRegistrationKind } from '#shared/data/consultation-types'
+import { consultationPublicPath } from '#shared/utils/consultation-url'
+import type { ConsultationRelatedLinkModel, TopicModel } from '~~/prisma/generated/models'
+
+function isPubliclyVisible(entity: { visibility: string }): boolean {
+  return entity.visibility !== 'hidden'
+}
+
+/**
+ * Endpoint de vista (BFF) para el detalle público de una consulta.
+ *
+ * Compone en una sola respuesta lo que la pantalla `/{seccion}/{id}/{nombre}` necesita
+ * —consulta + temas + enlaces— evitando las tres llamadas independientes que
+ * hacía la página. La autorización sigue siendo por recurso: quien puede
+ * gestionar la consulta (admin de plataforma o gestor con `ConsultationMembership`)
+ * ve la vista admin y los temas ocultos; el resto ve solo la vista pública y
+ * los temas visibles. Ver la excepción documentada en
+ * `docs/rutas-backend-entity-driven.md`.
+ */
+export default defineEventHandler(async (event) => {
+  const identifier = parseConsultationIdParam(event)
+  const ctx = await getAuthContext(event)
+  const userId = ctx.user?.id ?? null
+
+  const consultation = await resolveConsultationById(identifier, {
+    section: true,
+    region: true,
+    workGroupAssignments: {
+      include: { workGroup: true },
+      orderBy: { workGroup: { displayOrder: 'asc' } }
+    },
+    categoryAssignments: {
+      include: { category: true },
+      orderBy: [{ isPrimary: 'desc' }, { displayOrder: 'asc' }, { id: 'asc' }]
+    },
+    consultationTags: {
+      include: { tag: true }
+    },
+    topics: {
+      orderBy: { displayOrder: 'asc' }
+    },
+    relatedLinks: {
+      orderBy: { displayOrder: 'asc' }
+    },
+    ...(userId
+      ? {
+          memberships: {
+            where: { userId },
+            select: { id: true }
+          }
+        }
+      : {})
+  })
+
+  const isAdminView = ctx.isPlatformAdmin
+    || ('memberships' in consultation && Array.isArray(consultation.memberships) && consultation.memberships.length > 0)
+
+  if (!isAdminView && !isPubliclyVisible(consultation)) {
+    throw createError({
+      statusCode: 404,
+      message: 'Consulta no encontrada'
+    })
+  }
+
+  // `resolveConsultationById` no propaga el tipo de los `include`; tipamos
+  // las relaciones cargadas con los modelos generados por Prisma.
+  const topics = (consultation as unknown as { topics: TopicModel[] }).topics
+  const relatedLinks = (consultation as unknown as { relatedLinks: ConsultationRelatedLinkModel[] }).relatedLinks
+
+  // Los no-gestores solo ven temas visibles: nunca se filtran temas ocultos al
+  // público desde este endpoint.
+  const visibleTopics = isAdminView
+    ? topics
+    : topics.filter(isPubliclyVisible)
+
+  const attachments = await listAttachments(
+    { ownerType: 'consultation', ownerId: consultation.id },
+    { adminView: isAdminView }
+  )
+
+  const gallery = await listGalleryImages(
+    { ownerType: 'consultation', ownerId: consultation.id },
+    { adminView: isAdminView }
+  )
+
+  // Portadas de los temas del carrusel, resueltas por lote para evitar el N+1.
+  const topicCovers = await getCoverImagesByOwner(
+    'topic',
+    visibleTopics.map(topic => topic.id),
+    { adminView: isAdminView }
+  )
+
+  // Portada propia de la consulta para el fondo del hero.
+  const consultationCover = await getCoverImage(
+    { ownerType: 'consultation', ownerId: consultation.id },
+    { adminView: isAdminView }
+  )
+  const consultationWithCover = {
+    ...consultation,
+    coverUrl: consultationCover?.url ?? null,
+    coverAltText: consultationCover?.altText ?? null
+  }
+
+  const attachCover = (topic: TopicModel) => {
+    const cover = topicCovers.get(topic.id)
+    return {
+      ...topic,
+      coverUrl: cover?.url ?? null,
+      coverAltText: cover?.altText ?? null
+    }
+  }
+
+  // Formulario de inscripción: solo existe en audiencias y consultas públicas.
+  // Se compone acá para que el banner no necesite un pedido extra.
+  const registrationKind = consultationTypeRegistrationKind(
+    (consultation as unknown as { section: { slug: string } | null }).section?.slug
+  )
+  const registrationFormRow = registrationKind
+    ? await prisma.consultationRegistrationForm.findUnique({ where: { consultationId: consultation.id } })
+    : null
+  const registrationForm = registrationFormRow && registrationKind
+    ? serializeConsultationRegistrationForm(registrationFormRow, 'public', {
+        kind: registrationKind,
+        consultationPath: consultationPublicPath(consultation as unknown as { id: number, slug: string, section: { slug: string } | null })
+      })
+    : null
+
+  if (isAdminView) {
+    return {
+      consultation: { ...serializeConsultation(consultationWithCover, 'admin'), canManage: true },
+      topics: visibleTopics.map(topic => serializeTopic(attachCover(topic), 'admin')),
+      links: relatedLinks.map(link => serializeConsultationLink(link, 'admin')),
+      attachments,
+      gallery,
+      registrationForm
+    }
+  }
+
+  return {
+    consultation: { ...serializeConsultation(consultationWithCover, 'public'), canManage: false },
+    topics: visibleTopics.map(topic => serializeTopic(attachCover(topic), 'public')),
+    links: relatedLinks.map(link => serializeConsultationLink(link, 'public')),
+    attachments,
+    gallery,
+    registrationForm
+  }
+})

@@ -1,5 +1,6 @@
 import { parsePositiveIntParam } from '~~/server/utils/http/params'
 import { serializeRegionalMeetingSubmission } from '~~/server/utils/serializers/regionalMeetingSubmission'
+import { attachmentListSelect } from '~~/server/utils/assets/multi-attachments'
 
 // Detalle de un aporte: exclusivo de platform-admin.
 export default defineEventHandler(async (event) => {
@@ -11,9 +12,7 @@ export default defineEventHandler(async (event) => {
     where: { id: submissionId },
     include: {
       links: true,
-      attachmentAsset: {
-        select: { originalFilename: true, mimeType: true, sizeBytes: true }
-      }
+      attachments: attachmentListSelect
     }
   })
 

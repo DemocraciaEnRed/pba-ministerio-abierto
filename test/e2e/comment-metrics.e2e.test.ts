@@ -39,7 +39,6 @@ describe('Server e2e: métricas de comentarios del panel de consulta', async () 
   let managerCookie: string
 
   let consultationId: number
-  let consultationSlug: string
   let membershipId: number
   let topicCommentCreatedAt: Date
 
@@ -65,7 +64,6 @@ describe('Server e2e: métricas de comentarios del panel de consulta', async () 
       }
     })
     consultationId = consultation.id
-    consultationSlug = consultation.slug
     createdConsultationIds.push(consultation.id)
 
     const topic = await prisma.topic.create({
@@ -190,13 +188,13 @@ describe('Server e2e: métricas de comentarios del panel de consulta', async () 
 
   describe('Autorización', () => {
     it('rechaza sin sesión (401)', async () => {
-      const res = await api(`/api/consultations/${consultationSlug}/comment-metrics`)
+      const res = await api(`/api/consultations/${consultationId}/comment-metrics`)
       expect(res.status).toBe(401)
     })
 
     it('rechaza a un usuario sin membresía en la consulta (403)', async () => {
       await prisma.consultationMembership.delete({ where: { id: membershipId } })
-      const res = await api(`/api/consultations/${consultationSlug}/comment-metrics`, { cookie: citizenCookie })
+      const res = await api(`/api/consultations/${consultationId}/comment-metrics`, { cookie: citizenCookie })
       expect(res.status).toBe(403)
 
       const restored = await prisma.consultationMembership.create({
@@ -206,22 +204,22 @@ describe('Server e2e: métricas de comentarios del panel de consulta', async () 
     })
 
     it('permite al gestor de la consulta y al administrador de plataforma', async () => {
-      const manager = await api(`/api/consultations/${consultationSlug}/comment-metrics`, { cookie: managerCookie })
+      const manager = await api(`/api/consultations/${consultationId}/comment-metrics`, { cookie: managerCookie })
       expect(manager.status).toBe(200)
 
-      const admin = await api(`/api/consultations/${consultationSlug}/comment-metrics`, { cookie: adminCookie })
+      const admin = await api(`/api/consultations/${consultationId}/comment-metrics`, { cookie: adminCookie })
       expect(admin.status).toBe(200)
     })
 
     it('devuelve 404 para una consulta inexistente', async () => {
-      const res = await api('/api/consultations/consulta-que-no-existe/comment-metrics', { cookie: adminCookie })
+      const res = await api('/api/consultations/999999999/comment-metrics', { cookie: adminCookie })
       expect(res.status).toBe(404)
     })
   })
 
   describe('Agregados por rango', () => {
     it('usa 14 días por defecto', async () => {
-      const res = await api<CommentMetrics>(`/api/consultations/${consultationSlug}/comment-metrics`, { cookie: adminCookie })
+      const res = await api<CommentMetrics>(`/api/consultations/${consultationId}/comment-metrics`, { cookie: adminCookie })
       expect(res.status).toBe(200)
       expect(res.data.range).toBe('14d')
       expect(res.data.total).toBe(7)
@@ -230,7 +228,7 @@ describe('Server e2e: métricas de comentarios del panel de consulta', async () 
 
     it('cuenta comentarios de la consulta y de sus temas en los últimos 7 días', async () => {
       const res = await api<CommentMetrics>(
-        `/api/consultations/${consultationSlug}/comment-metrics?range=7d`,
+        `/api/consultations/${consultationId}/comment-metrics?range=7d`,
         { cookie: adminCookie }
       )
 
@@ -248,7 +246,7 @@ describe('Server e2e: métricas de comentarios del panel de consulta', async () 
 
     it('sin período de comparación para el rango histórico', async () => {
       const res = await api<CommentMetrics>(
-        `/api/consultations/${consultationSlug}/comment-metrics?range=all`,
+        `/api/consultations/${consultationId}/comment-metrics?range=all`,
         { cookie: adminCookie }
       )
 
@@ -263,7 +261,7 @@ describe('Server e2e: métricas de comentarios del panel de consulta', async () 
 
     it('rechaza un rango inválido (422)', async () => {
       const res = await api(
-        `/api/consultations/${consultationSlug}/comment-metrics?range=3d`,
+        `/api/consultations/${consultationId}/comment-metrics?range=3d`,
         { cookie: adminCookie }
       )
       expect(res.status).toBe(422)

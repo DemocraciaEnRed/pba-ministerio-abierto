@@ -22,7 +22,7 @@ async function createConsultation(payload: ConsultationFormPayload) {
       title: 'Consulta creada',
       color: 'success'
     })
-    await navigateTo(`/consultas/${created.slug}/panel`)
+    await navigateTo(consultationPanelPath(created.id))
   } catch (error) {
     const e = error as { data?: { message?: string }, message?: string }
     toast.add({

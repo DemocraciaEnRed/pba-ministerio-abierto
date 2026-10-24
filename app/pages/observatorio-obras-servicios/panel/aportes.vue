@@ -55,14 +55,16 @@ function openDetail(contribution: AdminObservatoryContributionDTO) {
   detailOpen.value = true
 }
 
+const { requesting, requestExport } = useDataExport()
+
 const headerButtons = computed<ButtonProps[]>(() => [
   {
     label: 'Descargar CSV',
-    icon: 'lucide:file-text',
+    icon: 'lucide:file-down',
     color: 'neutral',
     variant: 'subtle',
-    to: '/api/observatory-contributions/export',
-    external: true
+    loading: requesting.value,
+    onClick: () => requestExport({ kind: 'observatory_contributions' })
   },
   {
     label: 'Actualizar',
@@ -132,13 +134,11 @@ const headerButtons = computed<ButtonProps[]>(() => [
                   />
                   {{ contribution.links.length }}
                 </span>
-                <UIcon
-                  v-if="contribution.attachment"
-                  name="lucide:paperclip"
-                  class="size-4"
-                  title="Tiene archivo adjunto"
+                <AttachmentsPopover
+                  :attachments="contribution.attachments"
+                  size="xs"
                 />
-                <span v-if="!contribution.links.length && !contribution.attachment">—</span>
+                <span v-if="!contribution.links.length && !contribution.attachments.length">—</span>
               </div>
             </td>
             <td>{{ formatDate(contribution.createdAt) }}</td>
@@ -189,6 +189,8 @@ const headerButtons = computed<ButtonProps[]>(() => [
           />
         </div>
       </div>
+
+      <ExportsRecentExports kind="observatory_contributions" />
     </UPageBody>
 
     <ObservatorioContributionSlideover

@@ -17,7 +17,7 @@ interface AdminTopicListItem {
 }
 
 const props = defineProps<{
-  consultationSlug: string
+  consultationId: string
   topic: AdminTopicListItem
 }>()
 
@@ -44,7 +44,7 @@ const endLabel = computed(() =>
   props.topic.participationEndsAt ? formatDateShort(props.topic.participationEndsAt) : 'Abierta indefinidamente'
 )
 
-const panelTo = computed(() => `/consultas/${props.consultationSlug}/panel/temas/${props.topic.slug}`)
+const panelTo = computed(() => consultationPanelPath(props.consultationId, `temas/${props.topic.slug}`))
 const editTo = computed(() => `${panelTo.value}/editar`)
 </script>
 

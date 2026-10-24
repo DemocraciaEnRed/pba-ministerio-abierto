@@ -84,21 +84,3 @@ export function topicStateBadge(
   if (visibility === 'archived') return { label: 'Archivado', color: 'neutral', icon: visibilityIcons.archived }
   return participationStateBadge(participationState)
 }
-
-/**
- * Estado de un ítem de la agenda de Encuentros Regionales. No se deriva de la
- * fecha: lo define quien administra. Comparte los tres estados y el criterio
- * visual de consultas y temas.
- */
-export type AgendaItemState = ParticipationState
-
-export function agendaItemStateBadge(state: AgendaItemState): EstadoBadge {
-  return participationStateBadge(state)
-}
-
-/** Opciones para elegir el estado de un ítem de agenda en el panel. */
-export const agendaItemStateOptions = [
-  { label: 'Participación programada', value: 'scheduled', icon: participationStateIcons.scheduled },
-  { label: 'Participación abierta', value: 'open', icon: participationStateIcons.open },
-  { label: 'Instancia participativa finalizada', value: 'closed', icon: participationStateIcons.closed }
-] satisfies { label: string, value: AgendaItemState, icon: string }[]

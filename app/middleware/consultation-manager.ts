@@ -17,8 +17,8 @@ export default defineNuxtRouteMiddleware(async (to) => {
     return navigateTo('/auth/login')
   }
 
-  const slug = String(to.params.slugConsulta)
-  const consultation = await requestFetch<ConsultationManageProbe>(`/api/consultations/${slug}`)
+  const consultationId = String(to.params.idConsulta)
+  const consultation = await requestFetch<ConsultationManageProbe>(`/api/consultations/${consultationId}`)
     .catch(() => null)
 
   if (!consultation?.canManage) {

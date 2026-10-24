@@ -16,6 +16,7 @@ export default defineEventHandler(async (event) => {
         select: {
           title: true,
           eventAt: true,
+          eventMode: true,
           venueName: true,
           venueCity: true,
           venueProvince: true,
@@ -35,6 +36,7 @@ export default defineEventHandler(async (event) => {
     kind,
     formTitle: accreditation.form.title,
     eventAt: accreditation.form.eventAt,
+    eventMode: accreditation.form.eventMode,
     venueName: accreditation.form.venueName,
     venueCity: accreditation.form.venueCity,
     venueProvince: accreditation.form.venueProvince

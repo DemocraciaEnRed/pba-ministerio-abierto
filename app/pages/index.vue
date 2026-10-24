@@ -96,15 +96,24 @@ const themeUi: ThemeUI = {
       </div>
 
       <UPageHero
-        title="MINISTERIO ABIERTO"
         description="Un espacio con propuestas de participación ciudadana sobre obras y servicios públicos en la Provincia de Buenos Aires."
         class="relative z-10"
         :ui="{
           root: 'bg-linear-to-b from-pba-primary-300/25 to-white/15 dark:from-pba-alt-900/50 dark:to-black/10',
-          description: 'text-neutral-100 dark:text-neutral-100 text-shadow-lg',
-          title: 'text-pba-300 text-shadow-lg'
+          description: 'text-neutral-100 dark:text-neutral-100 text-shadow-lg'
         }"
-      />
+      >
+        <template #title>
+          <img
+            src="https://democraciaenred.nyc3.digitaloceanspaces.com/projects/pba-ministerio-abierto/app/assets/logo/logo-text-white.svg"
+            alt="Ministerio Abierto"
+            width="365"
+            height="123"
+            class="mx-auto h-auto w-full max-w-80 sm:max-w-md lg:max-w-lg drop-shadow-lg"
+            loading="eager"
+          >
+        </template>
+      </UPageHero>
     </section>
     <USeparator />
     <UPageSection
@@ -169,6 +178,17 @@ const themeUi: ThemeUI = {
         </UPageCard>
       </div>
     </UPageSection>
+    <ClientOnly>
+      <USeparator />
+      <HomeExplorador />
+      <template #fallback>
+        <UContainer class="space-y-8 py-10 sm:py-12 lg:py-16">
+          <USkeleton class="mx-auto h-10 w-64" />
+          <USkeleton class="h-80 w-full rounded-lg" />
+        </UContainer>
+      </template>
+    </ClientOnly>
+    <USeparator />
     <UPageSection>
       <a
         href="https://mapainversionespba.minfra.gba.gob.ar/"

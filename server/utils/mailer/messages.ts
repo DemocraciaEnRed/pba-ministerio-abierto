@@ -94,12 +94,18 @@ export interface RegistrationConfirmationData {
   consultationUrl: string
   formTitle: string
   eventAt: Date
-  venueName: string
-  venueAddress: string
-  venueCity: string
-  venueProvince: string
+  venueName: string | null
+  venueAddress: string | null
+  venueCity: string | null
+  venueProvince: string | null
   participationMode: RegistrationParticipationMode | null
   isLegalEntity: boolean
+  observatory?: {
+    attendanceMode: 'in_person' | 'virtual'
+    institutionSource: 'directory' | 'other' | 'individual'
+    institutionName: string | null
+    meetingUrl: string | null
+  } | null
 }
 
 /** Email de confirmación de inscripción a una audiencia o consulta pública. */
@@ -125,7 +131,11 @@ export async function sendRegistrationConfirmationEmail(to: string, data: Regist
       consultationUrl: `${base}${data.consultationUrl}`,
       formTitle: data.formTitle,
       eventAt,
-      venue: `${data.venueName} — ${data.venueAddress}, ${data.venueCity}, ${data.venueProvince}`,
+      venue: data.observatory?.attendanceMode === 'virtual'
+        ? null
+        : `${data.venueName} — ${data.venueAddress}, ${data.venueCity}, ${data.venueProvince}`,
+      observatory: data.observatory ?? null,
+      attendanceModeLabel: data.observatory?.attendanceMode === 'virtual' ? 'Virtual' : 'Presencial',
       characterLabel: REGISTRATION_CHARACTER_LABELS[character],
       participationModeLabel: data.participationMode
         ? REGISTRATION_PARTICIPATION_MODE_LABELS[data.participationMode]

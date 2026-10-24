@@ -2,6 +2,7 @@
 import type { BadgeProps, UserProps } from '@nuxt/ui'
 import { getConsultationType } from '#shared/data/consultation-types'
 import type { PublicConsultationListItem } from '~/types/consulta'
+import { REGISTRATION_EVENT_MODE_LABELS } from '#shared/data/consultation-registrations'
 
 const props = withDefaults(
   defineProps<{
@@ -18,7 +19,7 @@ const badge = computed<BadgeProps>(() => {
 })
 
 /** Destino público de la consulta. */
-const to = computed(() => `/consultas/${props.consultation.slug}`)
+const to = computed(() => props.consultation.publicPath)
 
 /** Descripción breve con fallback. */
 const description = computed(() =>
@@ -75,6 +76,38 @@ const datesLabel = computed(() => {
     : formatDateShort(startsAt)
 })
 
+/**
+ * Inscripción presencial: se destaca mientras sirva para actuar (inscripción
+ * programada o abierta) o mientras el encuentro todavía no ocurrió.
+ */
+const registration = computed(() => {
+  const value = props.consultation.registration
+  if (!value) return null
+  if (value.state === 'closed' && new Date(value.eventAt).getTime() < Date.now()) return null
+  return value
+})
+
+const registrationBadge = computed<BadgeProps | null>(() => {
+  const value = registration.value
+  if (!value) return null
+  switch (value.state) {
+    case 'open':
+      return { label: `Inscripción abierta hasta el ${formatDayMonth(value.closesAt)}`, color: 'primary', variant: 'solid', icon: 'lucide:ticket' }
+    case 'scheduled':
+      return { label: `Inscripción desde el ${formatDayMonth(value.opensAt)}`, color: 'primary', variant: 'subtle', icon: 'lucide:ticket' }
+    case 'closed':
+      return { label: 'Inscripción cerrada', color: 'neutral', variant: 'subtle', icon: 'lucide:ticket-x' }
+  }
+  return null
+})
+
+const venueLabel = computed(() => {
+  const value = registration.value
+  if (!value) return ''
+  const place = [value.venueName, value.venueCity].filter(Boolean).join(', ')
+  return value.eventMode && value.eventMode !== 'in_person' ? [REGISTRATION_EVENT_MODE_LABELS[value.eventMode], place].filter(Boolean).join(' · ') : place
+})
+
 // En horizontal el pie va en el slot `authors` (queda a la derecha, junto al
 // contenido); en vertical va en `footer` (debajo). Slot dinámico para no
 // duplicar el markup.
@@ -91,11 +124,14 @@ const footerSlot = computed(() => (props.orientation === 'horizontal' ? 'authors
     :orientation="orientation"
     variant="subtle"
     class="group h-full"
+    :ui="orientation === 'horizontal'
+      ? { root: 'lg:items-stretch', header: 'lg:aspect-auto lg:h-full lg:min-h-56' }
+      : undefined"
   >
     <template #header>
       <div
         class="relative aspect-video overflow-hidden"
-        :class="orientation === 'horizontal' ? 'sm:rounded-l-lg' : 'rounded-t-lg'"
+        :class="orientation === 'horizontal' ? 'sm:rounded-l-lg lg:aspect-auto lg:h-full' : 'rounded-t-lg'"
       >
         <img
           v-if="consultation.coverUrl"
@@ -170,6 +206,39 @@ const footerSlot = computed(() => (props.orientation === 'horizontal' ? 'authors
             variant="soft"
             size="sm"
           />
+        </div>
+
+        <div
+          v-if="registration && registrationBadge"
+          class="flex flex-col gap-2 rounded-md bg-primary/5 p-2 ring ring-primary/20"
+        >
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <UBadge
+              v-bind="registrationBadge"
+              size="sm"
+            />
+            <!-- `relative z-10` lo pone por encima del link que cubre toda la card -->
+            <UButton
+              v-if="registration.state === 'open'"
+              :to="registration.path"
+              label="Inscribite"
+              trailing-icon="lucide:arrow-right"
+              size="xs"
+              class="relative z-10"
+            />
+          </div>
+          <p class="flex items-start gap-1 text-xs text-toned">
+            <UIcon
+              name="lucide:users"
+              class="mt-px size-3.5 shrink-0 text-primary"
+            />
+            <span>
+              <span class="font-medium">Encuentro presencial:</span>
+              {{ formatEventDateTime(registration.eventAt) }} h<template v-if="venueLabel">
+                · {{ venueLabel }}
+              </template>
+            </span>
+          </p>
         </div>
 
         <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted">

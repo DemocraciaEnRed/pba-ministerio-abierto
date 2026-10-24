@@ -96,7 +96,7 @@ function prevPage() {
         <UPageCard
           v-for="item in data.items"
           :key="item.id"
-          :to="`/consultas/${item.slug}/panel`"
+          :to="consultationPanelPath(item.id)"
           class="space-y-2"
         >
           <div class="flex items-start justify-between gap-3">

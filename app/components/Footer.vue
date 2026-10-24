@@ -116,7 +116,10 @@ const footerColumns: FooterColumn[] = [
 </script>
 
 <template>
-  <UFooter class="pt-12 pb-16">
+  <UFooter
+    class="pt-12"
+    :ui="{ bottom: 'pb-0 lg:pb-0' }"
+  >
     <template #top>
       <img
         src="https://democraciaenred.nyc3.digitaloceanspaces.com/projects/pba-ministerio-abierto/app/assets/footer-header.png"
@@ -135,7 +138,13 @@ const footerColumns: FooterColumn[] = [
             alt="Ministerio Abierto"
             class=""
           >
-          <div class="flex flex-wrap gap-1 items-center justify-start">
+        </div>
+      </template>
+    </UFooterColumns>
+    <template #bottom>
+      <div class="text-center text-sm text-gray-500 bg-primary dark:bg-primary-700 py-4">
+        <UContainer>
+          <div class="flex flex-wrap gap-1 items-center justify-center">
             <UButton
               v-for="link in socialLinks"
               :key="link.label"
@@ -144,12 +153,12 @@ const footerColumns: FooterColumn[] = [
               :aria-label="link.label"
               target="_blank"
               size="lg"
-              color="primary"
+              color="neutral"
               variant="ghost"
             />
           </div>
-        </div>
-      </template>
-    </UFooterColumns>
+        </UContainer>
+      </div>
+    </template>
   </UFooter>
 </template>

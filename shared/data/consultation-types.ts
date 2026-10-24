@@ -21,9 +21,10 @@ export type ConsultationTypeSlug = typeof CONSULTATION_TYPE_SLUGS[number]
 /**
  * Variante del formulario de inscripción. `hearing` suma la forma de
  * participación (asistente/expositor) y la sección de exposición; `consultation`
- * y `dialogue` solo registran asistentes y cambian el texto de la instancia.
+ * y `dialogue` solo registran asistentes; `observatory` simplifica la institución
+ * y permite configurar modalidad de asistencia y admisión.
  */
-export type RegistrationFormKind = 'hearing' | 'consultation' | 'dialogue'
+export type RegistrationFormKind = 'hearing' | 'consultation' | 'dialogue' | 'observatory'
 
 export interface ConsultationTypeDefinition {
   slug: ConsultationTypeSlug
@@ -40,7 +41,7 @@ export interface ConsultationTypeDefinition {
   allowsRegion: boolean
   /** Habilita asignar un grupo de trabajo del Observatorio a las consultas de este tipo. */
   allowsWorkGroup: boolean
-  /** Habilita crear un formulario de inscripción presencial para la consulta. */
+  /** Habilita crear un formulario de inscripción para la consulta. */
   registrationFormKind: RegistrationFormKind | null
   defaultConsultationFormat: 'single' | 'multiple'
   /** `false` para tipos anunciados pero todavía no lanzados. */
@@ -114,7 +115,7 @@ export const CONSULTATION_TYPES: readonly ConsultationTypeDefinition[] = [
     landingRoute: '/observatorio-obras-servicios',
     allowsRegion: false,
     allowsWorkGroup: true,
-    registrationFormKind: null,
+    registrationFormKind: 'observatory',
     defaultConsultationFormat: 'multiple',
     enabled: true
   }

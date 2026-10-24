@@ -1,4 +1,5 @@
 import * as z from 'zod'
+import { RegionalMeetingAgendaSchema } from '#shared/schemas/regional-meetings'
 
 const slugField = z
   .string()
@@ -6,6 +7,19 @@ const slugField = z
   .min(1, 'El slug es requerido')
   .max(120, 'El slug no puede superar los 120 caracteres')
   .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'El slug solo puede tener minúsculas, números y guiones')
+
+// Nombre legible de la URL pública (`/{seccion}/{id}/{nombre}`). No identifica
+// la consulta (puede repetirse) y es opcional: si falta, el servidor lo genera
+// desde el título al crear y lo conserva al editar.
+const addressNameField = z.preprocess(
+  value => (value === null || (typeof value === 'string' && value.trim() === '') ? undefined : value),
+  z
+    .string()
+    .trim()
+    .max(120, 'La dirección no puede superar los 120 caracteres')
+    .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'La dirección solo puede tener minúsculas, números y guiones')
+    .optional()
+)
 
 const titleField = z
   .string()
@@ -52,11 +66,58 @@ const idListField = z
 
 const commentsEnabledField = z.boolean().default(true)
 
+// Solo aplican a los tipos que habilitan región (Encuentros Regionales); el
+// handler decide si son obligatorios según el tipo de la consulta.
+const regionIdField = z
+  .int('La región debe ser un ID válido')
+  .positive('Elegí una región')
+  .nullable()
+  .optional()
+
+const regionalMeetingField = RegionalMeetingAgendaSchema.nullable().optional()
+
+const participationStateField = z.enum(['scheduled', 'open', 'closed'], {
+  message: 'El estado debe ser programada, abierta o finalizada'
+})
+
+// Lista de estados temporales en CSV (`open,scheduled`) o repetida en la query.
+// Se conserva el orden recibido sin duplicados: define el orden de los grupos.
+const participationStateListField = z.preprocess(
+  (value) => {
+    if (value === undefined || value === null || value === '') return undefined
+    const raw = Array.isArray(value) ? value : [value]
+    const states = raw
+      .flatMap(item => String(item).split(','))
+      .map(item => item.trim())
+      .filter(item => item.length > 0)
+    return states.length > 0 ? [...new Set(states)] : undefined
+  },
+  z.array(participationStateField).optional()
+)
+
+const queryDateField = z
+  .string()
+  .trim()
+  .datetime('La fecha debe estar en formato ISO válido')
+  .transform(value => new Date(value))
+  .optional()
+
+/** Ventana máxima para `activeFrom`/`activeTo` (agenda), en días. */
+export const CONSULTATIONS_ACTIVE_WINDOW_MAX_DAYS = 92
+
 export const ConsultationsQuerySchema = z.object({
   q: z.string().trim().max(120, 'El texto de búsqueda no puede superar los 120 caracteres').optional(),
   visibility: z.enum(['hidden', 'visible', 'archived']).optional(),
   state: z.enum(['scheduled', 'open', 'closed', 'archived']).optional(),
+  states: participationStateListField,
+  activeFrom: queryDateField,
+  activeTo: queryDateField,
   featured: z
+    .enum(['true', 'false'])
+    .transform(value => value === 'true')
+    .optional(),
+  /** Solo instancias con la inscripción presencial abierta ahora. */
+  registrationOpen: z
     .enum(['true', 'false'])
     .transform(value => value === 'true')
     .optional(),
@@ -70,10 +131,47 @@ export const ConsultationsQuerySchema = z.object({
   tagIds: idListField,
   page: z.coerce.number().int('La página debe ser un entero').min(1, 'La página mínima es 1').default(1),
   perPage: z.coerce.number().int('La cantidad debe ser un entero').min(1, 'La cantidad mínima es 1').max(100, 'La cantidad máxima es 100').default(20)
+}).superRefine((query, ctx) => {
+  if (query.state && query.states) {
+    ctx.addIssue({
+      code: 'custom',
+      path: ['states'],
+      message: 'Usá "state" o "states", no ambos a la vez'
+    })
+  }
+
+  if (Boolean(query.activeFrom) !== Boolean(query.activeTo)) {
+    ctx.addIssue({
+      code: 'custom',
+      path: [query.activeFrom ? 'activeTo' : 'activeFrom'],
+      message: 'Indicá las dos fechas del rango (desde y hasta)'
+    })
+    return
+  }
+
+  if (query.activeFrom && query.activeTo) {
+    if (query.activeFrom > query.activeTo) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['activeTo'],
+        message: 'La fecha "hasta" debe ser posterior a la fecha "desde"'
+      })
+      return
+    }
+
+    const maxMs = CONSULTATIONS_ACTIVE_WINDOW_MAX_DAYS * 24 * 60 * 60 * 1000
+    if (query.activeTo.getTime() - query.activeFrom.getTime() > maxMs) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['activeTo'],
+        message: `El rango de fechas no puede superar los ${CONSULTATIONS_ACTIVE_WINDOW_MAX_DAYS} días`
+      })
+    }
+  }
 })
 
 export const CreateConsultationSchema = z.object({
-  slug: slugField,
+  slug: addressNameField,
   title: titleField,
   // El tipo de consulta se define solo en el alta: determina qué estructura habilita.
   sectionId: z
@@ -87,11 +185,13 @@ export const CreateConsultationSchema = z.object({
   closedMessage: textAreaField,
   commentsEnabled: commentsEnabledField,
   commentsGuidance: textAreaField.default(null),
-  resultsVisibility: z.enum(['hidden', 'participants_only', 'public']).default('public')
+  resultsVisibility: z.enum(['hidden', 'participants_only', 'public']).default('public'),
+  regionId: regionIdField,
+  regionalMeeting: regionalMeetingField
 })
 
 export const UpdateConsultationSchema = z.object({
-  slug: slugField,
+  slug: addressNameField,
   title: titleField,
   summary: textAreaField,
   body: textAreaField,
@@ -101,7 +201,9 @@ export const UpdateConsultationSchema = z.object({
   closedMessage: textAreaField,
   commentsEnabled: commentsEnabledField,
   commentsGuidance: textAreaField.default(null),
-  resultsVisibility: z.enum(['hidden', 'participants_only', 'public'])
+  resultsVisibility: z.enum(['hidden', 'participants_only', 'public']),
+  regionId: regionIdField,
+  regionalMeeting: regionalMeetingField
 })
 
 export const SetConsultationVisibilitySchema = z.object({
@@ -141,10 +243,6 @@ export const SetConsultationSectionSchema = z.object({
   sectionId: z.int().positive('La sección debe ser un ID válido').nullable()
 })
 
-export const SetConsultationRegionSchema = z.object({
-  regionId: z.int().positive('La región debe ser un ID válido').nullable()
-})
-
 export const SetConsultationWorkGroupsSchema = z.object({
   observatoryWorkGroupIds: z
     .array(z.int().positive('El grupo de trabajo debe ser un ID válido'))
@@ -171,6 +269,5 @@ export type UpdateConsultationFeaturedInput = z.output<typeof UpdateConsultation
 export type SetConsultationCategoriesInput = z.output<typeof SetConsultationCategoriesSchema>
 export type SetConsultationTagsInput = z.output<typeof SetConsultationTagsSchema>
 export type SetConsultationSectionInput = z.output<typeof SetConsultationSectionSchema>
-export type SetConsultationRegionInput = z.output<typeof SetConsultationRegionSchema>
 export type SetConsultationWorkGroupsInput = z.output<typeof SetConsultationWorkGroupsSchema>
 export type AssignConsultationMemberInput = z.output<typeof AssignConsultationMemberSchema>

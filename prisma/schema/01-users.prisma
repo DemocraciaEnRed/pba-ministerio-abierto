@@ -43,6 +43,7 @@ model User {
   updatedConsultationClosures ConsultationClosure[] @relation("ConsultationClosureUpdatedBy")
   verificationTokens VerificationToken[]
   consultationRegistrations ConsultationRegistration[] @relation("ConsultationRegistrationUser")
+  dataExports DataExport[] @relation("DataExportRequestedBy")
 
   @@index([status])
   @@index([avatarAssetId])

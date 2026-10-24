@@ -28,23 +28,23 @@ export interface AdminTopicSummary {
 }
 
 /**
- * Carga el tema (vista admin) a partir de los slugs de la ruta.
+ * Carga el tema (vista admin) a partir del id de la consulta y el slug del tema de la ruta.
  * Usa una key estable para compartir el resultado entre el layout del tema
  * y las páginas de su panel de control (sin refetch duplicado).
  */
 export function useTopicAdmin() {
   const route = useRoute()
-  const consultationSlug = computed(() => String(route.params.slugConsulta))
+  const consultationId = computed(() => String(route.params.idConsulta))
   const topicSlug = computed(() => String(route.params.slugTema))
 
   // `useRequestFetch` reenvía la cookie de sesión durante el SSR para que el
   // backend resuelva la vista admin y `canManage` del usuario logueado.
   const requestFetch = useRequestFetch()
   const asyncData = useAsyncData(
-    () => `admin-topic-${consultationSlug.value}-${topicSlug.value}`,
-    () => requestFetch<AdminTopicSummary>(`/api/consultations/${consultationSlug.value}/topics/${topicSlug.value}`),
-    { watch: [consultationSlug, topicSlug] }
+    () => `admin-topic-${consultationId.value}-${topicSlug.value}`,
+    () => requestFetch<AdminTopicSummary>(`/api/consultations/${consultationId.value}/topics/${topicSlug.value}`),
+    { watch: [consultationId, topicSlug] }
   )
 
-  return { consultationSlug, topicSlug, ...asyncData }
+  return { consultationId, topicSlug, ...asyncData }
 }

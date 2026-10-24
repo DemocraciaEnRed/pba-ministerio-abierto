@@ -1,9 +1,21 @@
 import type {
   RegistrationParticipantCharacter,
-  RegistrationParticipationMode
+  RegistrationParticipationMode,
+  RegistrationAttendanceMode,
+  RegistrationInstitutionSource
 } from '../../../prisma/generated/enums'
+import type { RegistrationConfirmation } from '#shared/data/consultation-registrations'
 
 export type ConsultationRegistrationView = 'admin'
+
+export function serializeRegistrationConfirmation(confirmation: RegistrationConfirmation): RegistrationConfirmation {
+  return {
+    consultationId: confirmation.consultationId,
+    attendanceMode: confirmation.attendanceMode,
+    meetingUrl: confirmation.attendanceMode === 'virtual' ? confirmation.meetingUrl : null,
+    emailSent: confirmation.emailSent
+  }
+}
 
 type RegistrationQuestionEntity = {
   id: number
@@ -25,6 +37,11 @@ type RegistrationEntity = {
   email: string
   phone: string
   character: RegistrationParticipantCharacter
+  attendanceMode: RegistrationAttendanceMode | null
+  institutionSource: RegistrationInstitutionSource | null
+  institutionId: number | null
+  institutionName: string | null
+  institutionCategoryName: string | null
   entityName: string | null
   entityAddress: string | null
   entityEmail: string | null
@@ -53,6 +70,11 @@ export interface AdminConsultationRegistrationDTO {
   email: string
   phone: string
   character: RegistrationParticipantCharacter
+  attendanceMode: RegistrationAttendanceMode | null
+  institutionSource: RegistrationInstitutionSource | null
+  institutionId: number | null
+  institutionName: string | null
+  institutionCategoryName: string | null
   entityName: string | null
   entityAddress: string | null
   entityEmail: string | null
@@ -80,6 +102,11 @@ export function serializeConsultationRegistration(
     email: registration.email,
     phone: registration.phone,
     character: registration.character,
+    attendanceMode: registration.attendanceMode,
+    institutionSource: registration.institutionSource,
+    institutionId: registration.institutionId,
+    institutionName: registration.institutionName,
+    institutionCategoryName: registration.institutionCategoryName,
     entityName: registration.entityName,
     entityAddress: registration.entityAddress,
     entityEmail: registration.entityEmail,

@@ -1,4 +1,5 @@
 import type { ConsultationsQueryInput } from '#shared/schemas/consultation'
+import type { ConsultationWhereInput } from '~~/prisma/generated/models'
 
 type ConsultationOrderState = 'scheduled' | 'open' | 'closed' | 'archived'
 
@@ -75,6 +76,17 @@ export function buildConsultationOrderBuckets(query: ConsultationsQueryInput, no
     return [{ where: {}, orderBy: consultationOrderBy(query.state) }]
   }
 
+  // Varios estados: un grupo por estado, en el orden útil de lectura
+  // (abiertas → programadas → finalizadas), independiente del orden recibido.
+  if (query.states) {
+    return (['open', 'scheduled', 'closed'] as const)
+      .filter(state => query.states!.includes(state))
+      .map(state => ({
+        where: consultationStateWhere(state, now),
+        orderBy: consultationOrderBy(state)
+      }))
+  }
+
   if (query.visibility === 'hidden' || query.visibility === 'archived') {
     return [{ where: {}, orderBy: consultationOrderBy('archived') }]
   }
@@ -127,40 +139,111 @@ export function getConsultationPageSegments(
 }
 
 /**
+ * Instancias visibles con actividad en la ventana `[from, to]`:
+ * - su período de participación se superpone con la ventana (empiezan antes
+ *   del fin y no terminaron antes del inicio; sin `endsAt` = indefinida), o
+ * - su inscripción presencial se superpone con la ventana, o
+ * - su encuentro presencial cae dentro de la ventana.
+ */
+export function consultationActiveWindowWhere(from: Date, to: Date) {
+  return {
+    visibility: 'visible' as const,
+    OR: [
+      {
+        startsAt: { lte: to },
+        OR: [{ endsAt: null }, { endsAt: { gte: from } }]
+      },
+      {
+        registrationForm: {
+          is: {
+            OR: [
+              { opensAt: { lte: to }, closesAt: { gte: from } },
+              { eventAt: { gte: from, lte: to } }
+            ]
+          }
+        }
+      },
+      {
+        regionalMeeting: {
+          is: {
+            OR: [
+              { registrationOpensAt: { lte: to }, registrationClosesAt: { gte: from } },
+              { heldAt: { gte: from, lte: to } }
+            ]
+          }
+        }
+      }
+    ]
+  } satisfies ConsultationWhereInput
+}
+
+/**
+ * Instancias cuya ventana de inscripción presencial está abierta en `now`
+ * (formulario propio o inscripción externa de un Encuentro Regional).
+ */
+export function consultationRegistrationOpenWhere(now: Date) {
+  return {
+    OR: [
+      { registrationForm: { is: { opensAt: { lte: now }, closesAt: { gte: now } } } },
+      {
+        regionalMeeting: {
+          is: {
+            registrationUrl: { not: null },
+            registrationOpensAt: { lte: now },
+            registrationClosesAt: { gte: now }
+          }
+        }
+      }
+    ]
+  } satisfies ConsultationWhereInput
+}
+
+/**
  * Construye el fragmento `where` común a partir de los filtros de query
- * (búsqueda, visibilidad, estado, destacadas, taxonomías). No incluye reglas
- * de autorización (visibilidad por rol/membresía), que cada handler aplica
- * por separado según su contexto.
+ * (búsqueda, visibilidad, estado, ventana activa, destacadas, taxonomías).
+ * Cada filtro es una cláusula independiente dentro de `AND` para que los `OR`
+ * (búsqueda, ventana, varios estados) no se pisen entre sí ni con las reglas
+ * de autorización que cada handler compone por separado.
  */
 export function buildConsultationFilters(query: ConsultationsQueryInput, now: Date) {
-  return {
-    ...(query.visibility ? { visibility: query.visibility } : {}),
-    ...(query.state ? consultationStateWhere(query.state, now) : {}),
-    ...(query.featured !== undefined ? { featured: query.featured } : {}),
-    ...(query.sectionSlug ? { section: { slug: query.sectionSlug } } : {}),
-    ...(query.sectionIds ? { sectionId: { in: query.sectionIds } } : {}),
-    ...(query.regionSlug ? { region: { slug: query.regionSlug } } : {}),
-    ...(query.regionIds ? { regionId: { in: query.regionIds } } : {}),
-    ...(query.observatoryWorkGroupSlug
-      ? { workGroupAssignments: { some: { workGroup: { slug: query.observatoryWorkGroupSlug } } } }
-      : {}),
-    ...(query.observatoryWorkGroupIds
-      ? { workGroupAssignments: { some: { workGroupId: { in: query.observatoryWorkGroupIds } } } }
-      : {}),
-    ...(query.categoryIds
-      ? { categoryAssignments: { some: { categoryId: { in: query.categoryIds } } } }
-      : {}),
-    ...(query.tagIds
-      ? { consultationTags: { some: { tagId: { in: query.tagIds } } } }
-      : {}),
-    ...(query.q
-      ? {
-          OR: [
-            { title: { contains: query.q } },
-            { summary: { contains: query.q } },
-            { body: { contains: query.q } }
-          ]
-        }
-      : {})
+  const clauses: ConsultationWhereInput[] = []
+
+  if (query.visibility) clauses.push({ visibility: query.visibility })
+  if (query.state) clauses.push(consultationStateWhere(query.state, now))
+  if (query.states) {
+    clauses.push({ OR: query.states.map(state => consultationStateWhere(state, now)) })
   }
+  if (query.activeFrom && query.activeTo) {
+    clauses.push(consultationActiveWindowWhere(query.activeFrom, query.activeTo))
+  }
+  if (query.featured !== undefined) clauses.push({ featured: query.featured })
+  if (query.registrationOpen === true) clauses.push(consultationRegistrationOpenWhere(now))
+  if (query.registrationOpen === false) clauses.push({ NOT: consultationRegistrationOpenWhere(now) })
+  if (query.sectionSlug) clauses.push({ section: { slug: query.sectionSlug } })
+  if (query.sectionIds) clauses.push({ sectionId: { in: query.sectionIds } })
+  if (query.regionSlug) clauses.push({ region: { slug: query.regionSlug } })
+  if (query.regionIds) clauses.push({ regionId: { in: query.regionIds } })
+  if (query.observatoryWorkGroupSlug) {
+    clauses.push({ workGroupAssignments: { some: { workGroup: { slug: query.observatoryWorkGroupSlug } } } })
+  }
+  if (query.observatoryWorkGroupIds) {
+    clauses.push({ workGroupAssignments: { some: { workGroupId: { in: query.observatoryWorkGroupIds } } } })
+  }
+  if (query.categoryIds) {
+    clauses.push({ categoryAssignments: { some: { categoryId: { in: query.categoryIds } } } })
+  }
+  if (query.tagIds) {
+    clauses.push({ consultationTags: { some: { tagId: { in: query.tagIds } } } })
+  }
+  if (query.q) {
+    clauses.push({
+      OR: [
+        { title: { contains: query.q } },
+        { summary: { contains: query.q } },
+        { body: { contains: query.q } }
+      ]
+    })
+  }
+
+  return { AND: clauses } satisfies ConsultationWhereInput
 }

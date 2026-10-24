@@ -1,13 +1,17 @@
 import type { H3Event } from 'h3'
-import { createHash } from 'node:crypto'
 import type { CommentAuthorMode } from '../../../prisma/generated/enums'
 import type { AuthContext } from '../auth/context'
 import { isTopicParticipationWindowOpen } from '../topics/participation-window'
 import { deriveParticipationState } from '../participation-state'
 import { resolveAssetAccessUrl, type AssetUrlResolvable } from '../assets/url'
-import { useStorageDriver } from '../storage'
-import { buildAssetStorageKey } from '../assets/upload'
-import { COMMENT_ATTACHMENT_MAX_SIZE_BYTES, isAllowedCommentAttachmentMime } from '../assets/policy'
+import {
+  attachmentListSelect,
+  buildAttachmentCreates,
+  parseUploadAttachments,
+  type ParsedUploadAttachment,
+  type StoredUploadAttachment,
+  type UploadMultipartPart
+} from '../assets/multi-attachments'
 import { parseData } from '../validate'
 import { CreateCommentSchema, type CreateCommentInput } from '#shared/schemas/comment'
 
@@ -28,7 +32,7 @@ export const commentAuthorInclude = {
 export const commentWithRelationsInclude = {
   author: commentAuthorInclude,
   reactions: { select: { reactionType: true, userId: true } },
-  attachmentAsset: { select: { id: true, originalFilename: true, mimeType: true, sizeBytes: true } }
+  attachments: attachmentListSelect
 } as const
 
 /**
@@ -323,73 +327,28 @@ export async function loadCommentWithConsultation(
   }
 }
 
-interface CommentMultipartPart {
-  name?: string
-  data?: Buffer
-  filename?: string
-  type?: string
-}
-
-export interface ParsedCommentAttachment {
-  buffer: Buffer
-  originalFilename: string
-  mimeType: string
-  sizeBytes: number
-  checksum: string
-}
-
 export interface ParsedCommentInput {
   data: CreateCommentInput
-  attachment: ParsedCommentAttachment | null
+  attachments: ParsedUploadAttachment[]
 }
 
-function readCommentTextPart(parts: CommentMultipartPart[], name: string): string | undefined {
+function readCommentTextPart(parts: UploadMultipartPart[], name: string): string | undefined {
   const part = parts.find(item => item.name === name && item.data && !item.filename)
   return part?.data?.toString('utf8')
 }
 
-/** Valida y arma el adjunto opcional del comentario (documento/imagen ≤ 10 MB). */
-function parseOptionalCommentAttachment(parts: CommentMultipartPart[]): ParsedCommentAttachment | null {
-  const filePart = parts.find(part => part.name === 'file' && part.data && part.filename)
-  if (!filePart?.data) return null
-
-  const mimeType = filePart.type?.trim()
-  if (!mimeType || !isAllowedCommentAttachmentMime(mimeType)) {
-    throw createError({
-      statusCode: 422,
-      message: 'El archivo debe ser un PDF, un documento de Office, texto o una imagen (.jpg/.png/.webp).'
-    })
-  }
-
-  const sizeBytes = filePart.data.length
-  if (sizeBytes === 0) {
-    throw createError({ statusCode: 422, message: 'El archivo está vacío.' })
-  }
-  if (sizeBytes > COMMENT_ATTACHMENT_MAX_SIZE_BYTES) {
-    throw createError({ statusCode: 422, message: 'El archivo supera el máximo permitido de 10 MB.' })
-  }
-
-  return {
-    buffer: filePart.data,
-    originalFilename: filePart.filename ?? 'adjunto',
-    mimeType,
-    sizeBytes,
-    checksum: createHash('sha256').update(filePart.data).digest('hex')
-  }
-}
-
 /**
  * Lee la entrada de creación de un comentario. Acepta `multipart/form-data`
- * (campos de texto + parte `file` opcional) y, si no es multipart, cae al body
- * JSON para mantener compatibilidad. El adjunto se valida acá pero se persiste
- * aparte (`persistCommentAttachment`).
+ * (campos de texto + hasta 3 partes `files`) y, si no es multipart, cae al body
+ * JSON para mantener compatibilidad. Los adjuntos se validan acá pero se
+ * persisten aparte (`withStoredAttachments` + `buildCommentAttachmentCreates`).
  */
 export async function parseCommentInput(event: H3Event): Promise<ParsedCommentInput> {
-  const parts = (await readMultipartFormData(event)) as CommentMultipartPart[] | null
+  const parts = (await readMultipartFormData(event)) as UploadMultipartPart[] | null
 
   if (!parts || parts.length === 0) {
     const data = await parseBody(event, CreateCommentSchema)
-    return { data, attachment: null }
+    return { data, attachments: [] }
   }
 
   const rawBody = readCommentTextPart(parts, 'body')
@@ -403,42 +362,12 @@ export async function parseCommentInput(event: H3Event): Promise<ParsedCommentIn
   if (rawAuthorMode) candidate.authorMode = rawAuthorMode
 
   const data = parseData(CreateCommentSchema, candidate)
-  const attachment = parseOptionalCommentAttachment(parts)
+  const attachments = parseUploadAttachments(parts)
 
-  return { data, attachment }
+  return { data, attachments }
 }
 
-/**
- * Sube el adjunto al storage (privado) y crea su `Asset`. Devuelve el id del
- * asset para vincularlo al comentario.
- */
-export async function persistCommentAttachment(
-  attachment: ParsedCommentAttachment,
-  uploadedByUserId: number
-): Promise<number> {
-  const driver = useStorageDriver()
-  const storageKey = buildAssetStorageKey('assets', attachment.mimeType)
-  // `public: false`: el adjunto solo se sirve por el endpoint protegido.
-  await driver.put({
-    key: storageKey,
-    body: attachment.buffer,
-    contentType: attachment.mimeType,
-    public: false
-  })
-
-  const asset = await prisma.asset.create({
-    data: {
-      assetType: 'uploaded_file',
-      mediaType: attachment.mimeType.startsWith('image/') ? 'image' : 'document',
-      storageProvider: driver.name,
-      storagePath: storageKey,
-      originalFilename: attachment.originalFilename,
-      mimeType: attachment.mimeType,
-      sizeBytes: attachment.sizeBytes,
-      checksum: attachment.checksum,
-      uploadedByUserId
-    }
-  })
-
-  return asset.id
+/** `create` anidado de los adjuntos ya subidos, para `prisma.comment.create`. */
+export function buildCommentAttachmentCreates(stored: StoredUploadAttachment[], uploadedByUserId: number) {
+  return { create: buildAttachmentCreates(stored, uploadedByUserId) }
 }

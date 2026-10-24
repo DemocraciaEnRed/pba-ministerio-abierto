@@ -19,7 +19,9 @@ enum ResultsVisibility {
 
 model Consultation {
   id                  Int       @id @default(autoincrement())
-  slug                String    @unique
+  /// Nombre legible de la URL pública (`/{seccion}/{id}/{slug}`). No es único:
+  /// la instancia se identifica por `id`.
+  slug                String
   title               String
   summary             String?   @db.Text
   body                String?   @db.Text
@@ -55,12 +57,28 @@ model Consultation {
   comments Comment[]
   relatedLinks ConsultationRelatedLink[]
   registrationForm ConsultationRegistrationForm?
+  regionalMeeting  RegionalMeetingAgendaItem?
+  legacySlugs ConsultationLegacySlug[]
+  dataExports DataExport[]
 
   @@index([visibility])
   @@index([featured])
   @@index([startsAt, endsAt])
   @@index([regionId])
   @@index([sectionId])
+}
+
+/// Slugs del formato anterior (`/consultas/{slug}`), congelados al migrar a
+/// `/{seccion}/{id}/{slug}`. Solo sirven para redirigir enlaces ya difundidos:
+/// no se agregan filas nuevas y un slug nunca se reasigna a otra instancia.
+model ConsultationLegacySlug {
+  slug           String   @id @db.VarChar(191)
+  consultationId Int
+  createdAt      DateTime @default(now())
+
+  consultation Consultation @relation(fields: [consultationId], references: [id], onDelete: Cascade)
+
+  @@index([consultationId])
 }
 
 model ConsultationRelatedLink {

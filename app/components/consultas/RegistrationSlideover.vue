@@ -2,7 +2,9 @@
 import type { AdminConsultationRegistrationDTO } from '~~/server/utils/serializers/consultationRegistration'
 import {
   REGISTRATION_CHARACTER_LABELS,
-  REGISTRATION_PARTICIPATION_MODE_LABELS
+  REGISTRATION_PARTICIPATION_MODE_LABELS,
+  REGISTRATION_ATTENDANCE_MODE_LABELS,
+  REGISTRATION_INSTITUTION_SOURCE_LABELS
 } from '#shared/data/consultation-registrations'
 
 defineOptions({ name: 'ConsultasRegistrationSlideover' })
@@ -26,7 +28,7 @@ const fullName = computed(() => {
   return item ? `${item.firstName} ${item.lastName}`.trim() : ''
 })
 
-const isLegalEntity = computed(() => props.registration?.character === 'legal_entity')
+const isLegalEntity = computed(() => props.registration?.character === 'legal_entity' && !props.registration.institutionSource)
 
 const hasPresentation = computed(() =>
   Boolean(props.registration?.presentationSummary || props.registration?.documentationDetail || props.registration?.questions.length)
@@ -88,8 +90,26 @@ const hasPresentation = computed(() =>
                 Carácter en que participa
               </dt>
               <dd class="text-highlighted">
-                {{ REGISTRATION_CHARACTER_LABELS[registration.character] }}
+                {{ registration.institutionSource ? REGISTRATION_INSTITUTION_SOURCE_LABELS[registration.institutionSource] : REGISTRATION_CHARACTER_LABELS[registration.character] }}
               </dd>
+            </div>
+            <div v-if="registration.attendanceMode">
+              <dt class="text-muted">
+                Modalidad elegida
+              </dt>
+              <dd>{{ REGISTRATION_ATTENDANCE_MODE_LABELS[registration.attendanceMode] }}</dd>
+            </div>
+            <div v-if="registration.institutionName">
+              <dt class="text-muted">
+                Institución / organización
+              </dt>
+              <dd>{{ registration.institutionName }}</dd>
+            </div>
+            <div v-if="registration.institutionCategoryName">
+              <dt class="text-muted">
+                Categoría al inscribirse
+              </dt>
+              <dd>{{ registration.institutionCategoryName }}</dd>
             </div>
             <div
               v-if="registration.participationMode"

@@ -28,12 +28,6 @@ const accessCards: (PageCardProps & { to: string })[] = [
     to: '/encuentros-regionales/panel/regiones'
   },
   {
-    title: 'Agenda',
-    description: 'Fechas y municipios de los Encuentros Regionales y su estado de realización.',
-    icon: 'i-lucide-calendar-days',
-    to: '/encuentros-regionales/panel/agenda'
-  },
-  {
     title: 'Testimonios',
     description: 'Testimonios de participantes que se muestran en la página pública.',
     icon: 'i-lucide-quote',

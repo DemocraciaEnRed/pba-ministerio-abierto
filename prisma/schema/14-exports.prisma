@@ -1,0 +1,63 @@
+/// Tipo de exportación. Cada tipo tiene su propia definición (filtros,
+/// autorización y columnas) en `server/utils/exports/kinds`.
+enum DataExportKind {
+  consultation_comments
+  platform_comments
+  consultation_registrations
+  consultation_accreditations
+  regional_meeting_submissions
+  observatory_contributions
+}
+
+enum DataExportStatus {
+  pending
+  processing
+  ready
+  failed
+}
+
+/// Exportación CSV pedida por un usuario. Se genera en segundo plano y queda
+/// guardada (en partes de hasta N filas) para descargarla después.
+model DataExport {
+  id                Int              @id @default(autoincrement())
+  kind              DataExportKind
+  status            DataExportStatus @default(pending)
+  requestedByUserId Int
+  /// Consulta del alcance, cuando el tipo es por consulta. Si la consulta se
+  /// borra, la exportación queda como registro (solo descargable por platform-admin).
+  consultationId    Int?
+  /// Descripción legible del alcance, congelada al pedirla.
+  title             String
+  /// Filtros validados con los que se pidió la exportación.
+  filters           Json?
+  totalRows         Int?
+  errorMessage      String?          @db.Text
+  createdAt         DateTime         @default(now())
+  startedAt         DateTime?
+  completedAt       DateTime?
+
+  requestedBy  User              @relation("DataExportRequestedBy", fields: [requestedByUserId], references: [id], onDelete: Cascade)
+  consultation Consultation?     @relation(fields: [consultationId], references: [id], onDelete: SetNull)
+  files        DataExportFile[]
+
+  @@index([requestedByUserId, createdAt])
+  @@index([consultationId, kind])
+  @@index([kind, createdAt])
+  @@index([status])
+}
+
+/// Parte de una exportación: un archivo CSV privado en el storage.
+model DataExportFile {
+  id          Int      @id @default(autoincrement())
+  exportId    Int
+  partNumber  Int
+  rowCount    Int
+  filename    String
+  storagePath String   @db.VarChar(512)
+  sizeBytes   Int
+  createdAt   DateTime @default(now())
+
+  export DataExport @relation(fields: [exportId], references: [id], onDelete: Cascade)
+
+  @@unique([exportId, partNumber])
+}

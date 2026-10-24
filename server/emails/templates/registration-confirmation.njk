@@ -19,20 +19,46 @@
       <td style="padding:8px 0; color:#71717a;">Fecha y hora</td>
       <td style="padding:8px 0;">{{ eventAt }}</td>
     </tr>
+    {% if venue %}
     <tr>
       <td style="padding:8px 0; color:#71717a;">Lugar</td>
       <td style="padding:8px 0;">{{ venue }}</td>
     </tr>
+    {% endif %}
+    {% if observatory %}
+      <tr>
+        <td style="padding:8px 0; color:#71717a;">Modalidad</td>
+        <td style="padding:8px 0;">{{ attendanceModeLabel }}</td>
+      </tr>
+      <tr>
+        <td style="padding:8px 0; color:#71717a;">Participación</td>
+        <td style="padding:8px 0;">{% if observatory.institutionSource == "individual" %}Persona física{% else %}{{ observatory.institutionName }}{% endif %}</td>
+      </tr>
+      {% if observatory.attendanceMode == "virtual" %}
+        <tr>
+          <td style="padding:8px 0; color:#71717a;">Conexión</td>
+          <td style="padding:8px 0;">
+            {% if observatory.meetingUrl %}
+              <a href="{{ observatory.meetingUrl }}">Ingresá a la reunión virtual</a>
+            {% else %}
+              La organización te comunicará los datos de conexión.
+            {% endif %}
+          </td>
+        </tr>
+      {% endif %}
+    {% endif %}
     {% if participationModeLabel %}
       <tr>
         <td style="padding:8px 0; color:#71717a;">Forma de participación</td>
         <td style="padding:8px 0;">{{ participationModeLabel }}</td>
       </tr>
     {% endif %}
+    {% if not observatory %}
     <tr>
       <td style="padding:8px 0; color:#71717a;">Carácter</td>
       <td style="padding:8px 0;">{{ characterLabel }}</td>
     </tr>
+    {% endif %}
   </table>
 
   <p style="margin:0 0 24px;">

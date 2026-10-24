@@ -1,33 +1,23 @@
-/// Estado explícito de un ítem de agenda. No se deriva de la fecha: lo define
-/// quien administra, igual que el resto de la agenda.
-enum AgendaItemState {
-  scheduled
-  open
-  closed
-}
-
-/// Ítem de agenda de los Encuentros Regionales. Hay exactamente uno por región
-/// (catálogo fijo de 8): se siembra y se edita (lugar/fecha/año/estado), pero no
-/// se crea ni elimina desde la app, y la región no cambia. La timeline pública se
-/// dibuja con estos datos.
+/// Datos de agenda de un Encuentro Regional. Es 1:1 con la consulta de tipo
+/// `encuentros-regionales`: se carga en el mismo formulario de alta/edición de
+/// la consulta. La región vive en `Consultation.regionId`, el estado se deriva
+/// de las fechas de la consulta y el año (para los tabs de la agenda) de `heldAt`.
 model RegionalMeetingAgendaItem {
-  id        Int      @id @default(autoincrement())
-  regionId  Int      @unique
+  id             Int      @id @default(autoincrement())
+  consultationId Int      @unique
   /// Lugar del encuentro: texto libre (no un municipio del catálogo cerrado).
-  location  String
-  heldAt    DateTime
-  /// Marca de año al inicio del segmento en la timeline (opcional).
-  year      Int?
-  /// Estado del encuentro: programado, abierto o realizado.
-  state     AgendaItemState @default(scheduled)
-  /// Resalta el ítem en la timeline pública.
-  highlighted Boolean @default(false)
-  /// Destino del botón "Inscribite"; si es null el botón no se muestra.
-  registrationUrl String? @db.VarChar(500)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  location       String
+  /// Fecha y hora del encuentro presencial.
+  heldAt         DateTime
+  /// Destino del botón "Inscribite" (formulario externo). Si es null no hay inscripción.
+  registrationUrl      String?   @db.VarChar(500)
+  /// Ventana en la que se muestra el botón "Inscribite". Obligatoria si hay URL.
+  registrationOpensAt  DateTime?
+  registrationClosesAt DateTime?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
-  region Region @relation(fields: [regionId], references: [id], onDelete: Restrict)
+  consultation Consultation @relation(fields: [consultationId], references: [id], onDelete: Cascade)
 
   @@index([heldAt])
 }
@@ -103,17 +93,31 @@ model RegionalMeetingSubmission {
   subejeTematico String?
   ideaProyecto String?  @db.Text
   comentarios  String?  @db.Text
-  /// Archivo adjunto opcional (PDF/Word, ≤8MB). Se sirve solo a platform-admin
-  /// mediante un endpoint protegido, nunca por URL pública.
-  attachmentAssetId Int?
   createdAt    DateTime @default(now())
 
-  attachmentAsset Asset?                          @relation("RegionalMeetingSubmissionAttachment", fields: [attachmentAssetId], references: [id], onDelete: SetNull)
+  /// Archivos adjuntos opcionales (hasta 3, 30 MB en total). Se sirven solo a
+  /// platform-admin mediante un endpoint protegido, nunca por URL pública.
+  attachments     RegionalMeetingSubmissionAttachment[]
   links           RegionalMeetingSubmissionLink[]
 
   @@index([createdAt])
   @@index([email])
-  @@index([attachmentAssetId])
+}
+
+/// Archivo adjunto de un aporte de Encuentros Regionales.
+model RegionalMeetingSubmissionAttachment {
+  id           Int      @id @default(autoincrement())
+  submissionId Int
+  assetId      Int
+  displayOrder Int      @default(0)
+  createdAt    DateTime @default(now())
+
+  submission RegionalMeetingSubmission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  asset      Asset                     @relation("RegionalMeetingSubmissionAttachmentAsset", fields: [assetId], references: [id], onDelete: Cascade)
+
+  @@unique([submissionId, assetId])
+  @@index([submissionId, displayOrder])
+  @@index([assetId])
 }
 
 /// Enlace en la nube asociado a un aporte (texto libre para archivos que la

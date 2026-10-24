@@ -19,6 +19,10 @@ Current files:
 - `08-taxonomy.prisma` — sections, categories, tags
 - `09-institution.prisma` — institution profile
 - `10-closure.prisma` — closure / results
+- `11-regional-meetings.prisma` — regional meetings (submissions, agenda, metrics)
+- `12-consultation-registrations.prisma` — registration forms, registrations, accreditation
+- `13-observatory.prisma` — observatory contributions, institutions, metrics
+- `14-exports.prisma` — persistent CSV exports and their file parts
 
 Place a new model in the file matching its concern. Only add a new numbered file for a genuinely new concern; keep the numeric prefixes ordered and two digits.
 

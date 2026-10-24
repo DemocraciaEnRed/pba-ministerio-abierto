@@ -146,21 +146,66 @@ describe('Server e2e: tipos de consulta', async () => {
   })
 
   describe('La región depende del tipo', () => {
-    it('rechaza asignar región a un tipo que no la admite', async () => {
-      const created = await createConsultation(`${slugPrefix}-sin-region`, dialogosSectionId)
-      expect(created.status).toBe(201)
+    const meeting = {
+      location: 'Junín',
+      heldAt: new Date().toISOString(),
+      registrationUrl: null,
+      registrationOpensAt: null,
+      registrationClosesAt: null
+    }
 
-      const res = await api(`/api/consultations/${created.data.id}/region`, {
-        method: 'PUT',
+    it('rechaza región y encuentro en un tipo que no los admite', async () => {
+      const res = await api('/api/consultations', {
+        method: 'POST',
         cookie: adminCookie,
-        body: { regionId }
+        body: {
+          slug: `${slugPrefix}-sin-region`,
+          title: 'Tipo e2e sin región',
+          sectionId: dialogosSectionId,
+          summary: null,
+          body: null,
+          startsAt: new Date().toISOString(),
+          endsAt: null,
+          closedMessage: null,
+          regionId,
+          regionalMeeting: meeting
+        }
       })
 
       expect(res.status).toBe(422)
     })
 
-    it('permite asignar región en encuentros regionales', async () => {
-      const created = await createConsultation(`${slugPrefix}-con-region`, regionalSectionId)
+    it('exige región y encuentro en encuentros regionales', async () => {
+      const res = await createConsultation(`${slugPrefix}-region-faltante`, regionalSectionId)
+      expect(res.status).toBe(422)
+    })
+
+    it('crea la consulta de encuentros regionales con región y encuentro', async () => {
+      const res = await api<{ id: number, region: { id: number } | null, regionalMeeting: { location: string } | null }>('/api/consultations', {
+        method: 'POST',
+        cookie: adminCookie,
+        body: {
+          slug: `${slugPrefix}-con-region`,
+          title: 'Tipo e2e con región',
+          sectionId: regionalSectionId,
+          summary: null,
+          body: null,
+          startsAt: new Date().toISOString(),
+          endsAt: null,
+          closedMessage: null,
+          regionId,
+          regionalMeeting: meeting
+        }
+      })
+
+      expect(res.status).toBe(201)
+      createdConsultationIds.push(res.data.id)
+      expect(res.data.region?.id).toBe(regionId)
+      expect(res.data.regionalMeeting?.location).toBe('Junín')
+    })
+
+    it('ya no expone el endpoint de asignación de región', async () => {
+      const created = await createConsultation(`${slugPrefix}-endpoint-region`, dialogosSectionId)
       expect(created.status).toBe(201)
 
       const res = await api(`/api/consultations/${created.data.id}/region`, {
@@ -169,20 +214,7 @@ describe('Server e2e: tipos de consulta', async () => {
         body: { regionId }
       })
 
-      expect(res.status).toBe(200)
-    })
-
-    it('permite limpiar la región aunque el tipo no la admita', async () => {
-      const created = await createConsultation(`${slugPrefix}-limpiar-region`, dialogosSectionId)
-      expect(created.status).toBe(201)
-
-      const res = await api(`/api/consultations/${created.data.id}/region`, {
-        method: 'PUT',
-        cookie: adminCookie,
-        body: { regionId: null }
-      })
-
-      expect(res.status).toBe(200)
+      expect(res.status).toBe(404)
     })
   })
 

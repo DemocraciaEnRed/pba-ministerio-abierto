@@ -21,12 +21,6 @@ const heldAtField = z
   .datetime('La fecha debe estar en formato ISO válido')
   .transform(value => new Date(value))
 
-const yearField = z
-  .int('El año debe ser un número entero')
-  .min(2000, 'El año no puede ser anterior a 2000')
-  .max(2100, 'El año no puede ser posterior a 2100')
-  .nullable()
-
 const municipalityField = z.enum(BUENOS_AIRES_MUNICIPALITIES, {
   error: 'Elegí un municipio válido'
 })
@@ -67,15 +61,54 @@ const registrationUrlField = z
 
 // --- Agenda ---
 
-export const AGENDA_ITEM_STATES = ['scheduled', 'open', 'closed'] as const
+const registrationWindowDateField = z
+  .string()
+  .trim()
+  .datetime('La fecha debe estar en formato ISO válido')
+  .transform(value => new Date(value))
+  .nullable()
 
-export const UpdateAgendaItemSchema = z.object({
-  location: locationField,
-  heldAt: heldAtField,
-  year: yearField.default(null),
-  state: z.enum(AGENDA_ITEM_STATES, { error: 'Elegí un estado válido' }).default('scheduled'),
-  highlighted: z.boolean().default(false),
-  registrationUrl: registrationUrlField.default(null)
+/**
+ * Datos del encuentro presencial de una consulta de Encuentros Regionales. Se
+ * envían junto con el alta/edición de la consulta. Si hay URL de inscripción,
+ * la ventana en la que se muestra el botón "Inscribite" es obligatoria y finita.
+ */
+export const RegionalMeetingAgendaSchema = z
+  .object({
+    location: locationField,
+    heldAt: heldAtField,
+    registrationUrl: registrationUrlField.default(null),
+    registrationOpensAt: registrationWindowDateField.default(null),
+    registrationClosesAt: registrationWindowDateField.default(null)
+  })
+  .superRefine((value, ctx) => {
+    if (!value.registrationUrl) return
+    if (!value.registrationOpensAt) {
+      ctx.addIssue({ code: 'custom', path: ['registrationOpensAt'], message: 'Indicá desde cuándo se muestra la inscripción' })
+    }
+    if (!value.registrationClosesAt) {
+      ctx.addIssue({ code: 'custom', path: ['registrationClosesAt'], message: 'Indicá hasta cuándo se muestra la inscripción' })
+    }
+    if (
+      value.registrationOpensAt
+      && value.registrationClosesAt
+      && value.registrationOpensAt.getTime() >= value.registrationClosesAt.getTime()
+    ) {
+      ctx.addIssue({ code: 'custom', path: ['registrationClosesAt'], message: 'El cierre de la inscripción debe ser posterior a la apertura' })
+    }
+  })
+  // Sin URL no hay inscripción: la ventana no tiene sentido y se descarta.
+  .transform(value => (value.registrationUrl
+    ? value
+    : { ...value, registrationOpensAt: null, registrationClosesAt: null }))
+
+export const RegionalMeetingAgendaQuerySchema = z.object({
+  year: z.coerce
+    .number()
+    .int('El año debe ser un número entero')
+    .min(2000, 'El año no puede ser anterior a 2000')
+    .max(2100, 'El año no puede ser posterior a 2100')
+    .optional()
 })
 
 // --- Métricas ---
@@ -206,7 +239,8 @@ export const CreateRegionalMeetingSubmissionSchema = z
     }
   })
 
-export type UpdateAgendaItemInput = z.output<typeof UpdateAgendaItemSchema>
+export type RegionalMeetingAgendaInput = z.output<typeof RegionalMeetingAgendaSchema>
+export type RegionalMeetingAgendaQueryInput = z.output<typeof RegionalMeetingAgendaQuerySchema>
 export type UpdateMetricInput = z.output<typeof UpdateMetricSchema>
 export type TestimonialItemInput = z.output<typeof testimonialItemSchema>
 export type CreateTestimonialGroupInput = z.output<typeof CreateTestimonialGroupSchema>

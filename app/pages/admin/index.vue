@@ -25,7 +25,10 @@ const headerButtons: ButtonProps[] = [
       :links="headerButtons"
     />
     <UPageBody>
-      <AdminPlatformOverviewStats />
+      <div class="space-y-8">
+        <AdminPlatformOverviewStats />
+        <AdminRecentCommentsFeed />
+      </div>
     </UPageBody>
   </div>
 </template>
