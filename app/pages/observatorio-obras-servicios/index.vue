@@ -203,7 +203,7 @@ const themeUi: ThemeUI = {
             ¿Cómo trabajamos en el Observatorio?
           </h3>
           <p class="leading-7 text-neutral-700 dark:text-neutral-300">
-            Poniendo en común el <span class="font-bold text-highlighted">Plan de Fortalecimiento Institucional 2024-2027</span> y el <span class="font-bold text-highlighted">Plan Estratégico de Infraestructura 2024-2027</span>, la agenda del Observatorio se organiza en siete grupos de trabajo temáticos, donde instituciones y especialistas analizan las iniciativas prioritarias del Ministerio, intercambian experiencias y proponen mejoras concretas. Además, se realizan reuniones plenarias al inicio y al cierre de cada año.
+            Poniendo en común el <span class="font-bold text-highlighted">Plan de Fortalecimiento Institucional 2024-2027</span> y el <span class="font-bold text-highlighted">Plan Estratégico de Infraestructura 2024-2035</span>, la agenda del Observatorio se organiza en siete grupos de trabajo temáticos, donde instituciones y especialistas analizan las iniciativas prioritarias del Ministerio, intercambian experiencias y proponen mejoras concretas. Además, se realizan reuniones plenarias al inicio y al cierre de cada año.
           </p>
         </div>
         <div class="flex w-full sm:w-4/5 lg:w-3/5 mx-auto gap-6 justify-center">
