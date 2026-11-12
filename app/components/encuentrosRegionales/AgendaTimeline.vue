@@ -101,11 +101,9 @@ function regionColorSlug(item: AgendaItem) {
               class="rounded-full shrink-0"
             />
           </div>
-
-          <p class="text-sm font-semibold text-default text-pretty">
+          <!-- <p class="text-sm font-semibold text-default text-pretty">
             {{ item.consultation.title }}
-          </p>
-
+          </p> -->
           <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-1 xl:grid-cols-2 gap-1 w-full">
             <div class="flex items-center justify-between gap-2 px-3 w-full border border-accented bg-accented/15 rounded-sm p-0.5">
               <UIcon
