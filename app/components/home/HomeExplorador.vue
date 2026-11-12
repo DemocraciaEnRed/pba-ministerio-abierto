@@ -201,7 +201,7 @@ function clearFilters() {
   <UPageSection
     id="explorador"
     class="scroll-mt-(--ui-header-height)"
-    title="Instancias de participación"
+    title="Agenda de participación"
   >
     <div class="min-w-0 max-w-full space-y-8">
       <div class="flex flex-col gap-2 sm:flex-row">
