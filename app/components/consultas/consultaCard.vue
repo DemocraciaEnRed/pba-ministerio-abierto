@@ -234,7 +234,7 @@ const footerSlot = computed(() => (props.orientation === 'horizontal' ? 'authors
             />
             <span>
               <span class="font-medium">Encuentro presencial:</span>
-              {{ formatEventDateTime(registration.eventAt) }} h<template v-if="venueLabel">
+              {{ formatEventDateTime(registration.eventAt) }}<template v-if="venueLabel">
                 · {{ venueLabel }}
               </template>
             </span>

@@ -50,10 +50,12 @@ export function fromNow(value: string | null | undefined): string {
 }
 
 /**
- * Día y hora compactos, p. ej. "jue 29 oct, 18:00". Se usa para la fecha del
- * encuentro presencial en cards y agenda.
+ * Fecha y hora del encuentro, p. ej. "29 de Octubre de 2026, 18:00 Hs.".
  */
 export function formatEventDateTime(value: string | null | undefined): string {
   if (!value) return 'Sin definir'
-  return dayjs(value).format('ddd D MMM, HH:mm').replaceAll('.', '')
+  const date = dayjs(value)
+  const month = date.format('MMMM')
+  const capitalizedMonth = month.charAt(0).toUpperCase() + month.slice(1)
+  return `${date.format('DD [de] ')}${capitalizedMonth}${date.format(' [de] YYYY, HH:mm [Hs.]')}`
 }

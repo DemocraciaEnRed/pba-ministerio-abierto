@@ -87,8 +87,8 @@ function regionColorSlug(item: AgendaItem) {
           :class="regionColorSlug(item) ? `bg-${regionColorSlug(item)}` : 'bg-accented'"
         />
 
-        <div class="flex flex-col gap-2 p-4 w-full leading-tight">
-          <div class="flex items-start justify-between gap-2">
+        <div class="flex flex-col gap-2 p-4 w-full min-w-0 leading-tight">
+          <div class="flex flex-wrap items-start justify-between gap-2">
             <p class="text-muted">
               Región
               <span class="font-bold text-lg text-highlighted">{{ item.region?.name ?? 'Sin región' }}</span>
@@ -98,29 +98,29 @@ function regionColorSlug(item: AgendaItem) {
               :label="participationStateBadge(item.consultation.participationState).label"
               :color="participationStateBadge(item.consultation.participationState).color"
               variant="subtle"
-              class="rounded-full shrink-0"
+              class="rounded-full shrink-0 max-w-full whitespace-normal"
             />
           </div>
           <!-- <p class="text-sm font-semibold text-default text-pretty">
             {{ item.consultation.title }}
           </p> -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-1 xl:grid-cols-2 gap-1 w-full">
-            <div class="flex items-center justify-between gap-2 px-3 w-full border border-accented bg-accented/15 rounded-sm p-0.5">
+          <div class="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-1 xl:grid-cols-3 gap-1 w-full">
+            <div class="flex items-center justify-between gap-2 px-3 w-full min-w-0 border border-accented bg-accented/15 rounded-sm p-0.5">
               <UIcon
                 name="lucide:pin"
                 class="min-w-4 size-4 text-secondary"
               />
-              <p class="text-sm text-right font-medium">
+              <p class="min-w-0 wrap-break-word text-sm text-right font-medium">
                 {{ item.location }}
               </p>
             </div>
-            <div class="flex items-center justify-between gap-2 px-3 w-full border border-accented bg-accented/15 rounded-sm p-0.5">
+            <div class="sm:col-span-2 md:col-span-1 xl:col-span-2 flex items-center justify-between gap-2 px-3 w-full min-w-0 border border-accented bg-accented/15 rounded-sm p-0.5">
               <UIcon
                 name="lucide:calendar"
                 class="min-w-4 size-4 text-secondary"
               />
-              <p class="text-sm text-right font-medium">
-                {{ formatEventDateTime(item.heldAt) }} h
+              <p class="min-w-0 wrap-break-word text-sm text-right font-medium">
+                {{ formatEventDateTime(item.heldAt) }}
               </p>
             </div>
           </div>
@@ -131,8 +131,8 @@ function regionColorSlug(item: AgendaItem) {
               label="Ver más"
               icon="lucide:arrow-right"
               trailing
-              color="neutral"
-              variant="subtle"
+              :color="item.consultation.participationState === 'closed' ? 'neutral' : 'primary'"
+              :variant="item.consultation.participationState === 'closed' ? 'subtle' : 'solid'"
               size="sm"
               block
             />
