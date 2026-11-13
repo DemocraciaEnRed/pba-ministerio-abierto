@@ -100,12 +100,13 @@ const themeUi: ThemeUI = {
         class="relative z-10"
         :ui="{
           root: 'bg-linear-to-b from-pba-primary-300/25 to-white/15 dark:from-pba-alt-900/50 dark:to-black/10',
-          description: 'text-neutral-100 dark:text-neutral-100 text-shadow-lg'
+          description: 'text-neutral-100 dark:text-neutral-100 text-shadow-lg',
+          container: 'py-14 sm:py-18 lg:py-24 gap-16 sm:gap-y-20'
         }"
       >
         <template #title>
           <img
-            src="https://democraciaenred.nyc3.digitaloceanspaces.com/projects/pba-ministerio-abierto/app/assets/logo/logo-text-white.svg"
+            src="https://democraciaenred.nyc3.digitaloceanspaces.com/projects/pba-ministerio-abierto/app/assets/logo/logo-light.svg"
             alt="Ministerio Abierto"
             width="365"
             height="123"

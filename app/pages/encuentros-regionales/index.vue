@@ -223,7 +223,10 @@ const comoHacemosPageSectionUi: ThemeUI['pageSection'] = {
               <div class="space-y-2">
                 <h1 class="text-2xl sm:text-3xl lg:text-4xl text-pretty tracking-tight font-extrabold text-primary uppercase text-left lg:text-center">
                   Participá de los encuentros regionales
-                </h1>
+              </h1>
+              <p class="text-neutral-700 dark:text-neutral-300 text-md md:text-xl font-light lg:text-center">
+                Ingresá a cada región para inscribirte, dejar tus aportes, proyectos y comentarios, y acceder a la información y a los materiales de cada jornada.
+              </p>
               </div>
               <div class="px-4 lg:px-6 bg-elevated/35 border border-default rounded-lg shadow-lg">
                 <EncuentrosRegionalesAgendaTimeline />
